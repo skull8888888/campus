@@ -1,0 +1,226 @@
+<link rel="import" href="../../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/slide-from-right-animation.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/slide-left-animation.html">
+<link rel="import" href="games-card-play-module.html">
+<link rel="import" href="games-avatar-module.html">
+<link rel="import" href="games-end-module.html">
+
+<dom-module id="games-game-module">
+  <template>
+    <style include="wrapper-module">
+
+      .correct{
+        color: green
+      }
+
+      .incorrect{
+        color: red
+      }
+
+      .score {
+        margin-left: 15px;
+        margin-right: 15px;
+        font-weight: 400;
+        font-size: 24px;
+      }
+
+      .timer{
+        font-weight: 400;
+        font-size: 24px;
+        color: darkgray
+      }
+    </style>
+    <div class="wrapper">
+      <paper-card>
+        <div class="card-content">
+          <div class="layout horizontal justified">
+            <games-avatar-module user="{{me}}" left></games-avatar-module>
+            <games-avatar-module user="{{player}}" align="right" right></games-avatar-module>
+          </div>
+          <div class="layout horizontal justified">
+            <div class="score" id="mineScore">{{mineScore}}</div>
+            <div class="timer" hidden$="{{!active}}">Время {{time}}</div>
+            <div class="score" id="playerScore">{{playerScore}}</div>
+          </div>
+        </div>
+      </paper-card>
+    </div>
+    <neon-animated-pages id="pages" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <neon-animatable><games-card-play-module index="1" card="[[deck.0]]" id="i0"></games-card-play-module></neon-animatable>
+      <neon-animatable><games-card-play-module index="2" card="[[deck.1]]" id="i1"></games-card-play-module></neon-animatable>
+      <neon-animatable><games-card-play-module index="3" card="[[deck.2]]" id="i2"></games-card-play-module></neon-animatable>
+      <neon-animatable><games-card-play-module index="4" card="[[deck.3]]" id="i3"></games-card-play-module></neon-animatable>
+      <neon-animatable><games-card-play-module index="5" card="[[deck.4]]" id="i4"></games-card-play-module></neon-animatable>
+      <neon-animatable><games-end-module status="{{status}}" score="{{mineScore}}"></games-end-module></neon-animatable>
+    </neon-animated-pages>
+  </template>
+  <script>
+    Polymer({
+      is: 'games-game-module',
+
+      properties:{
+        deck: Object,
+
+        mineScore: {
+          type: Number,
+          value: 0
+        },
+        playerScore: {
+          type: Number,
+          value: 0
+        },
+        meSelected: {
+          value: false,
+          type: Boolean
+        },
+        playerSelected: {
+          value: false,
+          type: Boolean
+        },
+      },
+
+      listeners: {
+        'selected': 'select',
+        'showCorrect': '_showCorrect',
+        'startTimer': 'startTimer',
+        'stopTimer': 'stopTimerCount'
+      },
+
+      observers:[
+        'bothSelected(meSelected,playerSelected)',
+        'timeChanged(time)',
+        'gameChanged(game)',
+        'playerChanged(room,player)'
+      ],
+
+      behaviors: [
+        DatabaseBehavior
+      ],
+
+      attached: function(){
+        this.$.pages.select(0);
+        this.stopTimerCount();
+      },
+
+      playerChanged: function(room,player){
+        const that = this;
+        if(player && room){
+          this.ansListener = this.db.ref('GamesRooms/' + room + '/' + player.key + '/answers').on('child_added',function(ans){
+            if(ans){
+              that.playerSelected = true;
+              if(ans.val().correct){
+                that.$.playerScore.style.color = 'green';
+                that.playerScore += ans.val().points;
+              } else {
+                that.$.playerScore.style.color = 'red';
+              };
+            }
+          });
+        }
+      },
+
+      gameChanged: function(game){
+        if(game){
+
+          this.deck = game.val.deck;
+        }
+      },
+
+      _showCorrect:function(e){
+        const childElement = Polymer.dom(this.root).querySelector('#i' + e.detail.index);
+        childElement.fire('showcorrect');
+      },
+
+      select: function(ans) {
+        this.meSelected = true;
+        var points = 0
+        if(ans.detail.correct){
+          this.$.mineScore.style.color = 'green';
+          this.mineScore += this.time;
+          points = this.time;
+        } else {
+          this.$.mineScore.style.color = 'red';
+        };
+        this.db.ref('GamesRooms/' + this.room + '/' + Cookies.get('id') + '/answers/' + ans.detail.index).set({
+          correct: ans.detail.correct,
+          points: points
+        });
+        this.stopTimerCount();
+      },
+
+      startTimer: function(){
+
+        var start = 16;
+        var that = this;
+        this.counter = setInterval(function(){
+          start--;
+          that.time = start;
+          if(start == 0){
+            that.stopTimerCount()
+          }
+        },1000);
+      },
+
+      stopTimerCount: function(){
+        clearInterval(this.counter);
+      },
+
+      bothSelected: function(me, player){
+        if(me == true && player == true){
+          var that = this;
+          setTimeout(function(){
+            that.fire('showCorrect',{index: that.$.pages.selected});
+          },1000);
+          setTimeout(function(){
+            that.meSelected = false;
+            that.playerSelected = false;
+            that.$.pages.selected++;
+            if(that.$.pages.selected == 5){
+              that.active = false;
+              if(that.mineScore > that.playerScore){
+                that.status = 'Победа'
+              } else if(that.mineScore == that.playerScore){
+                that.status = 'Ничья'
+              } else{
+                that.status = 'Поражение'
+              };
+
+              that.db.ref('GamesPlayed/' + Cookies.get('id') + '/' + that.game.key).once('value',function(played){
+                if(!played.exists()){
+                  var data = {};
+                  that.db.ref('Users/' + Cookies.get('id') + '/score').transaction(function(score){
+                    score + that.mineScore;
+                    return score
+                  });
+                  that.db.ref('GamesPlayed/' + Cookies.get('id') + '/' + that.game.key).set('played');
+                } else {
+                  that.mineScore = 0;
+                }
+              });
+              that.fire('ended');
+            } else {
+              that.startTimer();
+            };
+
+          },3000);
+        };
+      },
+
+      timeChanged:function(time){
+        if(time == 0){
+          if(this.meSelected == false){
+            this.$.mineScore.style.color = 'red';
+          };
+          var that = this;
+          this.db.ref('GamesRooms/' + this.room + '/' + Cookies.get('id') + '/answers/' + (this.$.pages.selected + 1)).set({
+            correct: false,
+            points: 0
+          });
+          that.meSelected = true;
+          that.playerSelected = true;
+        };
+      },
+    });
+  </script>
+
+</dom-module>

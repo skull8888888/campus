@@ -1,0 +1,62 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/campus-module.html",
+  "fragments": [
+
+    "src/club/club-module.html",
+
+    "src/clubs/clubs-module.html",
+
+    "src/dialogs/dialogs-module.html",
+
+    "src/feed/feed-module.html",
+
+    "src/games/games-module.html",
+    "src/games/games-prepare-module.html",
+    "src/games/games-subject-module.html",
+
+    "src/learn/learn-module.html",
+    "src/learn/pupil/learn-pupil-module.html",
+    "src/learn/pupil/learn-pupil-timetable-module.html",
+    "src/learn/pupil/learn-pupil-journal-module.html",
+    "src/learn/pupil/learn-pupil-files-module.html",
+    "src/learn/teacher/learn-teacher-module.html",
+    "src/learn/teacher/learn-teacher-files-module.html",
+    "src/learn/teacher/learn-teacher-timetable-module.html",
+    "src/learn/teacher/learn-teacher-journal-module.html",
+
+
+    "src/search-module.html",
+
+    "src/mygames/mygames-module.html",
+    "src/mygames/mygames-create-module.html",
+
+    "src/notifs/notifs-module.html",
+    "src/notifs/notifs-all-module.html",
+    "src/notifs/notifs-new-module.html",
+
+    "src/profile/profile-module.html",
+    "src/profile/profile-info-less-module.html",
+
+    "src/school/school-module.html",
+
+    "src/settings/settings-module.html",
+    "src/settings/settings-teacher-module.html",
+    "src/settings/settings-pupil-module.html",
+
+    "src/login-module.html",
+
+    "src/join-module.html",
+
+    "src/schedule/schedule-module.html"
+  ],
+  "sourceGlobs": [
+   "src/**/*",
+   "images/**/*",
+   "bower.json"
+  ],
+  "includeDependencies": [
+    "manifest.json",
+    "bower_components/webcomponentsjs/webcomponents-lite.min.js"
+  ]
+}

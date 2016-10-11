@@ -1,0 +1,194 @@
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+
+<dom-module id="profile-info-less-module">
+  <style include="wrapper-module">
+    .tag{
+      margin: 4px;
+      font-size: 18px;
+    }
+
+    .icon{
+      float: left;
+    }
+
+    .info-name {
+      @apply(--paper-font-headline)
+        }
+
+    .light {
+      color: var(--paper-grey-500);
+    }
+
+    .medium{
+      color: var(--paper-grey-700);
+    }
+
+    .info{
+      margin-top: 8px;
+      border-top: var(--paper-grey-300) 1px solid;
+      border-bottom: var(--paper-grey-300) 1px solid;
+    }
+
+    iron-image#image{
+      width: 80px;
+      height: 80px;
+      border-radius: 40px
+    }
+
+    .top {
+     margin: 0px 5px 0px 10px;
+    }
+
+    .right{
+      margin: 0px 10px 0 5px;
+    }
+
+    .w{
+      width:
+    }
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card class="userInfo">
+        <div class="card-content">
+          <div class="layout horizontal">
+            <iron-image id="image" src="{{user.val.info.image}}" sizing="cover"></iron-image>
+            <div class="layout vertical" style="margin-left:10px">
+              <div class="info-name">{{user.val.info.name}} {{user.val.info.surname}}</div>
+              <div class="medium">{{localize(user.val.info.type)}}</div>
+            </div>
+          </div>
+
+          <div class="layout vertical">
+            <template is="dom-if" if="[[!isMine(user.key)]]">
+              <label for="load"><paper-icon-button icon="image:camera-alt"></paper-icon-button>Обновить</label><input type="file" value="upload" id="load" style="position:absolute; visibility:hidden"/>
+              <paper-progress value="{{progress}}" hidden$="{{progressHidden}}" class="mw"></paper-progress>
+            </template>
+            <template is="dom-if" if="[[isMine(user.key)]]" restamp="true">
+              <template is="dom-if" if="{{!subscribed}}" restamp="true">
+                <paper-button on-tap="subscribe" class="button" >Подписаться</paper-button>
+              </template>
+              <template is="dom-if" if="{{subscribed}}" restamp="true">
+                <paper-button on-tap="unsubscribe" class="button">Вы подписаны</paper-button>
+              </template>
+            </template>
+          </div>
+
+          <div class="layout info" style="text-align:center">
+            <template is="dom-if" if="[[sh]]" restamp="true">
+              <div class="school tag">
+                <iron-icon icon="social:school" class="light icon"></iron-icon>
+                [[sh]]
+              </div>
+            </template>
+            <template is="dom-if" if="[[user.val.class]]" restamp="true">
+              <div class="subject tag">
+                <iron-icon icon="social:group" class="light icon"></iron-icon>
+                [[user.val.class]] {{localize(user.val.group)}}
+              </div>
+            </template>
+            <template is="dom-if" if="[[user.val.subject]]" restamp="true">
+              <div class="subject tag">
+                <iron-icon icon="icons:class" class="light icon"></iron-icon>
+                [[localize(user.val.subject)]]
+              </div>
+            </template>
+          </div>
+          <div class="about medium">
+            О себе
+            <paper-icon-button icon="icons:expand-{{active}}" on-tap="expand"></paper-icon-button>
+            <iron-collapse id="more">
+              <div class="aboutText">[[user.val.des]]</div>
+            </iron-collapse>
+          </div>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'profile-info-less-module',
+
+      properties:{
+        progressHidden:{
+          type: Boolean,
+          value: true
+        }
+      },
+
+      behaviors:[
+        LocalizeBehavior,
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'userChanged(user)'
+      ],
+
+      attached:function(){
+        const that = this;
+        this.$.load.addEventListener('change',function(e){
+          that.progressHidden = false;
+          var file = e.target.files[0];
+          var task = that.app.storage().ref('Avatars/' + Cookies.get('id') + '/' + file.name).put(file);
+          task.on('state_changed',function(snapshot){
+            that.progress = snapshot.bytesTransferred / snapshot.totalBytes * 100
+          },function(err){
+            alert(err);
+          },function(){
+            that.progressHidden = true;
+            that.db.ref('Users/' + that.user.key  + '/personal/image').set(task.snapshot.downloadURL);
+          });
+        });
+      },
+
+      userChanged: function(user){
+        this.active = 'more';
+        if(user.val.online){
+          this.status = 'online'
+        } else {
+          this.status = 'offline'
+        };
+        const that = this;
+        this.getItemOnce('SchoolsName/' + user.val.school,function(sh){
+          that.sh = sh;
+        });
+
+        if(user.key != Cookies.get('id')){
+          this.db.ref('Followers/' + user.key + '/' + Cookies.get('id')).on('value',function(snapshot){
+
+            if(snapshot.exists()){
+              that.subscribed = true
+            } else {
+              that.subscribed = false
+            }
+          });
+        }
+      },
+
+      isMine: function(key){
+        return key != Cookies.get('id');
+      },
+
+      subscribe: function(){
+        var data = {};
+        data['Following/' + Cookies.get('id') + '/' + this.user.key] = 'follow';
+        data['Followers/' + this.user.key + '/' + Cookies.get('id')] = 'followed';
+        this.db.ref().update(data);
+      },
+
+      unsubscribe: function(){
+        var data = {};
+        data['Following/' + Cookies.get('id') + '/' + this.user.key] = null;
+        data['Followers/' + this.user.key + '/' + Cookies.get('id')] = null;
+        this.db.ref().update(data);
+      },
+
+
+      expand: function(){
+        this.active = this.$.more.opened ? 'more' : 'less';
+        this.$.more.toggle();
+      },
+    });
+  </script>
+</dom-module>

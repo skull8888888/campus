@@ -1,0 +1,112 @@
+<link rel="import" href="../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+
+<dom-module id="join-module">
+<template>
+    <style include="wrapper-module">
+      paper-card{
+          width: 100%
+      }
+
+      a{
+        text-decoration: none;
+        color: black;
+        text-align: center;
+        color: var(--app-primary-color)
+      }
+
+      .join {
+        background-color:  var(--app-primary-color);
+        color: white;
+        width: 200px;
+      }
+    </style>
+   <iron-grid>
+    <div class="xs12 offset-xs0 l4 offset-l4 wrapper">
+      <paper-card>
+        <div class="card-content">
+          <form is="iron-form" id="form">
+            <vaadin-combo-box items="[[types]]" label="Кто вы?" required item-label-path="name" item-value-path="key" value="{{type}}"></vaadin-combo-box>
+            <paper-input name="name" label="Имя" value="{{Name}}" required></paper-input>
+            <paper-input name="surname" label="Фамилия" value="{{surname}}" required></paper-input>
+            <paper-input name="email" label="Email" value="{{email}}" required></paper-input>
+            <paper-input name="password" label="Пароль" type="password" value="{{password}}" required></paper-input>
+            <paper-input name="password" label="Повторите пароль" type="password" pattern="{{password}}" error-message="пароли не совпадают" required></paper-input>
+            </form>
+          </div>
+          <div class="card-actions layout vertical center">
+            <paper-button raised on-tap="join" class="join">Готово</paper-button>
+            <a href="/login">
+              <paper-button on-tap="hasAccount">Есть аккаунт</paper-button>
+            </a>
+          </div>
+        </paper-card>
+    </div>
+    </iron-grid>
+    <firebase-auth id="auth"></firebase-auth>
+</template>
+<script>
+  Polymer({
+    is: 'join-module',
+
+    properties:{
+      types:{
+        type: Array,
+        value:[]
+      }
+    },
+
+    behaviors:[
+      LocalizeBehavior,
+      Polymer.FirebaseDatabaseBehavior
+    ],
+
+    attached: function(){
+      this.types = [
+        {
+          name: this.localize('teacher'),
+          key: 'teacher'
+        },
+        {
+          name: this.localize('curator'),
+          key: 'curator'
+        },
+        {
+          name: this.localize('pupil'),
+          key: 'pupil'
+        },
+        {
+          name: this.localize('admin'),
+          key: 'admin'
+        }
+      ]
+
+    },
+
+    join: function(){
+      const that = this;
+      if(this.$.form.validate()){
+        this.$.auth.createUserWithEmailAndPassword(this.email,this.password).then(function(user){
+          that.db.ref('Users/' + user.uid).set({
+            info:{
+              link: user.uid,
+              name: that.Name,
+              surname: that.surname,
+              image: 'https://firebasestorage.googleapis.com/v0/b/campus-3320b.appspot.com/o/Avatars%2FDeelProfile.png?alt=media&token=64c39a16-6de9-469a-be69-9f429af21a54',
+              type: that.type,
+            },
+            online: true
+          });
+          Cookies.set('id',user.uid,{expires: 10000,path:''});
+          Cookies.set('link',user.uid,{expires: 10000,path:''});
+          window.location = 'feed'
+        }).catch(function(error){
+          that.fire('open-toast',{
+            text: error
+          })
+        });
+      };
+    },
+  })
+</script>
+
+</dom-module>

@@ -1,0 +1,122 @@
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
+
+<dom-module id="settings-account-module">
+  <style include="wrapper-module">
+    .prefix{
+      color: var(--paper-grey-500)
+    }
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card>
+        <div class="card-content">
+          <form is="iron-form" id="form">
+            <div class="layout horizontal">
+              <paper-input  maxlength="20" label="Персональный адрес" value="{{li}}">
+                <div prefix class="prefix">campus-a.kz/</div>
+              </paper-input>
+              <paper-spinner-lite active="{{lactive}}"></paper-spinner-lite>
+              <iron-icon icon="{{icon}}"></iron-icon>
+            </div>
+            <vaadin-combo-box label="Школа" items="[[schools]]" item-label-path="val" item-value-path="key" value="{{user.val.school}}"></vaadin-combo-box>
+            <div class="layout horizontal mw">
+              <paper-input  maxlength="12" label="ИИН (обязательно)" value="{{user.val.pin}}">
+              </paper-input>
+              <paper-spinner-lite active="{{active}}"></paper-spinner-lite>
+              <paper-icon-button icon="icons:verified-user" style="color:red"></paper-icon-button>
+            </div>
+            <paper-textarea max-rows="4" label="О себе" value="{{user.val.des}}"></paper-textarea>
+          </form>
+        </div>
+        <div class="card-actions">
+          <paper-button on-tap="save" class="button" style="float: right; margin-bottom: 5px">Сохранить</paper-button>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'settings-account-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'pinChanged(user.val.pin)',
+        'idChanged(user.val.info.link)',
+        'linkChanged(li)'
+      ],
+
+      idChanged:function(id){
+        this.li = id;
+      },
+
+      attached: function(){
+        var that = this;
+        this.fillObjects('SchoolsName/',function(schools){
+          that.schools = schools;
+        });
+      },
+
+      pinChanged: function(pin){
+        this.active = false;
+        if(pin)
+          if(pin.length == 12){
+            this.active = true
+          }
+      },
+
+      linkChanged:function(link){
+
+        if(link && link != this.user.val.info.link){
+          this.lactive = true;
+          if(this.l)
+            this.l.off();
+          const that = this;
+          this.l = this.db.ref('Users/').orderByChild('info/link').equalTo(link);
+          this.l.once('value',function(li){
+            that.lactive = false;
+            if(!li.exists()){
+              that.li = link;
+              that.ok = true
+              that.icon="icons:done";
+            } else {
+              that.ok = false
+              that.icon="icons:close";
+            }
+          });
+        }
+      },
+
+      save: function(){
+
+        const that = this;
+
+        var data = {};
+
+        data.pin = this.user.val.pin || null;
+        data.school = this.user.val.school || null;
+        data.des =  this.user.val.des || null;
+
+        var link = this.li || this.user.val.link;
+        if(link == this.li && this.ok){
+
+          Cookies.set('link',this.li,{expires: 10000,path:''});
+          this.db.ref('Users/' + Cookies.get('id') + '/info/link').set(this.li);
+          that.fire('open-toast',{
+            text: 'Изменения сохранены'
+          });
+        };
+
+        this.db.ref('Users/' + this.user.key).update(data).then(function(){
+          that.fire('userChanged')
+          that.fire('open-toast',{
+            text: 'Изменения сохранены'
+          });
+        })
+      }
+    })
+  </script>
+</dom-module>

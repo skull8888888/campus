@@ -1,0 +1,168 @@
+<link rel="import" href="learn-teacher-journal-add-module.html">
+<link rel="import" href="../../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../bower_components/paper-input/paper-input-container.html">
+<link rel="import" href="learn-teacher-goal-module.html">
+
+<dom-module id="learn-teacher-journal-create-module">
+  <template>
+    <style include="wrapper-module">
+      .cl{
+        margin: 10px
+      }
+
+      vaadin-combo-box{
+        width: 300px;
+      }
+
+      paper-input{
+        width: 100px
+      }
+
+      paper-textarea{
+
+      }
+
+      #parals{
+        width: 100px
+      }
+
+      #subs{
+        width: 170px
+      }
+
+      .add{
+        padding: 8px
+      }
+
+      paper-fab{
+        position: absolute;
+        bottom: -18px;
+        right: 15px;
+        z-index: 3
+      }
+
+      #d{
+        width: 400px
+      }
+
+      .nums{
+        width: 50px
+      }
+
+    </style>
+<!--
+    <learn-teacher-journal-add-module>
+    </learn-teacher-journal-add-module>
+-->
+    <div class="wrapper">
+      <paper-card>
+        <div>
+          <form is="iron-form" id="form" class="cl layout horizontal">
+            <vaadin-combo-box id="subs" label="Предмет" items="{{subs}}" item-label-path="val" item-value-path="key" value="{{sub}}" required></vaadin-combo-box>
+            <vaadin-combo-box id="parals" label="Парал." items="{{parals}}" item-label-path="i" item-value-path="i" value="{{paral}}" required></vaadin-combo-box>
+          </form>
+          <paper-fab icon="icons:add" on-tap="open"></paper-fab>
+        </div>
+      </paper-card>
+      <template is="dom-if" if="{{noGoals}}" restamp="true">
+        <h3>Пока нет целей, но если вы учитель по этому предмету то вы можете добавить цели, нажав на кнопку</h3>
+      </template>
+      <iron-list items="[[goals]]" as="goal">
+        <template>
+          <div>
+            <learn-teacher-goal-module goal="[[goal]]"></learn-teacher-goal-module>
+          </div>
+        </template>
+      </iron-list>
+    </div>
+    <paper-dialog id="d">
+      <paper-textarea label="Описание цели" max-rows="3" value="{{des}}"></paper-textarea>
+      <div class="layout horizontal mw">
+        <vaadin-combo-box class="nums" items="{{nums}}" value="{{f}}" no-label-float></vaadin-combo-box>
+
+        <vaadin-combo-box class="nums" items="{{nums}}" value="{{s}}" no-label-float></vaadin-combo-box>
+
+        <vaadin-combo-box class="nums" items="{{nums}}" value="{{t}}" no-label-float></vaadin-combo-box>
+        <paper-button class="button" style="float:right" on-tap="add">Добавить цель</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-journal-create-module',
+
+      properties:{
+        parals: {
+          type: Array,
+          value: function(){
+            var a = [];
+            for(var i=1; i< 13;i++){
+              a.push({
+                i: i
+              });
+            };
+            return a;
+          }
+        },
+        nums: {
+          type: Array,
+          value: function(){
+           return '0,1,2,3,4,5,6,7,8,9,10'.split(',');
+          }
+        },
+      },
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      observers:[
+        'fillGoals(sub,paral)',
+      ],
+
+      attached:function(){
+        const that = this;
+        this.fillObjects('Subjects/',function(subs){
+          var s = [];
+          subs.forEach(function(i){
+            s.push({
+              val:that.localize(i.key),
+              key: i.key
+            });
+          });
+          that.subs = s;
+        });
+      },
+
+      fillGoals:function(s,p){
+
+        if(s,p){
+          console.log(s,p);
+          const that = this;
+          this.fillItems('Goals/' + u.val.school + '/' + this.sub + '/' + this.paral,function(goals){
+            that.goals = goals
+            if(goals.length == 0){
+              that.noGoals = true;
+            }
+          },true);
+        }
+      },
+
+      add:function(){
+        this.db.ref('Goals/' + u.val.school + '/' + this.sub + '/' + this.paral).push({
+          n: this.f + '.' + this.s + '.' + this.t,
+          des: this.des,
+          auth: Cookies.get('id')
+        })
+      },
+
+      open:function(){
+
+        if(this.$.form.validate()){
+          this.$.d.toggle();
+        }
+      }
+    })
+  </script>
+</dom-module>

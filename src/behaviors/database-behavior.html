@@ -1,0 +1,131 @@
+<link rel="import" href="../../bower_components/polymerfire/firebase-database-behavior.html">
+
+<script>
+    DB = {
+
+      behaviors:[
+        Polymer.FirebaseDatabaseBehavior
+      ],
+
+      fillObjects: function(ref,callback,push){
+          var that = this;
+          this.db.ref(ref).on('value',function(objects){
+            var Objects = [];
+            objects.forEach(function(object){
+            var Object = {
+              key: object.key,
+              val: object.val()
+            };
+            push ? Objects.push(Object) : Objects.unshift(Object);
+            });
+            callback(Objects);
+          });
+      },
+
+      fillItems: function(ref,callback,push){
+        var that = this;
+        this.db.ref(ref).on('value',function(objects){
+          var Objects = [];
+          objects.forEach(function(object){
+            var Object = object.val();
+            push ? Objects.push(Object) : Objects.unshift(Object);
+          });
+          callback(Objects);
+        });
+      },
+
+      fillItemsOnce: function(ref,callback,push){
+        var that = this;
+        this.db.ref(ref).once('value',function(objects){
+          var Objects = [];
+          objects.forEach(function(object){
+            var Object = object.val();
+            push ? Objects.push(Object) : Objects.unshift(Object);
+          });
+          callback(Objects);
+        });
+      },
+
+      fillOrder: function(ref,child,eq,callback,push){
+        var that = this;
+        this.db.ref(ref).orderByChild(child).equalTo(eq).on('value',function(objects){
+          var Objects = [];
+          objects.forEach(function(object){
+            var Object = {
+              key: object.key,
+              val: object.val()
+            };
+            push ? Objects.push(Object) : Objects.unshift(Object);
+          });
+          callback(Objects);
+        });
+      },
+
+      fillLast: function(ref,num,callback,push){
+        const that = this;
+        this.db.ref(ref).limitToLast(num).on('value',function(objects){
+          var Objects = [];
+          objects.forEach(function(object){
+            var Object = {
+              key: object.key,
+              val: object.val()
+            };
+            push ? Objects.push(Object) : Objects.unshift(Object);
+          });
+          callback(Objects);
+        });
+      },
+
+      getItem: function(ref,callback){
+        this.db.ref(ref).on('value',function(item){
+          callback(item.val());
+        })
+      },
+
+      getItemOnce: function(ref,callback){
+        this.db.ref(ref).once('value',function(item){
+          callback(item.val());
+        })
+      },
+
+      getObject: function(ref,callback){
+        this.db.ref(ref).on('value',function(item){
+          callback({
+            val: item.val(),
+            key: item.key
+          });
+        })
+      },
+
+      getObjectOnce: function(ref,callback){
+        this.db.ref(ref).once('value',function(item){
+          callback({
+            val: item.val(),
+            key: item.key
+          });
+        })
+      },
+
+//      sendNotifs:function(l,e,auth,text){
+//        const that = this;
+//        this.db.ref('Users/').orderBy(l).equalTo(e).once('value',function(items){
+//          items.forEach(function(item){
+//            that.db.ref('Notifs/' + item.key).push({
+//              auth:auth,
+//              text: text,
+//              time: Date.now()
+//            });
+//          });
+//        });
+//      },
+
+      attached: function(){
+        const list = Polymer.dom(this.root).querySelector('iron-list');
+        if(list){
+          list.scrollTarget = this.ownerDocument.documentElement;
+        }
+      }
+    };
+
+    var DatabaseBehavior = [DB, Polymer.FirebaseDatabaseBehavior]
+</script>

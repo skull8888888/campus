@@ -1,0 +1,108 @@
+<link rel="import" href="../../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="learn-admin-stuff-user-module.html">
+
+<dom-module id="learn-admin-stuff-module">
+  <template>
+    <style include="wrapper-module">
+      .show{
+        height: 100px
+      }
+    </style>
+    <iron-grid>
+      <div class="l4 xs12 offset-xs0 wrapper">
+        <paper-card class="mw show">
+          <div class="wrapper layout vertical show">
+            Показать <vaadin-combo-box items="[[types]]" label="Кого показать?" required item-label-path="name" item-value-path="key" value="{{stype}}"></vaadin-combo-box>
+          </div>
+        </paper-card>
+      </div>
+      <div class="wrapper l4 offset-l4 xs12 offset-xs0">
+        <paper-card>
+          <form is="iron-form" id="form">
+            <div class="wrapper">
+              Добавить
+              <div class="layout horizontal">
+                <paper-input label="Имя" value="{{Name}}">
+                </paper-input>
+                <paper-input label="Фамилия" value="{{surname}}">
+                </paper-input>
+              </div>
+            </div>
+            <div class="wrapper layout horizontal">
+              <paper-input maxlength="12" label="ИИН" value="{{pin}}">
+              </paper-input>
+              <vaadin-combo-box items="[[types]]" label="Кто это?" required item-label-path="name" item-value-path="key" value="{{type}}"></vaadin-combo-box>
+              <paper-fab icon="icons:add" on-tap="add"></paper-fab>
+            </div>
+          </form>
+        </paper-card>
+      </div>
+    </iron-grid>
+    <iron-list items="[[users]]" as="user" class="mw" grid>
+      <template>
+        <learn-admin-stuff-user-module user="[[user]]" type="[[stype]]"></learn-admin-stuff-user-module>
+      </template>
+    </iron-list>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-admin-stuff-module',
+
+      behaviors:[
+        LocalizeBehavior,
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'stypeChanged(stype)'
+      ],
+
+      listeners:{
+        'delete-user': 'delete'
+      },
+
+      attached: function(){
+
+        this.types = [
+          {
+            name: this.localize('teacher'),
+            key: 'teacher'
+          },
+          {
+            name: this.localize('curator'),
+            key: 'curator'
+          },
+          {
+            name: this.localize('admin'),
+            key: 'admin'
+          }
+        ]
+      },
+
+      add: function(){
+
+        if(this.$.form.validate()){
+          this.db.ref('SchoolStuff/' + this.user.val.school + '/' + this.type + '/' + this.pin).set({
+            name: this.Name,
+            surname: this.surname,
+            addedBy: Cookies.get('id')
+          })
+        }
+      },
+
+      stypeChanged:function(t){
+        const that = this
+        if(t){
+          this.fillObjects('SchoolStuff/' + this.user.val.school + '/' + this.stype,function(users){
+            that.users = users
+          })
+        }
+      },
+
+      delete:function(e){
+        this.db.ref('SchoolStuff/' + this.user.val.school + '/' + e.detail.type + '/' + e.detail.id).set(null)
+      }
+    })
+  </script>
+</dom-module>

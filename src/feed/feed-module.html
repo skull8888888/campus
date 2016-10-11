@@ -1,0 +1,70 @@
+<link rel="import" href="../post/post-create-module.html">
+<link rel="import" href="../post/post-module.html">
+
+<dom-module id="feed-module">
+  <template>
+    <style include="wrapper-module">
+    </style>
+
+    <iron-grid>
+      <div class="l4 offset-l4 xs12 offset-xs0">
+        <post-create-module auth="[[user.key]]"></post-create-module>
+        <iron-list items="[[feed]]" as="post" class="mw">
+          <template>
+            <post-module post="[[post]]" r="Users/[[post.val.auth]]/info"></post-module>
+          </template>
+        </iron-list>
+      </div>
+    </iron-grid>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'feed-module',
+
+      properties:{
+        feed:{
+          type:Array,
+          value:[]
+        }
+      },
+
+      observers:[
+        'userChanged(user)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      userChanged:function(user){
+
+        const that = this;
+
+        var feed = [];
+
+        this.fillObjects('Following/' + Cookies.get('id'),function(users){
+
+          users.push({
+            key: Cookies.get('id')
+          });
+
+          users.forEach(function(i,index){
+            that.fillOrder('Posts/','auth',i.key,function(posts){
+//              console.log(posts);
+              posts.forEach(function(post){
+                feed.push(post);
+              });
+              if(index == users.length - 1){
+                console.log(feed);
+                that.feed = feed;
+              }
+            });
+          })
+        });
+      }
+
+    });
+  </script>
+</dom-module>

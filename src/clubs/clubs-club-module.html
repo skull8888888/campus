@@ -1,0 +1,49 @@
+<dom-module id="clubs-club-module">
+  <style include="wrapper-module">
+    iron-image{
+      width: 100%;
+      height: 210px
+    }
+
+    paper-card{
+      width: 200px;
+    }
+
+    :host{
+      width: auto
+    }
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card>
+        <iron-image src$="[[c.image]]" sizing="cover"></iron-image>
+        <div class="card-content">
+          {{c.name}}
+          <div><iron-icon icon="social:group"></iron-icon>[[c.members]]</div>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'clubs-club-module',
+
+      observers:[
+        'clubChanged(club.key)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+
+      clubChanged:function(key){
+        const that = this;
+        this.getItemOnce('Clubs/' + key + '/info',function(c){
+          that.c = c;
+          console.log(c)
+        })
+      }
+    })
+  </script>
+</dom-module>

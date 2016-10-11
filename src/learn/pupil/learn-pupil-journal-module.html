@@ -1,0 +1,42 @@
+<link rel="import" href="learn-pupil-journal-subject-module.html">
+<link rel="import" href="learn-pupil-journal-subjects-module.html">
+<link rel="import" href="../../../bower_components/vaadin-grid/vaadin-grid.html">
+
+<dom-module id="learn-pupil-journal-module">
+  <template>
+    <style>
+    </style>
+      <app-location route="{{route}}"></app-location>
+      <app-route
+                 route="{{route}}"
+                 pattern="/learn/journal/:subject"
+                 data="{{router}}"
+                 tail="{{subroute}}"
+                 active="{{subjectActive}}"
+                 >
+      </app-route>
+      <iron-grid>
+        <iron-pages class="offset-l3 l6 xs12 offset-xs0" id="pages">
+          <learn-pupil-journal-subjects-module></learn-pupil-journal-subjects-module>
+          <learn-pupil-journal-subject-module></learn-pupil-journal-subject-module>
+        </iron-pages>
+      </iron-grid>
+    </template>
+    <script>
+      Polymer({
+        is: 'learn-pupil-journal-module',
+
+        observers:[
+          'activeChanged(subjectActive)'
+        ],
+
+        activeChanged: function(active){
+          if(active){
+            this.$.pages.select(1)
+          } else {
+            this.$.pages.select(0)
+          }
+        }
+      });
+    </script>
+</dom-module>

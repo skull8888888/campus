@@ -1,0 +1,59 @@
+<link rel="import" href="../post/post-create-module.html">
+<link rel="import" href="../post/post-module.html">
+<link rel="import" href="club-info-module.html">
+
+<dom-module id="club-module">
+  <template>
+    <style include="wrapper-module">
+      paper-card{
+        width: 100%;
+        margin: 10px;
+      }
+
+      .name{
+        border-bottom: 1px solid var(--paper-grey-300);
+        font-size: 20px;
+        padding: 10px;
+      }
+
+      .info{
+        height: 40vh
+      }
+    </style>
+    <iron-grid>
+      <div class="l3 offset-l1">
+        <club-avatar-module></club-avatar-module>
+      </div>
+      <div class="l4 xs12 layout vertical">
+        <club-info-module club="[[club]]"></club-info-module>
+        <post-create-module auth="[[club.key]]"></post-create-module>
+        <iron-list items="[[posts]]" as="post">
+          <template>
+            <post-module post="[[post]]" r="Clubs/{{club.key}}/info/"></post-module>
+          </template>
+        </iron-list>
+      </div>
+    </iron-grid>
+  </template>
+  <script>
+    Polymer({
+      is: 'club-module',
+
+      observers:[
+        'clubChanged(club)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      clubChanged: function(club){
+        const that = this;
+        this.fillOrder('Posts/','auth',club.key,function(posts){
+          that.posts = posts;
+          console.log(posts);
+        })
+      }
+    });
+  </script>
+</dom-module>

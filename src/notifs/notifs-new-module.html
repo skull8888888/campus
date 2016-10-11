@@ -1,0 +1,52 @@
+<dom-module id="notifs-new-module">
+  <template>
+    <style include="wrapper-module">
+
+    </style>
+
+    <iron-list items="[[notifs]]" as="notif">
+      <template>
+        <notifs-notif-module notif="[[notif]]"></notifs-notif-module>
+      </template>
+    </iron-list>
+  </template>
+  <script>
+    Polymer({
+      is: 'notifs-new-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'userChanged(user)'
+      ],
+
+      userChanged:function(u){
+        console.log(u);
+        const that = this;
+
+//        this.db.ref('Notifs/' + Cookies.get('id')).orderByChild('seen').equalTo('false').transition(function(notifs){
+//
+//          if(notifs.exists()){
+//            var notifs = [];
+//            var newNotifs = {};
+//            notifs.forEach(function(notif){
+//              notifs.push(notif.val());
+//
+//              var n = notif.val();
+//              n.seen = Date.now();
+//
+//              newNotifs[notif.key] = n;
+//            });
+//            that.notifs = notifs;
+//
+//            return newNotifs
+//          }
+//
+//        });
+      },
+
+    })
+  </script>
+</dom-module>

@@ -1,0 +1,50 @@
+<dom-module id="search-module">
+  <template>
+    <style include="wrapper-module">
+
+    </style>
+    <div style="padding:8px;text-align:left">
+      <paper-input label="Имя пользователя" value="{{searchText}}"></paper-input>
+      <div>
+
+      </div>
+      <iron-list items="[[searchItems]]" as="item">
+        <template>
+          <a style="padding:8px;" href$="/[[item.val.info.link]]" class="link layout horizontal">
+            <iron-image class="ava" src="[[item.val.info.image]]" class="ava" sizing="cover"></iron-image>
+            <div style="margin-left:8px;">
+              <div class="name">
+                [[item.val.info.name]]
+                [[item.val.info.surname]]
+              </div>
+              <div class="medium">
+                [[localize(item.val.info.type)]]
+              </div>
+            </div>
+          </a>
+        </template>
+      </iron-list>
+    </div>
+    <iron-ajax
+               auto
+               url="https://campus-server.herokuapp.com/search/[[searchText]]"
+               id="xhr"
+               on-response="handleResponse"
+               loading="[[active]]"
+               ></iron-ajax>
+  </template>
+  <script>
+    Polymer({
+      is: 'search-module',
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      handleResponse:function(e){
+        this.searchItems = e.detail.__data__.response;
+      }
+    })
+  </script>
+</dom-module>

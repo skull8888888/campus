@@ -1,0 +1,42 @@
+<link rel="import" href="school-school-module.html">
+<link rel="import" href="school-enter-module.html">
+<link rel="import" href="school-vacancy-module.html">
+<link rel="import" href="school-desk-module.html">
+<link rel="import" href="school-contacts-module.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+
+<dom-module id="school-module">
+  <template>
+    <style is="custom-style">
+
+      paper-tabs{
+        @apply(--tabs-theme)
+      }
+    </style>
+    <div>
+      <paper-tabs selected="{{selected}}" scrollable>
+        <paper-tab>Школа</paper-tab>
+        <paper-tab>Поступление</paper-tab>
+        <paper-tab>Вакансии</paper-tab>
+        <paper-tab>Контакты</paper-tab>
+        <paper-tab>Доска почета</paper-tab>
+      </paper-tabs>
+    </div>
+    <iron-pages selected="{{selected}}">
+      <school-school-module></school-school-module>
+      <school-enter-module></school-enter-module>
+      <school-vacancy-module></school-vacancy-module>
+      <school-contacts-module></school-contacts-module>
+      <school-desk-module></school-desk-module>
+    </iron-pages>
+  <firebase-auth id="auth"></firebase-auth>
+  </template>
+
+  <script>
+
+    Polymer({
+      is: 'school-module',
+
+    });
+  </script>
+</dom-module>

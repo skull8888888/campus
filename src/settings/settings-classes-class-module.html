@@ -1,0 +1,40 @@
+<dom-module id="settings-classes-class-module">
+  <style include="wrapper-module">
+    .class {
+      width: 140px;
+      height: 65px;
+      border-radius: 5px;
+      background-color: var(--paper-grey-200);
+      margin: 10px
+    }
+
+  </style>
+  <template>
+    <div class="wrapper class layout horizontal justified">
+      <div class="layout vertical">
+        <div>[[cl.val.class]]</div>
+        <div>[[localize(cl.val.group)]]</div>
+        <div>[[localize(cl.val.subject)]]</div>
+      </div>
+      <paper-icon-button icon="icons:clear" on-tap="delete"></paper-icon-button>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'settings-classes-class-module',
+
+      behaviors:[
+        LocalizeBehavior
+      ],
+
+      delete: function(){
+
+        this.fire('delete',{
+          key: this.cl.key,
+          chos:this.cl.val.chos || null,
+          sub: this.cl.val.subject || this.cl.val.class.split('-')[0]
+        })
+      },
+    })
+  </script>
+</dom-module>

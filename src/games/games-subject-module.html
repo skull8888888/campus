@@ -1,0 +1,52 @@
+<link rel="import" href="games-game-card-module.html">
+
+<dom-module id="games-subject-module">
+  <template>
+    <style include="wrapper-module">
+      h1{
+        text-align: center
+      }
+    </style>
+    <h1 class="medium">{{localize(subject)}}</h1>
+    <iron-grid>
+      <div class="offset-l2 l8 offset-xs0 xs12">
+        <iron-list id="list" items="[[games]]" as="game" grid class="mw">
+          <template>
+            <a href$="{{subject}}/{{game.key}}" class="link">
+              <games-game-card-module game="{{game}}"></games-game-card-module>
+            </a>
+          </template>
+        </iron-list>
+      </div>
+    </iron-grid>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'games-subject-module',
+
+      observers:[
+        'subjectChanged(subject)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      subjectChanged: function(subject){
+        if(subject){
+          console.log('subject changed ',subject)
+          var that = this;
+          this.fillOrder('Games/','subject',subject,function(games){
+            that.games = games.sort(function(g1,g2){
+              var comp = g1.val.stars < g2.val.stars ? 1: -1;
+              return comp
+            });
+          });
+        };
+      },
+    });
+  </script>
+
+</dom-module>

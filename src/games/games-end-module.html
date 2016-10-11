@@ -1,0 +1,47 @@
+<dom-module id="games-end-module">
+  <style include="wrapper-module">
+    .card-content {
+     text-align: center
+    }
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card>
+        <div class="card-content">
+          <h1 style$="color: {{color(status)}}">{{status}}</h1>
+          <h1 style=" color: var(--paper-grey-600)">+{{score}}</h1>
+
+          <a href="/games" id="link" class="link">
+            <paper-button on-tap="done" class="button">К играм</paper-button>
+          </a>
+        </div>
+      </paper-card>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'games-end-module',
+
+      listeners: {
+        'showcorrect': '_showCorrect',
+      },
+
+      color: function(status){
+        var c = '';
+        switch(status){
+          case 'Победа':
+            c = 'green'
+            break;
+          case 'Поражение':
+            c = 'red'
+            break;
+          case 'Ничья':
+            c = 'black'
+            break;
+        }
+        return c
+      },
+    })
+  </script>
+</dom-module>

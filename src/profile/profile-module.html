@@ -1,0 +1,87 @@
+<link rel="import" href="../post/post-create-module.html">
+<link rel="import" href="../post/post-module.html">
+<link rel="import" href="profile-info-module.html">
+<link rel="import" href="profile-avatar-module.html">
+<link rel="import" href="profile-people-module.html">
+<link rel="import" href="profile-games-module.html">
+<link rel="import" href="profile-clubs-module.html">
+
+<dom-module id="profile-module">
+  <template>
+    <style>
+    </style>
+    <iron-grid>
+      <template is="dom-if" if="[[desktop]]">
+        <div class="l2 offset-l2 xs12 offset-xs0 left layout vertical">
+          <profile-avatar-module user="{{user}}"></profile-avatar-module>
+<!--
+          <profile-people-module link="Followers/[[user.key]]" type="Подписчики"></profile-people-module>
+          <profile-people-module link="Following/[[user.key]]" type="Подписки"></profile-people-module>
+          <profile-clubs-module link="ClubsOfUsers/[[user.key]]"></profile-clubs-module>
+          <profile-games-module userId="[[user.key]]"></profile-games-module>
+-->
+        </div>
+      </template>
+      <div class="l4 xs12 offset-xs0 layout vertical">
+        <template is="dom-if" if="[[desktop]]">
+          <profile-info-module user="[[user]]"></profile-info-module>
+        </template>
+        <template is="dom-if" if="[[!desktop]]">
+          <profile-info-less-module user="[[user]]"></profile-info-less-module>
+        </template>
+        <template is="dom-if" if="[[isMine(user.key)]]">
+          <post-create-module auth="[[user.key]]"></post-create-module>
+        </template>
+        <iron-list style="width:100%" items="[[posts]]" as="post">
+          <template>
+            <post-module post="[[post]]" r="Users/[[user.key]]/info"></post-module>
+          </template>
+        </iron-list>
+      </div>
+    </iron-grid>
+  </template>
+  <script>
+    Polymer({
+      is: 'profile-module',
+      properties:{
+        user:{
+          type: Object,
+          observer: 'userChanged'
+        },
+        active: {
+          type: String,
+          value: 'more'
+        },
+
+        posts:Array
+      },
+
+      behaviors:[
+        DatabaseBehavior,
+      ],
+
+      attached: function(){
+        console.log(window.innerWidth);
+        if(window.innerWidth <= 600){
+          this.desktop = false;
+          this.importHref(this.resolveUrl('profile-info-less-module.html'), null, null, true);
+        } else {
+          this.desktop = true;
+        };
+      },
+
+      userChanged: function(user){
+        const that = this;
+        this.fillOrder('Posts/','auth',user.key,function(posts){
+          that.posts = posts;
+        });
+      },
+
+      isMine:function(key){
+        return key == Cookies.get('id')
+      }
+
+    });
+
+  </script>
+</dom-module>

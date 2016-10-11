@@ -1,0 +1,64 @@
+<dom-module id="notifs-notif-module">
+  <template>
+    <style include="wrapper-module">
+      paper-card{
+        padding:8px;
+      }
+      #ava{
+        width: 50px;
+        height: 50px;
+        border-radius: 25px;
+      }
+
+      .name {
+       margin-top: 8px;
+        margin-left: 8px;
+      }
+
+      .text{
+        margin-top: 8px;
+      }
+    </style>
+    <div class="wrapper">
+      <paper-card>
+        <div class="auth layout horizontal">
+          <iron-image id="ava" src="[[user.image]]" sizing="cover"></iron-image>
+          <div class="name">
+            [[user.name]] [[user.surname]]
+          </div>
+        </div>
+        <div class="text">
+          [[text]]
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'notifs-notif-module',
+
+      observers:[
+        'notifChanged(notif)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      notifChanged:function(n){
+        const that = this;
+        this.getItemOnce('Users/' + n.auth + '/personal',function(u){
+          that.user = u;
+        });
+
+        switch(n.type){
+            case 'hw':
+            this.text = 'Домашняя работа на ' + n.des.date + ' добавлена: ' + '" '+ n.des.text+ '"'
+            break
+            default:
+            break
+        }
+      },
+    })
+  </script>
+</dom-module>

@@ -1,0 +1,104 @@
+<dom-module id="dialogs-chat-module">
+  <template>
+    <style include="wrapper-module">
+      .message {
+        float: left;
+        border-radius: 10px;
+        border-bottom-left-radius: 0px;
+        margin: 4px 15px 4px 4px;
+        background-color: red;
+        max-width: 80%;
+        padding: 8px;
+      }
+
+      .mine {
+        border-bottom-right-radius: 0px;
+        border-bottom-left-radius: 10px;
+        float: right;
+        background-color: #81D4FA;
+        color: white;
+        max-width: 80%
+      }
+
+      paper-card{
+        height: calc(100vh - 100px);
+      }
+
+      iron-list{
+        width: 100%;
+/*        height: 60vh*/
+      }
+
+      paper-textarea{
+        width: 100%;
+/*        margin: 10px 0px 10px 0px*/
+      }
+
+      #container{
+        height: 80%;
+        width: 100%;
+        border-bottom: 1px solid var(--paper-grey-300)
+      }
+
+      paper-icon-button{
+        border-radius: 4px;
+        margin-bottom: 8px;
+      }
+    </style>
+
+    <iron-grid>
+      <div class="offset-l4 l4 offset-xs0 xs12 wrapper">
+        <paper-card>
+          <div id="container" style="overflow: auto;">
+            <iron-list id="list" items="{{messages}}" as="message" scroll-target="container">
+              <template>
+                <div>
+                  <div class$="{{mine(message.val.from)}}" tabindex$="[[tabIndex]]">
+                    {{message.val.text}}
+                  </div>
+                </div>
+              </template>
+            </iron-list>
+          </div>
+          <div class="layout horizontal">
+            <paper-textarea label="Новое сообщение" rows="2" max-rows="2" no-float-label></paper-textarea>
+            <paper-icon-button icon="icons:mail" class="button"></paper-icon-button>
+          </div>
+        </paper-card>
+      </div>
+    </iron-grid>
+  </template>
+  <script>
+    Polymer({
+      is: 'dialogs-chat-module',
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers: [
+        'personIdChanged(personId)',
+        'messagesChanged(messages)'
+      ],
+
+      personIdChanged: function(personId){
+        if(item !== null){
+          var that = this;
+          this.fillObjects('Messages/' + Cookies.get('id') + '/' + personId, function(messages){
+            that.messages = messages;
+          },true);
+        }
+      },
+
+      messagesChanged: function(messages){
+        console.log(messages);
+        this.$.list.scrollToIndex(15);
+        this.$.list.fire('iron-resize');
+      },
+
+      mine: function(from){
+        return (this.$.auth.user.uid === from) ? 'message mine' : 'message';
+      }
+    });
+  </script>
+
+</dom-module>

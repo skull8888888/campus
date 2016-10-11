@@ -1,0 +1,59 @@
+<dom-module id="dialogs-person-module">
+  <template>
+    <style include="wrapper-module">
+      .info {
+        margin-left: 10px;
+        margin-bottom: -10px;
+        width: calc(100% - 60px);
+        border-bottom: 1px solid var(--paper-grey-300);
+      }
+
+      iron-image{
+        width:50px;
+        height:50px;
+        border-radius: 25px;
+      }
+
+      .person{
+        margin: 10px 0px 10px 10px;
+        text-decoration: none;
+        color: black
+      }
+
+      .name{
+        margin-left: 8px;
+      }
+    </style>
+    <div class="person layout horizontal">
+      <div class="layout horizontal mw">
+        <iron-image sizing="cover" src="{{user.image}}"></iron-image>
+        <div class="name info layout vertical">
+          {{user.name}} {{user.surname}}
+          <div>[[chat.val]]</div>
+        </div>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'dialogs-person-module',
+
+      observers:[
+        'chatChanged(chat)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      chatChanged:function(chat){
+        const that = this;
+        this.getItem('Users/' + chat.key + '/personal',function(user){
+          that.user = user;
+        });
+      }
+
+    });
+  </script>
+
+</dom-module>

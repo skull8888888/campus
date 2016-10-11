@@ -1,0 +1,135 @@
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-database-behavior.html">
+
+<dom-module id="post-create-module">
+  <template>
+    <style include="wrapper-module">
+
+      paper-textarea{
+        margin: 0;
+/*        width: 100px*/
+      }
+
+      #content {
+       padding: 10px
+      }
+
+      paper-button{
+        --paper-button:{
+          height: 40px;
+        }
+      }
+    </style>
+    <div class="wrapper">
+      <paper-card>
+        <div id="content">
+          <paper-textarea label="Очень крутая новость" value="{{text}}" focused="{{focused}}" no-label-float></paper-textarea>
+          <div id="imgdiv" hidden$="{{imageHidden}}">
+            <paper-icon-button icon="icons:clear" on-tap="delete" style="float: right"></paper-icon-button>
+          </div>
+        </div>
+        <div class="card-actions">
+          <label for="upload"><paper-icon-button icon="image:camera-alt"></paper-icon-button></label><input type="file" value="upload" id="upload" style="position:absolute; visibility:hidden"/>
+          <paper-button on-tap="done" class="button" style="float:right;position:relative;">Отправить</paper-button>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'post-create-module',
+
+      properties: {
+        imageHidden:{
+          type: Boolean,
+          value: true
+        },
+
+        progressHidden:{
+          type: Boolean,
+          value: true
+        }
+      },
+
+      observers:[
+        'focusedChanged(focused)'
+      ],
+
+      behaviors:[
+        Polymer.FirebaseDatabaseBehavior
+      ],
+
+      attached: function(){
+        const that = this;
+        this.$.upload.addEventListener('change',function(e){
+          that.id = that.db.ref('Posts/').push().key;
+          that.fire('toggle-ptoast');
+          var file = e.target.files[0];
+          var task = that.app.storage().ref('Posts/' + that.id + '/image/' + file.name).put(file);
+          task.on('state_changed',function(snapshot){
+            that.fire('progressChanged',{p:snapshot.bytesTransferred / snapshot.totalBytes * 100});
+          },function(err){
+            alert(err);
+          },function(){
+
+            that.getHeight(task.snapshot.downloadURL,function(ratio){
+              that.$.imgdiv.style.height = (that.$.content.clientWidth - 20) * ratio + 'px';
+              that.$.imgdiv.style.width = (that.$.content.clientWidth - 20) + 'px';
+              that.src = task.snapshot.downloadURL;
+              that.$.imgdiv.style.background = 'url("' + that.src + '") center no-repeat';
+              that.$.imgdiv.style.backgroundSize = 'contain';
+              that.fire('toggle-ptoast');
+              that.imageHidden = false;
+            });
+          });
+        });
+      },
+
+      getHeight:function(url,callback){
+        var img = new Image();
+        const that =this;
+        img.onload = function(){
+          var ratio = this.height / this.width;
+          that.ratio = ratio;
+          callback(ratio);
+        };
+        img.src = url;
+      },
+
+      focusedChanged:function(focused){
+        if(focused){
+          this.id = this.db.ref('Posts/').push().key;
+        }
+      },
+
+      delete: function(){
+        this.imageHidden = true;
+        this.src = '';
+      },
+
+      done: function(){
+
+        var image = this.src != undefined ? this.src : null;
+        var text = this.text != undefined ? this.text : null;
+        var ratio = this.ratio || null;
+
+        if(this.text != undefined || image){
+          this.db.ref('Posts/' + this.id).set({
+            text: text,
+            time: Date.now(),
+            image: image,
+            auth: this.auth,
+            ratio: ratio
+          });
+          this.src = null;
+          this.text = null;
+          this.imageHidden = true;
+          this.progressHidden = true
+        } else {
+          this.fire('open-toast',{text: 'Напишите что-нибудь, или прикрепите фото-мото'});
+        };
+      },
+
+    });
+  </script>
+</dom-module>

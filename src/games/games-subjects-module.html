@@ -1,0 +1,34 @@
+<link rel="import" href="games-subject-card-module.html">
+
+<dom-module id="games-subjects-module">
+  <template>
+    <style is="custom-style" include="wrapper-module">
+
+    </style>
+    <iron-list id="list" items="{{subjects}}" as="subject" grid>
+      <template>
+        <a href="/games/{{subject.key}}" class="link">
+          <games-subject-card-module subject="{{subject}}" index="{{index}}"></games-subject-card-module>
+        </a>
+      </template>
+    </iron-list>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'games-subjects-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      ready: function(){
+        var that = this;
+        this.fillObjects('GamesInfo/',function(subjects){
+          that.subjects = subjects;
+        });
+      },
+    });
+  </script>
+
+</dom-module>

@@ -1,0 +1,87 @@
+<dom-module id="learn-pupil-files-file-module">
+  <template>
+    <style include="wrapper-module">
+      paper-card{
+        width: 200px;
+        height: 250px;
+        padding: 10px;
+        position: relative;
+      }
+
+      :host{
+        width: auto
+      }
+
+      iron-image{
+        width: 40px;
+        height: 40px;
+        border-radius: 20px;
+      }
+
+      .info{
+        position: absolute;
+        bottom: 0px;
+      }
+
+      .name{
+        margin-left: 5px;
+        line-height: 18px;
+        font-size: 16px;
+      }
+
+      .size{
+        font-size: 15px;
+      }
+    </style>
+    <div class="wrapper">
+      <paper-card elevation="0">
+
+        <div class="auth layout horizontal">
+          <iron-image src="[[a.image]]" sizing="cover"></iron-image>
+          <div class="name layout vertical">
+            {{a.name}} [[a.surname]]
+          </div>
+        </div>
+        <div class="info">
+          <div style="font-weight:500;font-size:20px">{{file.name}}
+          </div>
+          <div class="size">
+            {{file.size}}
+          </div>
+          <a href="data:text/csv;[[file.src]]" download="[[file.name]]">
+            <paper-icon-button on-tap="download" icon="icons:save"></paper-icon-button>
+          </a>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-pupil-files-file-module',
+
+      behaviors:[
+        DatabaseBehavior,
+        CardColorBehavior
+      ],
+
+      observers:[
+        'fileChanged(file)'
+      ],
+
+      fileChanged:function(f){
+        const that = this;
+        this.getItemOnce('Users/' + f.auth + '/personal',function(a){
+          that.a = a;
+        })
+      },
+
+      download:function(e){
+        console.log(e);
+      },
+
+      delete:function(){
+        this.fire('delete',{index:this.index});
+      }
+    })
+  </script>
+</dom-module>

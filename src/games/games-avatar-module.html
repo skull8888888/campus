@@ -1,0 +1,66 @@
+<dom-module id="games-avatar-module">
+  <template>
+    <style include="iron-flex-alignment iron-flex">
+      iron-image{
+        height: 50px;
+        width: 50px;
+        border-radius: 25px;
+      }
+
+      .imageWrapper {
+        height: 50px;
+        width: 50px;
+        border-radius: 25px;
+      }
+
+      .mine{
+        float: left
+      }
+
+      .player {
+        float: right
+      }
+
+      .head{
+        --paper-card-content:{
+          padding: 5px;
+        }
+      }
+
+      .type {
+        position: relative;
+        top: -5px;
+        color: var(--paper-grey-400)
+      }
+
+      .name{
+        margin: 5px;
+      }
+    </style>
+    <div class="player layout horizontal">
+      <template is="dom-if" if="[[hide(left)]]">
+        <iron-image src$="{{user.val.info.image}}" sizing="cover"></iron-image>
+      </template>
+      <div class="layout vertical name">
+        <div>{{user.val.info.name}} {{user.val.info.surname}}</div>
+        <div class="type" style$="text-align: {{align}}">{{localize(user.val.info.type)}}</div>
+      </div>
+      <template is="dom-if" if="{{hide(right)}}">
+        <iron-image src$="{{user.val.info.image}}" sizing="cover"></iron-image>
+      </template>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'games-avatar-module',
+
+      behaviors:[
+        LocalizeBehavior
+      ],
+
+      hide: function(e){
+        return !e
+      }
+    });
+  </script>
+</dom-module>

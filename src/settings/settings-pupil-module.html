@@ -1,0 +1,278 @@
+<dom-module id="settings-pupil-module">
+  <style include="wrapper-module iron-flex">
+    .class {
+      width: 80px
+    }
+
+    .group {
+      width: 90px
+    }
+
+    input{
+      border: 0px
+    }
+
+    .subject {
+      position: relative;
+      left: 0
+    }
+
+    .del{
+      margin: 0
+    }
+
+    .wrapper {
+      display:flex
+    }
+
+    #nums,#lets{
+      width: 50px
+    }
+
+    #group{
+      width: 120px
+    }
+
+    #fsub,#ssub,#tsub{
+      width: 140px;
+    }
+
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card>
+        <div class="card-content">
+          <div class="layout horizontal">
+            <vaadin-combo-box always-float-label label="Парал." items="[[nums]]" item-label-path="i" item-value-path="i" value="{{num}}" id="nums"></vaadin-combo-box>
+            <vaadin-combo-box always-float-label label="Буква" items="[[lets]]" value="{{let}}" id="lets"></vaadin-combo-box>
+            <vaadin-combo-box  always-float-label label="Группа" items="[[groups]]" item-label-path="name" item-value-path="key" value="{{user.val.group}}" id="group"></vaadin-combo-box>
+          </div>
+          <template is="dom-if" if="[[high]]" restamp="true">
+            <div class="mw">
+              <div class="layout horizontal">
+                <vaadin-combo-box id="fsub" always-float-label label="1 предмет по выб." items="[[fsubs]]" item-label-path="name" item-value-path="key" value="{{fsub}}" id="nums"></vaadin-combo-box>
+                <vaadin-combo-box always-float-label label="Группа" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{fnum}}" id="nums"></vaadin-combo-box>
+              </div>
+
+              <div class="layout horizontal">
+                <vaadin-combo-box id="ssub"  always-float-label label="2 предмет по выб." items="[[fsubs]]" item-label-path="name" item-value-path="key" value="{{ssub}}" id="nums"></vaadin-combo-box>
+                <vaadin-combo-box always-float-label label="Группа" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{snum}}" id="nums"></vaadin-combo-box>
+              </div>
+
+              <div class="layout horizontal">
+                <vaadin-combo-box id="tsub" always-float-label label="3 предмет по выб." items="[[tsubs]]" item-label-path="name" item-value-path="key" value="{{tsub}}" id="nums"></vaadin-combo-box>
+                <vaadin-combo-box always-float-label label="Группа" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{tnum}}" id="nums"></vaadin-combo-box>
+              </div>
+
+            </div>
+          </template>
+          <vaadin-combo-box label="Любимый предмет" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{user.val.subject}}"></vaadin-combo-box>
+        </div>
+        <div class="card-actions">
+          <paper-button on-tap="save" class="button" style="float: right; margin-bottom: 5px">Сохранить</paper-button>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'settings-pupil-module',
+
+      properties:{
+        let:{
+          reflectToAttributes: true,
+          notify: true
+        },
+
+        num:{
+          reflectToAttributes: true,
+          notify: true
+        },
+
+        group:{
+          reflectToAttributes: true,
+          notify: true
+        },
+
+        nums: {
+          type: Array,
+          value: function(){
+            var a = [];
+            for(var i=1; i< 13;i++){
+              a.push({
+                i: i
+              });
+            };
+            return a;
+          }
+        },
+
+        lets: {
+          type: Array,
+          value:function(){
+            return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+          }
+        }
+
+      },
+
+      observers:[
+        'userChanged(user)',
+        'numChanged(num)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      userChanged:function(user){
+
+        if(user.val.class){
+          var cl = user.val.class.split('-');
+          this.num = cl[0]
+          this.let = cl[1]
+        }
+
+        if(user.val.subs){
+          if(user.val.subs.fsub){
+            var fsub = user.val.subs.fsub.split('-');
+            this.fsub = fsub[0]
+            this.fnum = fsub[1]
+          }
+
+          if(user.val.subs.ssub){
+            var ssub = user.val.subs.ssub.split('-');
+            this.ssub = ssub[0]
+            this.snum = ssub[1]
+          }
+
+          if(user.val.subs.tsub){
+            var tsub = user.val.subs.tsub.split('-');
+            this.tsub = tsub[0]
+            this.tnum = tsub[1]
+          }
+        }
+
+      },
+
+      numChanged:function(n){
+        if(n >= 11){
+          this.high = true
+        } else {
+          this.high = false
+        }
+      },
+
+
+      attached: function(){
+
+        var that = this;
+
+
+//        this.db.ref('Users/').once('value',function(users){
+//
+//          var newUsers = {};
+//
+//          users.forEach(function(user){
+//            var v = user.val();
+//
+//            v.info.type = v.type
+//            v.type = null
+//            newUsers[user.key] = v;
+//          });
+//          that.db.ref('Users/').update(newUsers);
+//        });
+
+        this.fillObjects('Subjects/',function(subjects){
+          var Subjects = [];
+          subjects.forEach(function(subject){
+            Subjects.push({
+              sub: that.localize(subject.key),
+              key:subject.key
+            });
+          });
+          that.subjects = Subjects;
+        });
+
+        this.groups = [
+          {
+            name: this.localize('g1'),
+            key: 'g1'
+          },
+          {
+            name: this.localize('g2'),
+            key: 'g2'
+          },
+          {
+            name: this.localize('g3'),
+            key: 'g3'
+          }
+        ]
+
+        this.fsubs = [
+          {
+            name: this.localize('phys'),
+            key: 'phys'
+          },
+          {
+            name: this.localize('chem'),
+            key: 'chem'
+          },
+          {
+            name: this.localize('bio'),
+            key: 'bio'
+          },
+          {
+            name: this.localize('ict'),
+            key: 'ict'
+          },
+        ],
+
+          this.tsubs = [
+          {
+            name: this.localize('econ'),
+            key: 'econ'
+          },
+          {
+            name: this.localize('kaz'),
+            key: 'kaz'
+          },
+          {
+            name: this.localize('rus'),
+            key: 'rus'
+          },
+          {
+            name: this.localize('geo'),
+            key: 'geo'
+          },
+        ]
+      },
+
+      save: function(){
+
+        var data = {};
+        data.class = this.num &&  this.let ? this.num + '-' +  this.let : null;
+        data.subject = this.user.val.subject ? this.user.val.subject : null;
+        data.group = this.user.val.group ? this.user.val.group : null;
+        data.full = data.class && this.user.val.school ? data.class + this.user.val.school: null
+
+        data.subs =  this.fsub ||  this.ssub ||  this.tsub ? {}: null;
+        if(data.subs){
+          data.subs.fsub = this.fsub && this.fnum ? this.fsub + '-' + this.fnum: null
+          data.subs.ssub = this.ssub && this.snum ? this.ssub + '-' + this.snum: null
+          data.subs.tsub = this.tsub && this.tnum ? this.tsub + '-' + this.tnum: null
+        }
+        const that = this;
+        this.db.ref('Users/' + this.user.key).update(data).then(function(){
+          that.fire('open-toast',{
+            text: 'Изменения сохранены'
+          });
+          console.log('save2');
+          that.fire('userChanged');
+        });
+      },
+
+    })
+  </script>
+</dom-module>

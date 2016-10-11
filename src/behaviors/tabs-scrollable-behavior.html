@@ -1,0 +1,24 @@
+<script>
+	TabsScrollableBehavior = {
+
+		behaviors: [
+			Polymer.IronResizableBehavior
+		],
+
+
+		listeners: {
+			'iron-resize': '_onResize'
+		},
+
+		_onResize: function(){
+			var width = window.innerWidth;
+			if (width <= 600){
+				this.scrollable = true;
+				this.tabsClass = ''
+			} else {
+				this.scrollable = false;
+				this.tabsClass = 'layout vertical';
+			}
+		}
+	}
+</script>

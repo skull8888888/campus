@@ -1,0 +1,52 @@
+<dom-module id="learn-teacher-row-module">
+  <template>
+    <style>
+      .subData {
+        -webkit-flex: 1;
+        flex: 1;
+        max-height: 20px;
+      }
+      .subCol {
+        width: 100%;
+        padding: 10px;
+
+        -webkit-flex-direction: column;
+        flex-direction: column;
+        position: relative;
+      }
+
+      paper-textarea{
+        width: 100%;
+      }
+
+      paper-button{
+        width: 100px;
+        float: right;
+        margin-bottom: 5px;
+      }
+    </style>
+    <div style="padding:0;margin:0">
+      <paper-textarea label="Домaшнаяя работа" value="{{text}}" max-rows="3"></paper-textarea>
+      <paper-button class="button" on-click="send">Отправить</paper-button>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-row-module',
+
+      observers:[
+        'textChanged(text)'
+      ],
+
+      behaviors:[
+        Polymer.FirebaseDatabaseBehavior
+      ],
+
+      send: function(){
+        this.fire('send',{
+          text: this.text
+        });
+      },
+    })
+  </script>
+</dom-module>

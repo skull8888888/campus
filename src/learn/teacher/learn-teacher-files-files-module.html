@@ -1,0 +1,84 @@
+<link rel="import" href="../../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="learn-teacher-files-file-module.html">
+
+<dom-module id="learn-teacher-files-files-module">
+  <template>
+    <style include="wrapper-module">
+    </style>
+    <div style="right:10px;margin-top:55px;position:fixed">
+      <label for="load"><paper-fab icon="icons:add"></paper-fab></label><input type="file" value="upload" id="load" style="position:absolute; visibility:hidden"/>
+
+    </div>
+    <iron-list id="list" items="[[files]]" as="file" grid class="mw">
+      <template>
+        <learn-teacher-files-file-module file="[[file]]" index="[[index]]"></learn-teacher-files-file-module>
+      </template>
+    </iron-list>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-files-files-module',
+
+      observers:[
+        'fillFiles(path,user)'
+      ],
+
+      listeners:{
+        'delete':'delete'
+      },
+
+      behaviors: [
+        DatabaseBehavior
+      ],
+
+      attached: function(){
+        const that = this;
+        this.progressHidden = true;
+        this.$.load.addEventListener('change',function(e){
+          var size = Math.round(e.target.files[0].size /1024/1024* 100) / 100;
+          console.log(size);
+          that.fire('toggle-ptoast');
+          var file = e.target.files[0];
+          var task = that.app.storage().ref('Files/' + that.user.val.school + '/'+ that.class.slice(0, -1) + '/' + that.class.substr(that.class.length - 1)+ '/' + that.sub + '/' + '/' + that.group + '/' + file.name).put(file);
+          task.on('state_changed',function(snapshot){
+            that.fire('progressChanged',{p:snapshot.bytesTransferred / snapshot.totalBytes * 100})
+          },function(err){
+            alert(err);
+          },function(){
+            that.fire('toggle-ptoast');
+            that.db.ref('SchoolFiles/' + that.user.val.school + '/' + that.class.slice(0, -1) + '/' + that.class.substr(that.class.length - 1) + '/' + that.sub).push({
+              src:task.snapshot.downloadURL,
+              name: file.name,
+              size: size + 'mb',
+              group: that.group,
+              auth: Cookies.get('id'),
+              time: Date.now()
+            });
+          });
+        });
+      },
+
+      fillFiles:function(path,user){
+        if(path){
+          var p = path.split('-');
+          this.class = p[0];
+          this.sub = p[1];
+          this.group = p[2];
+          const that = this;
+          this.fillItems('SchoolFiles/' + user.val.school + '/' + that.class.slice(0, -1) + '/' + that.class.substr(this.class.length - 1) + '/' + this.sub,function(files){
+            that.files = files;
+          })
+        };
+
+      },
+
+      delete:function(e){
+        console.log(this.files[e.detail.index])
+      },
+
+      add:function(){
+
+      }
+    })
+  </script>
+</dom-module>

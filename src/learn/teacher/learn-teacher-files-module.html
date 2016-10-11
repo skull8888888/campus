@@ -1,0 +1,71 @@
+<link rel="import" href="learn-teacher-files-class-module.html">
+<link rel="import" href="learn-teacher-files-files-module.html">
+
+<dom-module id="learn-teacher-files-module">
+  <template>
+    <style>
+      .mw{
+        width: 100%
+      }
+    </style>
+    <app-location route="{{route}}"></app-location>
+    <app-route
+               route="{{route}}"
+               pattern="/learn/files/:p"
+               data="{{router}}"
+               active="{{active}}"
+               >
+    </app-route>
+    <iron-pages id="pages" class="mw">
+      <iron-grid>
+        <div class="l8 offset-l2">
+          <iron-list items="[[classes]]" as="cl" grid class="mw">
+            <template>
+              <a href="/learn/files/{{cl.class}}-{{cl.subject}}-{{cl.group}}">
+                <learn-teacher-files-class-module cl="[[cl]]" index="[[index]]"></learn-teacher-files-class-module>
+              </a>
+            </template>
+          </iron-list>
+        </div>
+      </iron-grid>
+      <iron-grid>
+        <div class="l8 offset-l2">
+          <learn-teacher-files-files-module path="[[router.p]]" user="[[user]]"></learn-teacher-files-files-module>
+        </div>
+      </iron-grid>
+    </iron-pages>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-files-module',
+
+      observers:[
+        'userChanged(user)',
+        'pageChanged(active)',
+      ],
+
+      attached: function(){
+        const list = Polymer.dom(this.root).querySelector('iron-list');
+        if(list){
+          list.scrollTarget = this.ownerDocument.documentElement;
+        }
+      },
+
+      userChanged:function(user){
+        var classes = [];
+        for(var index in user.val.classes){
+          classes.push(user.val.classes[index])
+        };
+        this.classes = classes;
+      },
+
+      pageChanged: function(a){
+        if(a){
+          this.$.pages.selected = 1
+        } else{
+          this.$.pages.selected = 0
+        }
+      },
+    })
+  </script>
+</dom-module>

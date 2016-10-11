@@ -1,0 +1,173 @@
+<link rel="import" href="../../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="games-avatar-module.html">
+<link rel="import" href="games-game-module.html">
+
+<dom-module id="games-prepare-module">
+  <template>
+    <style include="wrapper-module">
+
+      .card{
+        height: 300px;
+      }
+
+      .player2 {
+        height: 100px;
+      }
+
+      .name{
+        margin: 5px;
+      }
+
+      .vs{
+        margin: 5px 30px 0px 30px;
+        font-size: 22px;
+      }
+
+      .versus {
+        margin-top: 150px
+      }
+
+      .search {
+       margin-top: 150px
+      }
+
+      .text{
+        margin-left: 15px
+      }
+
+    </style>
+    <neon-animated-pages id="pages" attr-for-selected="name" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <div class="layout horizontal vertical center search" name="search">
+        <div class="layout horizontal">
+          <paper-spinner-lite active></paper-spinner-lite>
+          <div class="text">Поиск соперника</div>
+        </div>
+      </div>
+      <div class="versus layout horizontal center-justified" name="found">
+        <games-avatar-module user="{{me}}" left></games-avatar-module>
+        <div class="vs">VS</div>
+        <games-avatar-module user="{{player}}" align="right" right></games-avatar-module>
+      </div>
+      <template is="dom-if" if="true" restamp="true" id="gameTemplate">
+        <games-game-module name="game" room="[[roomId]]" game="[[game]]" me="[[me]]" player="[[player]]" id="game"></games-game-module>
+      </template>
+    </neon-animated-pages>
+    <paper-toast id="toast" text="К сожалению, соперник покинул игру. Не беда, поищим еще"></paper-toast>
+  </template>
+  <script>
+    Polymer({
+      is: 'games-prepare-module',
+
+      properties:{
+        roomId: String
+      },
+
+      observers: [
+        'playerChanged(player)',
+      ],
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      listeners:{
+        'ended': 'ended',
+        'meLeft': 'meLeft',
+        'startSearch': 'startSearch'
+      },
+
+      startSearch: function(){
+
+        this.$.pages.select('search');
+        const that = this;
+
+        this.engine = this.db.ref('GamesRooms/').orderByChild(Cookies.get('id'));
+        this.engine.once('child_added',function(room){
+          if(room.val()){
+            var r = room.val();
+
+            that.getObjectOnce('Users/' + r[Cookies.get('id')].playingWith,function(player){
+              that.player = player;
+              that.roomId = room.key;
+
+              that.left = that.db.ref('GamesRooms/' + room.key);
+              that.left.onDisconnect().set(null);
+              that.left.once('child_removed',function(child){
+                if(child.key == player.key){
+                  var s = that.db.ref('GamesSearch/' + that.game.key + '/' + Cookies.get('id'))
+                  s.set('searching');
+                  s.onDisconnect().set(null);
+                  that.db.ref('GamesRooms/' + room.key + '/' + Cookies.get('id')).set(null);
+                  that.playerLeft();
+                };
+              });
+            });
+          };
+        });
+      },
+
+      playerChanged: function(player){
+        if(player){
+          this.$.pages.select('found');
+          const that = this;
+          setTimeout(function(){
+
+            that.$$("#game").fire('startTimer');
+            that.$.pages.select('game');
+          },3000);
+        }
+      },
+
+      playerLeft: function(){
+        this.$.toast.open();
+
+        var that = this;
+        setTimeout(function(){
+          that.$.pages.select('search');
+          that.startSearch();
+          that.$$("#game").fire('stopTimer');
+          if(that.$.gameTemplate.ctor)
+            restamp(that.$.gameTemplate);
+        },3000);
+      },
+
+      meLeft: function(){
+
+        var updatedData = {};
+        if(this.game.key){
+
+          updatedData['GamesSearch/' + this.game.key + '/' + Cookies.get('id')] = null;
+        };
+
+        if(this.roomId){
+          const that = this;
+
+          updatedData['GamesRooms/' + this.roomId + '/' + Cookies.get('id')] = null;
+        };
+        this.$$("#game").fire('stopTimer');
+        if(this.$.gameTemplate.ctor)
+          restamp(this.$.gameTemplate);
+        this.db.ref().update(updatedData);
+      },
+
+      ended: function(){
+        this.left.off();
+        this.engine.off();
+        const that = this;
+        setTimeout(function(){
+          that.db.ref('GamesRooms/' + this.roomId + '/' + Cookies.get('id')).set(null);
+        },500);
+
+        this.db.ref('Games/' + this.game.key + '/played').transaction(function(played){
+          played++;
+          return played;
+        });
+      }
+
+    });
+  </script>
+</dom-module>

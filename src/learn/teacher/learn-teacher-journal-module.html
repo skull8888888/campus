@@ -1,0 +1,55 @@
+<link rel="import" href="learn-teacher-journal-pupil-module.html">
+<link rel="import" href="learn-teacher-journal-pupils-module.html">
+<link rel="import" href="learn-teacher-journal-create-module.html">
+
+<dom-module id="learn-teacher-journal-module">
+  <template>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route
+               route="{{route}}"
+               pattern="/learn/journal/:page"
+               data="{{router}}"
+               tail="{{subroute}}"
+               active="{{subjectActive}}"
+               >
+    </app-route>
+    <iron-pages id="pages" style="width:100%">
+      <iron-grid>
+        <div class="offset-l3 l6 xs12 offset-xs0">
+          <learn-teacher-journal-pupils-module></learn-teacher-journal-pupils-module>
+        </div>
+      </iron-grid>
+      <iron-grid>
+        <div class="offset-l3 l6 xs12 offset-xs0">
+          <learn-teacher-journal-pupil-module></learn-teacher-journal-pupil-module>
+        </div>
+      </iron-grid>
+      <iron-grid>
+        <div class="offset-l4 l4 xs12 offset-xs0">
+          <learn-teacher-journal-create-module></learn-teacher-journal-create-module>
+        </div>
+      </iron-grid>
+    </iron-pages>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-journal-module',
+
+      observers:[
+        'activeChanged(subjectActive,router)'
+      ],
+
+      activeChanged: function(active,r){
+
+        if(active && r.page != 'create'){
+          this.$.pages.select(1)
+        } else if(r.page == 'create' && active){
+          this.$.pages.select(2)
+        } else {
+          this.$.pages.select(0)
+        }
+      }
+    });
+  </script>
+</dom-module>

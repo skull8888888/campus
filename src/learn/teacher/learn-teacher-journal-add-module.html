@@ -1,0 +1,22 @@
+<dom-module id="learn-teacher-journal-add-module">
+  <template>
+    <style include="wrapper-module">
+
+    </style>
+    <div class="wrapper">
+      <paper-card style="padding:8px">
+        <paper-textarea label="Описание цели"></paper-textarea>
+        <div class="layout horizontal">
+          <paper-input label="Номер цели"></paper-input>
+
+          <paper-fab icon="icons:add" on-tap="add"></paper-fab>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-journal-add-module'
+    })
+  </script>
+</dom-module>

@@ -1,0 +1,65 @@
+<link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
+
+<dom-module id="learn-teacher-module">
+  <style include="iron-flex wrapper-module">
+
+    paper-tabs{
+      @apply(--tabs-theme);
+      position: fixed;
+      width: 100vw;
+      z-index: 1;
+      /*      --paper-tabs-selection-bar-color: #111111;*/
+    }
+
+    iron-pages{
+      position: relative;
+      top: 50px;
+    }
+  </style>
+  <template>
+    <app-location route="{{route}}" path="[[path]]"></app-location>
+    <app-route
+               route="{{route}}"
+               pattern="/learn/:page"
+               data="{{router}}"
+               >
+    </app-route>
+    <paper-tabs selected="{{selected}}" attr-for-selected="name" scrollable id="tabs">
+
+      <paper-tab name="timetable">ДОМАШНЕЕ ЗАДАНИЕ</paper-tab>
+      <paper-tab name="files">ФАЙЛЫ</paper-tab>
+      <paper-tab name="journal">ЖУРНАЛ</paper-tab>
+      <paper-tab name="notifs">УВЕДОМЛЕНИЯ</paper-tab>
+    </paper-tabs>
+    <iron-pages selected="{{selected}}" attr-for-selected="name">
+      <learn-teacher-journal-module name="journal"></learn-teacher-journal-module>
+      <learn-teacher-timetable-module user="[[user]]" name="timetable"></learn-teacher-timetable-module>
+      <learn-teacher-notifs-module user="[[user]]" name="notifs"></learn-teacher-notifs-module>
+      <learn-teacher-files-module user="[[user]]" name="files"></learn-teacher-files-module>
+    </iron-pages>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-module',
+
+      properties:{
+        selected:String
+      },
+
+      observers: [
+        'pageChanged(router.page)',
+        'selectedChanged(selected)'
+      ],
+
+      pageChanged: function(page){
+        this.selected = page || 'timetable';
+        this.importHref(this.resolveUrl('learn-teacher-' + this.selected + '-module.html'), null, null, true);
+
+      },
+
+      selectedChanged:function(selected){
+        this.path = '/learn/' + selected;
+      }
+    })
+  </script>
+</dom-module>

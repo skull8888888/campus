@@ -1,0 +1,95 @@
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+
+<dom-module id="club-info-module">
+  <style include="iron-flex iron-flex-alignment">
+
+    :host{
+      width: 100%
+    }
+
+    paper-card{
+      width: 100%;
+    }
+
+    .wrapper {
+      padding: 10px
+    }
+
+    .tag{
+      margin: 4px;
+      font-size: 18px;
+    }
+
+    .icon{
+      float: left;
+    }
+
+    .info-name {
+      @apply(--paper-font-headline)
+        }
+
+    .light {
+      color: var(--paper-grey-500);
+    }
+
+    .medium{
+      color: var(--paper-grey-700);
+    }
+
+    .info{
+      margin-top: 8px;
+      border-top: var(--paper-grey-300) 1px solid;
+      border-bottom: var(--paper-grey-300) 1px solid;
+    }
+
+    iron-image{
+      width: 120px;
+      height: 120px;
+      border-radius: 60px
+    }
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card class="userInfo">
+        <div class="card-content">
+          <div class="layout horizontal justified">
+            <div class="layout vertical">
+              <div class="info-name">{{club.val.name}}</div>
+            </div>
+          </div>
+          <div class="medium"></div>
+
+          <div class="layout vertical info" style="text-align:center">
+
+          </div>
+          <div class="about medium">
+            Информация
+            <paper-icon-button icon="icons:expand-{{active}}" on-tap="expand"></paper-icon-button>
+            <iron-collapse id="more">
+              <div class="aboutText">[[club.val]]</div>
+            </iron-collapse>
+          </div>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'club-info-module',
+
+      observers:[
+        'clubChanged(club)'
+      ],
+
+      clubChanged: function(club){
+        this.active = 'more';
+        console.log(club);
+      },
+
+      expand: function(){
+        this.active = this.$.more.opened ? 'more' : 'less';
+        this.$.more.toggle();
+      },
+    });
+  </script>
+</dom-module>

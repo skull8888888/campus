@@ -1,0 +1,127 @@
+<dom-module id="school-school-module">
+	<template>
+		<style is="custom-style">
+			paper-card{
+				width: 100%;
+				margin: 8px;
+			}
+
+			.schoolName{
+				color: white;
+				text-align: center;
+				background-color: var(--app-primary-color);
+			}
+
+			.tabs{
+				color: white;
+				background-color: var(--app-primary-color);
+			}
+			
+			iron-grid{
+				width: 100%
+			}
+			
+			.head{
+				height: 300px;
+			}
+			
+			.personal{
+				height: 120px;
+			}
+			
+			paper-card.avatar{
+				--paper-card-header-image:{
+					height: 284px;
+					width: 100%;
+					border-bottom-left-radius: 2px;
+					border-bottom-right-radius: 2px;
+				}
+			}
+			
+			.students {
+				background-color: #80CBC4;
+			}
+			
+			.teachers {
+				background-color: #4DB6AC;
+			}
+			
+			.curators {
+				background-color: #26A69A;
+			}
+			
+			.admins {
+				background-color: #009688;
+			}
+			
+			.type{
+				font-weight: 500;
+				font-size: 18px;
+				color: white;
+			}
+			
+			.num {
+				font-weight: 700;
+				font-size: 24px;
+				color: white;
+			}
+
+		</style>
+		<iron-grid>
+			<div class="l2 offset-l3 head">
+				<paper-card>
+					lego
+				</paper-card>
+			</div>
+			<div class="l4 head">
+				<paper-card class="avatar" image="http://kingofwallpapers.com/images/images-169.jpg">
+				</paper-card>
+			</div>
+			<div class="l6 offset-l3">
+				<iron-grid>
+					<div class="l3 personal">
+						<paper-card class="students">
+							<div class="card-content">
+								<span class="type">Ученики<iron-icon icon="icons:class" style="float: right"></iron-icon></span>
+								<div class="num">2342</div>
+							</div>
+						</paper-card>
+					</div>
+					<div class="l3 personal">
+						<paper-card class="teachers">
+							<div class="card-content">
+								<span class="type">Учителя<iron-icon icon="icons:class" style="float: right"></iron-icon></span>
+								<div class="num">2342</div>
+							</div>
+						</paper-card>
+					</div>
+					<div class="l3 personal">
+						<paper-card class="curators">
+							<div class="card-content">
+								<span class="type">Кураторы<iron-icon icon="icons:class" style="float: right"></iron-icon></span>
+								<div class="num">2342</div>
+							</div>
+						</paper-card>
+					</div>
+					<div class="l3 personal">
+						<paper-card class="admins">
+							<div class="card-content">
+								<span class="type">Управление<iron-icon icon="icons:class" style="float: right"></iron-icon></span>
+								<div class="num">2342</div>
+							</div>
+						</paper-card>
+					</div>
+				</iron-grid>
+			</div>
+		</iron-grid>
+		<firebase-auth id="auth"></firebase-auth>
+	</template>
+
+	<script>
+
+		Polymer({
+			is: 'school-school-module',
+
+		});
+	</script>
+</dom-module>

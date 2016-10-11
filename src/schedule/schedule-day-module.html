@@ -1,0 +1,77 @@
+<link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid.html">
+
+<dom-module id="schedule-day-module">
+  <template>
+    <style include="wrapper-module iron-flex">
+
+      vaadin-grid{
+        --vaadin-grid-row-height: 30px;
+        --vaadin-grid-header-row-height: 30px;
+      }
+
+      .month {
+        border-bottom: 1px solid var(--paper-grey-300);
+        padding: 10px;
+        text-align: center;
+        color: var(--paper-grey-600)
+      }
+
+      .homework {
+        margin: 10px;
+        background-color: red;
+      }
+    </style>
+    <div class="wrapper">
+      <paper-card>
+        <div class="month">{{localize(d)}}</div>
+        <vaadin-grid id="grid" frozen-columns="1">
+          <table>
+            <colgroup>
+              <col name="sub"/>
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Предмет</th>
+              </tr>
+            </thead>
+          </table>
+        </vaadin-grid>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'schedule-day-module',
+
+      observers:[
+        'fill(item,n)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      attached: function(){
+        const that = this;
+      },
+
+      fill: function(i,n){
+        this.d = 'd' + n
+        console.log(n)
+        const that = this
+        this.getItem('SchoolSchedule/' + i.sch + '/' + i.num + '/' + i.let + '/' + n,function(subs){
+          var Subs = []
+          subs.forEach(function(s){
+            Subs.push({
+              sub: that.localize(s)
+            })
+          })
+          that.$.grid.items = Subs
+          that.$.grid.refreshItems()
+        })
+      }
+    });
+  </script>
+
+</dom-module>

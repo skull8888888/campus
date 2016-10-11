@@ -1,0 +1,50 @@
+<dom-module id="profile-person-module">
+  <style include="wrapper-module">
+
+    :host{
+      width: 50px;
+      height: 50px;
+      padding: 10px
+    }
+
+/*
+    iron-image{
+      height: 50px;
+      width: 50px;
+      border-radius: 25px;
+    }
+*/
+
+    .person{
+      text-align: center;
+      text-decoration: none;
+      color: black
+    }
+  </style>
+  <template>
+    <a class="person" href$="{{person.val.link}}">
+      <iron-image src$="{{person.val.image}}" sizing="cover"></iron-image>
+      <div>{{person.val.name}}</div>
+    </a>
+  </template>
+  <script>
+    Polymer({
+      is: 'profile-person-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'idChanged(personId)'
+      ],
+
+      idChanged: function(id){
+        var that = this;
+        this.getItem('Users/' + id,function(person){
+          that.person = person
+        });
+      }
+    })
+  </script>
+</dom-module>

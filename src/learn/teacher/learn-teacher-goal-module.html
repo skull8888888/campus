@@ -1,0 +1,37 @@
+<dom-module id="learn-teacher-goal-module">
+  <template>
+    <style include="wrapper-module">
+      paper-card{
+        padding: 8px;
+        margin-bottom: 8px;
+        margin-top: 8px;
+      }
+    </style>
+    <div>
+      <paper-card>
+        [[u.name]] [[u.surname]]
+        [[goal.n]] [[goal.des]]
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-goal-module',
+
+      observers:[
+        'goalChanged(goal)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      goalChanged:function(g){
+        const that = this;
+        this.getItemOnce('Users/' + g.auth + '/personal',function(u){
+          that.u = u;
+        });
+      }
+    })
+  </script>
+</dom-module>

@@ -1,0 +1,112 @@
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="learn-admin-day-module.html">
+
+<dom-module id="learn-admin-timetable-module">
+  <template>
+    <style include="wrapper-module">
+      #nums,#lets{
+        width: 100px
+      }
+
+      #sch{
+        width: 300px
+      }
+    </style>
+
+    <iron-grid>
+      <div class="l2 xs12 offset-xs0 wrapper">
+        <paper-card style="padding:10px">
+          <div class="layout horizontal center-center">
+            <vaadin-combo-box id="nums" always-float-label label="Парал." items="[[nums]]" item-label-path="i" item-value-path="i" value="{{num}}" id="nums"></vaadin-combo-box>
+            <vaadin-combo-box id="lets" always-float-label label="Буква" items="[[lets]]" value="{{let}}" id="lets"></vaadin-combo-box>
+          </div>
+        </paper-card>
+      </div>
+    </iron-grid>
+    <iron-grid>
+      <div class="l2 xs12 offset-xs0">
+        <learn-admin-day-module item="[[item]]" n="0"></learn-admin-day-module>
+      </div>
+      <div class="l2 xs12 offset-xs0">
+        <learn-admin-day-module item="[[item]]" n="1"></learn-admin-day-module>
+      </div>
+      <div class="l2 xs12 offset-xs0">
+        <learn-admin-day-module item="[[item]]" n="2"></learn-admin-day-module>
+      </div>
+      <div class="l2 xs12 offset-xs0">
+        <learn-admin-day-module item="[[item]]" n="3"></learn-admin-day-module>
+      </div>
+      <div class="l2 xs12 offset-xs0">
+        <learn-admin-day-module item="[[item]]" n="4"></learn-admin-day-module>
+      </div>
+      <div class="l2 xs12 offset-xs0">
+        <learn-admin-day-module item="[[item]]" n="5"></learn-admin-day-module>
+      </div>
+    </iron-grid>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-admin-timetable-module',
+
+      properties:{
+        nums: {
+          type: Array,
+          value: function(){
+            var a = [];
+            for(var i=7; i< 13;i++){
+              a.push({
+                i: i
+              });
+            };
+            return a;
+          }
+        },
+        lets: {
+          type: Array,
+          value:function(){
+            return 'ABCDEFKLMNO'.split('');
+          }
+        }
+      },
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      observers:[
+        'fill(user,num,let)'
+      ],
+
+      attached:function(){
+
+        const that = this
+        this.fillObjects('Subjects/',function(subjects){
+          var Subjects = [];
+          subjects.forEach(function(subject){
+            Subjects.push({
+              sub: that.localize(subject.key),
+              key:subject.key
+            });
+          });
+          that.subjects = Subjects;
+        });
+
+        this.fillObjects('SchoolsName/',function(schools){
+          that.schools = schools;
+        });
+      },
+
+      fill:function(user,n,l){
+        if(n && l && n != '' && l != ''){
+          this.item = {
+            let: l,
+            num: n,
+            sch: user.val.school
+          }
+        }
+      }
+
+    })
+  </script>
+</dom-module>

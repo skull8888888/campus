@@ -1,0 +1,62 @@
+<link rel="import" href="mygames-games-module.html">
+
+<dom-module id="mygames-module">
+  <template>
+    <style include="iron-flex wrapper-module">
+
+    </style>
+    <app-location route="{{route}}"></app-location>
+    <app-route
+               route="{{route}}"
+               pattern="/mygames/:act"
+               data="{{router}}"
+               active="{{createActive}}"
+               >
+    </app-route>
+    <iron-pages id="pages">
+      <iron-grid>
+        <div class="l8 offset-l2">
+          <mygames-games-module></mygames-games-module>
+        </div>
+      </iron-grid>
+      <template is="dom-if" if="true" restamp="true" id="t">
+        <mygames-create-module game="{{game}}"></mygames-create-module>
+      </template>
+    </iron-pages>
+  </template>
+  <script>
+    Polymer({
+      is: 'mygames-module',
+
+      observers:[
+        'createActiveChanged(createActive,router)',
+//        'l(createActive,router)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      createActiveChanged: function(active,router){
+
+        if(active && router.act){
+
+          if(router.act != 'create'){
+            const that = this;
+            that.game = undefined;
+            this.getObjectOnce('Games/' + router.act,function(game){
+              that.game = game;
+            });
+          };
+          if(this.$.t.ctor)
+            restamp(this.$.t);
+          this.importHref(this.resolveUrl('mygames-create-module.html'), null, null, true);
+          this.$.pages.select(1);
+        } else {
+
+          this.$.pages.select(0);
+        }
+      }
+    })
+  </script>
+</dom-module>

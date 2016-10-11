@@ -1,0 +1,121 @@
+<link rel="import" href="../../bower_components/iron-signals/iron-signals.html">
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+
+<dom-module id="games-card-play-module">
+  <template>
+    <style include="wrapper-module">
+      .ans{
+        width: 100%;
+        font-size: 20px;
+        background-color: var(--paper-grey-200)
+      }
+
+      .correct{
+        background-color: mediumseagreen;
+        color: white;
+      }
+
+      .incorrect{
+        background-color: red;
+        color: white
+      }
+
+      .darken{
+        background-color: var(--paper-grey-100);
+        color: white
+      }
+
+      .content{
+        padding: 10px;
+        text-align: center
+      }
+
+      paper-button{
+        --paper-button:{
+          margin: 0;
+          margin-top: 10px;
+          height: 75px;
+        }
+      }
+
+      .que {
+       font-size: 22px
+      }
+
+      .round {
+       color: var(--paper-grey-600)
+      }
+
+    </style>
+    <div class="wrapper">
+      <paper-card>
+        <div class="content">
+          <div class="round"> Раунд {{index}}</div>
+          <div class="que">{{card.que}}</div>
+          <paper-button noink on-tap="select" class="ans" id="i0">{{card.answers.0.text}}</paper-button>
+          <paper-button noink on-tap="select" class="ans" id="i1">{{card.answers.1.text}}</paper-button>
+          <paper-button noink on-tap="select" class="ans" id="i2">{{card.answers.2.text}}</paper-button>
+          <paper-button noink on-tap="select" class="ans" id="i3">{{card.answers.3.text}}</paper-button>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'games-card-play-module',
+
+      properties: {
+        index: String,
+        card: Object,
+        enabled:{
+          type: Boolean,
+          value: true
+        }
+      },
+
+      behaviors:[
+        Polymer.IronResizableBehavior
+      ],
+
+      listeners: {
+        'showcorrect': '_showCorrect',
+        'iron-resize': 'resize',
+      },
+
+      resize: function(){
+        if(window.innerWidth <= 400){
+          this.small = 'xs12 offset-xs0'
+        } else{
+          this.small = 'offset-l4 l4'
+        };
+      },
+
+      select: function(e){
+        if(this.enabled){
+          this.fire('selected',{
+            item: this.card.answers[e.target.id.substr(e.target.id.length - 1)],
+            index: this.index,
+            correct: this.card.answers[e.target.id.substr(e.target.id.length - 1)].correct,
+          });
+          if(this.card.answers[e.target.id.substr(e.target.id.length - 1)].correct){
+            e.target.className += ' correct'
+          }else {
+            e.target.className += ' incorrect'
+          }
+          this.enabled = false;
+        }
+      },
+
+      _showCorrect: function(e){
+        for (var i = 0; i < 4; i++) {
+          if(this.card.answers[i].correct){
+            this.$['i' + i].className += ' correct';
+          }else{
+            this.$['i' + i].className += ' darken'
+          }
+        }
+      },
+    })
+  </script>
+
+</dom-module>

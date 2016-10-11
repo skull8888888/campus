@@ -1,0 +1,69 @@
+<link rel="import" href="../../bower_components/polymerfire/firebase-database-behavior.html">
+<link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+
+<dom-module id="post-avatar-module">
+  <template>
+    <style include="wrapper-module">
+      #av{
+        height: 50px;
+        width: 50px;
+        border-radius: 25px;
+      }
+
+      .name{
+        margin: 5px;
+        color: black;
+      }
+
+
+    </style>
+    <div class="layout horizontal justified">
+      <a class="layout horizontal wrapper link" href="{{user.link}}">
+        <iron-image id="av" src$="{{auth.image}}" sizing="cover"></iron-image>
+        <div class="layout vertical name">
+          <div>{{auth.name}} {{auth.surname}}</div>
+        </div>
+      </a>
+      <template is="dom-if" if="mine(id)">
+        <paper-menu-button>
+          <paper-icon-button icon="icons:more-vert" on-tap="delete"></paper-icon-button>
+          <paper-menu class="dropdown-content">
+            <paper-item>Share</paper-item>
+            <paper-item>Settings</paper-item>
+            <paper-item>Help</paper-item>
+          </paper-menu>
+        </paper-menu-button>
+      </template>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'post-avatar-module',
+
+      observers:[
+        'refChanged(r)'
+      ],
+
+      behaviors:[
+        Polymer.FirebaseDatabaseBehavior
+      ],
+
+      refChanged:function(r){
+        const that = this;
+
+        this.db.ref(r).once('value',function(auth){
+          that.auth = auth.val()
+          that.id = auth.key
+        })
+      },
+
+      mine: function(id){
+        if(id == Cookies.get('id')){
+          return true
+        }
+      }
+    });
+  </script>
+</dom-module>

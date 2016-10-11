@@ -1,0 +1,96 @@
+<link rel="import" href="post-avatar-module.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-database-behavior.html">
+
+<dom-module id="post-module">
+  <style include="wrapper-module">
+
+    .head{
+      border-bottom: 2px solid  var(--paper-grey-500);
+    }
+
+    .content {
+      border-top:  1px solid  var(--paper-grey-300);
+      padding: 10px;
+    }
+
+    paper-icon-button{
+      color: var(--paper-grey-600)
+    }
+
+    iron-image{
+/*      border-radius: 0px;*/
+      width: 100%;
+      margin-top: 10px;
+    }
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card id="card">
+        <post-avatar-module r="[[r]]"></post-avatar-module>
+        <div class="content">
+          <div>
+            {{post.val.text}}
+          </div>
+          <template is="dom-if" if="{{showImage}}" restamp="true" id="imageTemplate">
+            <iron-image src$="{{post.val.image}}" id="img" sizing="contain" height="{{height}}"></iron-image>
+          </template>
+        </div>
+        <div class="card-actions">
+          <paper-icon-button icon="icons:favorite{{bordered}}" on-tap="like" id="heart"></paper-icon-button>
+          {{likes}}
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'post-module',
+
+      behaviors:[
+        Polymer.FirebaseDatabaseBehavior
+      ],
+
+      properties:{
+        r: String
+      },
+
+      observers:[
+        'postChanged(post)'
+      ],
+
+      postChanged: function(post){
+        const that = this;
+        console.log(post);
+        if(post.val.image){
+          this.showImage = true;
+
+          this.height = (that.$.card.clientWidth - 20) * post.val.ratio + 'px';
+          this.width = (that.$.card.clientWidth - 20) + 'px';
+        } else {
+          this.showImage = false;
+          this.height = 0;
+        };
+        this.db.ref('Posts/' + post.key + '/liked').on('value',function(likes){
+          that.likes = likes.numChildren();
+        });
+        this.db.ref('Posts/' + post.key + '/liked/' + Cookies.get('id')).on('value',function(liked){
+          if(liked.val() == 'liked'){
+            that.bordered = '';
+            that.$.heart.style.color = '#f44336';
+          } else {
+            that.bordered = '-border';
+            that.$.heart.style.color = 'var(--paper-grey-600)';
+          }
+        });
+      },
+
+      like:function(){
+        if(this.bordered == ''){
+          this.db.ref('Posts/' + this.post.key + '/liked/' + Cookies.get('id')).set(null)
+        } else {
+          this.db.ref('Posts/' + this.post.key + '/liked/' + Cookies.get('id')).set('liked')
+        }
+      }
+    })
+  </script>
+</dom-module>

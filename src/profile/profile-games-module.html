@@ -1,0 +1,30 @@
+<dom-module id="profile-games-module">
+  <style-module include="wrapper-module">
+
+  </style-module>
+  <template>
+    <div class="wrapper">
+      <paper-card>
+        <div>Игры {{num}}</div>
+        <iron-list>
+          <template>
+            
+          </template>
+        </iron-list>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'profile-games-module',
+      
+      observers:[
+        'idChanged(personId)'
+      ],
+      
+      idChanged: function(id){
+        
+      }
+    })
+  </script>
+</dom-module>

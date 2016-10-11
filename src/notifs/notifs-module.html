@@ -1,0 +1,60 @@
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="notifs-notif-module.html">
+
+<dom-module id="notifs-module">
+  <style include="wrapper-module">
+    paper-tabs{
+      @apply(--tabs-theme);
+      position: fixed;
+      width: 100vw;
+      z-index: 1;
+      /*      --paper-tabs-selection-bar-color: #111111;*/
+    }
+
+    iron-pages{
+      position: relative;
+      top: 50px;
+    }
+  </style>
+  <template>
+
+    <paper-tabs selected="{{selected}}" attr-for-selected="name" scrollable id="tabs">
+
+      <paper-tab name="new">НОВЫЕ</paper-tab>
+      <paper-tab name="all">ВСЕ</paper-tab>
+
+    </paper-tabs>
+    <iron-grid class="mw">
+      <div class="l4 offset-l4">
+        <iron-pages selected="{{selected}}" attr-for-selected="name" class="mw">
+          <notifs-new-module name="new" user="[[user]]"></notifs-new-module>
+          <notifs-all-module name="all" user="[[user]]"></notifs-all-module>
+        </iron-pages>
+      </div>
+    </iron-grid>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'notifs-module',
+
+      properties:{
+        selected:{
+          type: String,
+          value:'new'
+        }
+      },
+
+      observers: [
+        'selectedChanged(selected)'
+      ],
+
+      selectedChanged:function(selected){
+        this.importHref(this.resolveUrl('notifs-' + selected + '-module.html'), null, null, true);
+      }
+    });
+
+  </script>
+
+</dom-module>

@@ -1,0 +1,506 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/iron-grid/iron-grid.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bower_components/iron-scroll-target-behavior/iron-scroll-target-behavior.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+
+<link rel="import" href="../bower_components/iron-icons/communication-icons.html">
+<link rel="import" href="../bower_components/iron-icons/social-icons.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/image-icons.html">
+<link rel="import" href="../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../bower_components/iron-icons/hardware-icons.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+
+<link rel="import" href="wrapper-module.html">
+
+<link rel="import" href="behaviors/database-behavior.html">
+<link rel="import" href="behaviors/localize-behavior.html">
+<link rel="import" href="behaviors/card-color-behavior.html">
+
+<script src="../bower_components/js-cookie/src/js.cookie.js"></script>
+
+<dom-module id="campus-module">
+  <template>
+    <style include="wrapper-module">
+      :host {
+
+        display: block;
+        --app-primary-color: #0097A7;
+        --app-secondary-color: black;
+
+        --tabs-theme: {
+          color: white;
+          background-color: var(--app-primary-color);
+        };
+
+        --h1-theme: {
+          color: white;
+          padding: 0px;
+          margin: 0px;
+          text-align: center;
+          background-color: var(--app-primary-color);
+        };
+      }
+
+      app-header {
+        background-color: var(--app-primary-color);
+        color: #fff;
+      }
+
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+
+      .drawer-list a {
+        display: block;
+        padding: 0 16px;
+        line-height: 40px;
+        text-decoration: none;
+        color: var(--app-secondary-color);
+      }
+      .drawer-list a.iron-selected {
+        color: black;
+/*        background-color: var(--app-primary-color);*/
+        font-weight: bold;
+      }
+
+      .drawer-list a.subroute {
+        padding-left: 32px;
+      }
+
+      a:focus{
+        outline: none;
+      }
+
+      .avatar{
+        padding: 10px;
+        font-size: 20px;
+      }
+
+      .ava{
+        width: 40px;
+        height: 40px;
+        border-radius: 20px;
+      }
+
+      .userName{
+        margin-top: 3px;
+        margin-left: 10px;
+      }
+
+      .ver{
+        color: var(--paper-grey-600);
+        margin: 40px 40px 10px 10px;
+      }
+
+      .l{
+        text-decoration: none;
+        color: var(--paper-grey-500);
+        font-size: 14px;
+      }
+
+      .linktome{
+        text-decoration: none;
+        color: var(--paper-grey-500);
+      }
+
+      #exit{
+        margin-left: 10px;
+      }
+    </style>
+    <app-location route="{{route}}" path="{{path}}"></app-location>
+    <app-route
+               route="{{route}}"
+               pattern="/:page"
+               data="{{router}}"
+    >
+    </app-route>
+    <app-drawer-layout fullbleed force-narrow>
+      <app-drawer id="drawer" swipe-open>
+        <div style="height: 100%; overflow: auto;">
+          <div class="avatar">
+            <div class="layout horizontal">
+              <iron-image class="ava" src$="[[user.val.info.image]]" sizing="cover"></iron-image>
+              <div class="userName">[[user.val.info.name]]</div>
+            </div>
+          </div>
+          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+            <a name="[[userLink]]" href$="/[[user.val.info.link]]"><iron-icon icon="social:person"></iron-icon>  Профиль</a>
+            <a name="feed" href="/feed"><iron-icon icon="social:poll"></iron-icon>  Новости</a>
+            <a name="notifs" href="/notifs"><iron-icon icon="social:notifications"></iron-icon>  Уведомления</a>
+            <a name="dialogs" href="/dialogs"><iron-icon icon="communication:email"></iron-icon>  Сообщения</a>
+            <a name="learn" href="/learn/timetable"><iron-icon icon="social:school"></iron-icon> Учеба</a>
+            <a name="school" href="/school"><iron-icon icon="icons:account-balance"></iron-icon> Школа</a>
+            <a name="games" href="/games"><iron-icon icon="hardware:videogame-asset"></iron-icon> Играть</a>
+            <a name="mygames" href="/mygames"><iron-icon icon="image:view-comfy"></iron-icon> Мои игры</a>
+            <a name="clubs" href="/clubs"><iron-icon icon="social:group"></iron-icon>  Клубы</a>
+            <a name="settings" href="/settings"><iron-icon icon="icons:settings"></iron-icon> Настройки</a>
+          </iron-selector>
+          <div class="ver" style>© Campus 2016  v. 0.0.2<br><div class="l">Designed and developed by <a href="/id1" class="linktome">Robert Kim</a></div></div>
+        </div>
+      </app-drawer>
+      <app-drawer id="drawer1" swipe-open align="right">
+        <search-module></search-module>
+      </app-drawer>
+      <app-header-layout fullbleed>
+        <app-header fixed effects="waterfall">
+          <app-toolbar>
+            <template is="dom-if" if="[[!menuHidden]]">
+              <paper-icon-button icon="icons:menu" drawer-toggle></paper-icon-button>
+            </template>
+            <template is="dom-if" if="[[!backHidden]]">
+              <paper-icon-button noink on-tap="back" icon="icons:arrow-back"></paper-icon-button>
+            </template>
+            <div main-title>Campus</div>
+            <template is="dom-if" if="[[!menuHidden]]">
+              <paper-icon-button icon="search" hidden$="[[menuHidden]]" on-tap="searchOpen"></paper-icon-button>
+            </template>
+          </app-toolbar>
+        </app-header>
+        <iron-pages attr-for-selected="name" id="pages">
+          <login-module name="login"></login-module>
+          <join-module name="join"></join-module>
+          <feed-module name="feed" user="[[user]]"></feed-module>
+          <notifs-module name="notifs" user="[[user]]"></notifs-module>
+          <dialogs-module name="dialogs"></dialogs-module>
+          <clubs-module name="clubs"></clubs-module>
+          <learn-module id="learn" name="learn" user="{{user}}"></learn-module>
+          <games-module name="games" user="{{user}}"></games-module>
+          <mygames-module name="mygames"></mygames-module>
+          <school-module name="school"></school-module>
+          <settings-module name="settings" user="[[user]]"></settings-module>
+          <club-module name="club" club="{{club}}"></club-module>
+          <profile-module name="profile" user="{{profile}}"></profile-module>
+          <profile-module name="[[user.val.info.link]]" user="{{user}}"></profile-module>
+          <noaccess-module name="noaccess" notext="[[notext]]"></noaccess-module>
+          <schedule-module name="schedule"></schedule-module>
+        </iron-pages>
+      </app-header-layout>
+    </app-drawer-layout>
+    <paper-toast id="toast" text="[[text]]"></paper-toast>
+    <paper-toast text="Идет загрузка" duration="0" id="ptoast">
+      <paper-progress value="{{progress}}" class="mw"></paper-progress>
+    </paper-toast>
+    <firebase-app
+                  auth-domain="campus-3320b.firebaseapp.com"
+                  database-url="https://campus-3320b.firebaseio.com"
+                  api-key="AIzaSyBVpKa8SmWPKl595AZ8BmCMVBOkmZ6Lft0"
+                  storage-bucket="campus-3320b.appspot.com"
+                  app-name="campus"
+                  >
+    </firebase-app>
+    <firebase-auth id="auth"></firebase-auth>
+  </template>
+
+  <script>
+
+    function restamp(template) {
+      template._teardownInstance();
+      template._ensureInstance();
+    };
+
+    Polymer({
+      is: 'campus-module',
+      properties: {
+
+        page: {
+          type: String,
+          reflectToAttribute: true,
+          observer: 'pageChanged'
+        },
+
+        links: {
+          type: Array,
+          value: [
+            {
+              ref:'Users',
+              key:'profile',
+            },
+            {
+              ref:'Clubs',
+              key:'club'
+            },
+          ]
+        },
+
+        data: {
+          type: Object,
+          observer: 'dataChanged'
+        },
+
+        path: {
+          type: String,
+          observer: 'pathChanged'
+        },
+
+        user:Object
+      },
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers: [
+        'routePageChanged(router.page)',
+        'dbChanged(db)',
+      ],
+
+      listeners:{
+        'open-toast': 'openToast',
+        'toggle-ptoast':'togglePToast',
+        'progressChanged':'progressChanged',
+        'exit':'exit',
+        'userChanged':'uChanged',
+        'access-denied': 'noaccess'
+      },
+
+      attached: function(){
+
+        this.$.auth.auth.onAuthStateChanged(function(state){
+          if(!state){
+            Cookies.remove('id',{path:''});
+            Cookies.remove('link',{path:''});
+            Cookies.remove('id',{path:''});
+            Cookies.remove('link',{path:''});
+            localStorage.setItem('user',null);
+          }
+        });
+      },
+
+      dbChanged:function(db){
+        if(Cookies.get('id')){
+          this.userLink = Cookies.get('link');
+          const that = this;
+
+          var user = localStorage.getItem('user');
+
+          if(!JSON.parse(user)){
+            db.ref('Users/' + Cookies.get('id')).once('value',function(user){
+              var u = {
+                val: user.val(),
+                key:user.key
+              };
+              localStorage.setItem('user', JSON.stringify(u));
+              var us = localStorage.getItem('user');
+              that.user = JSON.parse(us);;
+
+            });
+          } else {
+
+            db.ref('Users/' + Cookies.get('id')).once('value',function(user){
+              var u = {
+                val: user.val(),
+                key:user.key
+              };
+
+              var us = JSON.parse(localStorage.getItem('user'))
+
+              if(JSON.stringify(u.val) !== JSON.stringify(us.val) ){
+                localStorage.setItem('user', JSON.stringify(u));
+                that.user = u;
+                that.verify(u)
+              };
+            });
+
+            this.user = JSON.parse(user);
+          };
+
+          var ref = db.ref('Users/' + Cookies.get('id') + '/online');
+          ref.set('true');
+          ref.onDisconnect().set(Date.now());
+        } else{
+          this.user = null
+        };
+      },
+
+      uChanged:function(e){
+        const that = this;
+        this.userLink = Cookies.get('link');
+        this.getObjectOnce('Users/' + Cookies.get('id'),function(u){
+          that.user = u;
+          localStorage.setItem('user', JSON.stringify(u));
+        });
+      },
+
+      togglePToast:function(){
+        this.$.ptoast.toggle()
+      },
+
+      progressChanged:function(e){
+        this.progress = e.detail.p
+      },
+
+
+      searchOpen:function(e){
+        this.importHref(this.resolveUrl('search-module.html'), null, null, true);
+        this.$.drawer1.toggle();
+      },
+
+      noaccess:function(e){
+        this.importHref(this.resolveUrl('noaccess-module.html'), null, null, true);
+        this.$.pages.select('noaccess')
+        this.notext = e.detail.text
+      },
+
+      exit:function(){
+        Cookies.remove('id',{path:''});
+        Cookies.remove('link',{path:''});
+        Cookies.remove('id',{path:''});
+        Cookies.remove('link',{path:''});
+        localStorage.setItem('user',null);
+        this.$.auth.auth.signOut().then(function() {
+          window.location = 'login';
+        }, function(error) {
+          alert(error);
+          // An error happened.
+        });
+      },
+
+      openToast: function(e){
+        this.text = e.detail.text;
+        this.$.toast.open();
+      },
+
+      pathChanged: function(path){
+        var re = new RegExp("/.+/", 'gi');
+        var learn1 = new RegExp("/learn/.+/.+", 'gi');
+        var learn = new RegExp("/learn/.+", 'gi');
+
+        if(path.match(learn)){
+          if(path.match(learn1)){
+            this.backHidden = false;
+            this.menuHidden = true;
+          } else {
+            this.backHidden = true;
+            this.menuHidden = false
+          };
+        } else if(path.match(re)){
+          this.backHidden = false;
+          this.menuHidden = true;
+        } else {
+          this.backHidden = true;
+          this.menuHidden = false
+        }
+      },
+
+      back: function(){
+        window.history.back()
+      },
+
+      routePageChanged: function(page) {
+
+        if(page == 'login' || page == 'join'){
+          this.menuHidden = true;
+        };
+
+        if(page == ''){
+          window.location = 'feed'
+        } else {
+          this.page = page
+        }
+      },
+
+      pageChanged: function(page){
+        this.$.drawer.close();
+        const that = this;
+        switch(page){
+          case 'notifs':
+          case 'clubs':
+          case 'feed':
+          case 'dialogs':
+          case 'learn':
+          case 'games':
+          case 'mygames':
+          case 'school':
+          case 'settings':
+            if(Cookies.get('id')){
+
+              that.importHref(that.resolveUrl(page + '/' + page + '-module.html'), null, null, true);
+              that.$.pages.select(page);
+            } else {
+              window.location = 'login';
+            }
+
+            if(page == 'learn' && this.user && this.verified){
+              this.$.learn.fire('check')
+            }
+            break;
+          case 'login':
+          case 'join':
+
+            if(Cookies.get('id')){
+              window.location = 'feed';
+            } else {
+              that.importHref(that.resolveUrl(page + '-module.html'), null, null, true);
+              that.$.pages.select(page);
+            }
+            break;
+          case 'schedule':
+            that.importHref(that.resolveUrl('schedule/schedule-module.html'), null, null, true);
+            that.$.pages.select(page);
+            break
+          default:
+            if(!Cookies.get('id')){
+              that.menuHidden = true;
+            };
+            that.findByKey(page);
+            break;
+        }
+      },
+
+      findByKey: function(key){
+        const that = this;
+        if(key == Cookies.get('link')){
+          console.log(Cookies.get('link'))
+          that.importHref(that.resolveUrl('profile/profile-module.html'), null, null, true);
+          that.$.pages.select(Cookies.get('link'));
+        } else {
+          this.links.forEach(function(link){
+            that.db.ref(link.ref).orderByChild('info/link').equalTo(key).once('value',function(item){
+              if(item.exists()){
+                item.forEach(function(item){
+                  that[link.key] = {
+                    val: item.val(),
+                    key: item.key
+                  };
+                });
+                that.importHref(that.resolveUrl(link.key + '/' + link.key + '-module.html'), null, null, true);
+                that.$.pages.select(link.key);
+              }
+            })
+          })
+        }
+      }
+    });
+
+  </script>
+
+</dom-module>

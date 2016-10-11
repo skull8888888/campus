@@ -1,0 +1,216 @@
+<link rel="import" href="settings-classes-class-module.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+
+<dom-module id="settings-classes-module">
+  <style  include="wrapper-module">
+
+    .light{
+      color:  var(--paper-grey-800);
+      font-size: 18px;
+    }
+
+    vaadin-combo-box{
+     width: 140px
+    }
+
+    iron-list {
+      width: 100%
+    }
+
+
+    .del{
+      margin: 0
+    }
+
+    .wrapper {
+      display:flex
+    }
+
+    #nums,#lets{
+      width: 50px
+    }
+
+    #group{
+      width: 120px
+    }
+  </style>
+  <template>
+    <div class="light">Мои классы</div>
+
+    <div class="layout horizontal">
+      <vaadin-combo-box always-float-label label="Парал." items="[[nums]]" item-label-path="i" item-value-path="i" value="{{num}}" id="nums"></vaadin-combo-box>
+      <vaadin-combo-box always-float-label label="Буква" items="[[lets]]" value="{{let}}" id="lets"></vaadin-combo-box>
+      <vaadin-combo-box  always-float-label label="Группа" items="[[groups]]" item-label-path="name" item-value-path="key" value="{{group}}" id="group"></vaadin-combo-box>
+      <vaadin-combo-box always-float-label label="Предмет" items="[[subjects]]" item-label-path="name" item-value-path="key" value="{{subject}}"></vaadin-combo-box>
+      <paper-fab on-tap="add" icon="icons:add"></paper-fab>
+    </div>
+
+    <iron-list items="[[classes]]" as="cl" grid>
+      <template>
+        <div>
+          <settings-classes-class-module cl="[[cl]]"></settings-classes-class-module>
+        </div>
+      </template>
+    </iron-list>
+
+    <div class="light">Мои предметы по выбору(если есть)</div>
+    <div class="layout horizontal">
+      <vaadin-combo-box always-float-label label="Предмет" items="[[subjects]]" item-label-path="name" item-value-path="key" value="{{csub}}"></vaadin-combo-box>
+      <vaadin-combo-box always-float-label label="Группа" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{cnum}}" id="nums"></vaadin-combo-box>
+      <paper-fab on-tap="addChos" icon="icons:add"></paper-fab>
+    </div>
+    <iron-list items="[[cclasses]]" as="ccl" grid>
+      <template>
+        <div>
+          <settings-classes-class-module cl="[[ccl]]"></settings-classes-class-module>
+        </div>
+      </template>
+    </iron-list>
+  </template>
+  <script>
+    Polymer({
+      is: 'settings-classes-module',
+
+      properties:{
+        let:{
+          reflectToAttributes: true,
+          notify: true
+        },
+
+        num:{
+          reflectToAttributes: true,
+          notify: true
+        },
+
+        group:{
+          reflectToAttributes: true,
+          notify: true
+        },
+
+        nums: {
+          type: Array,
+          value: function(){
+            var a = [];
+            for(var i=1; i< 13;i++){
+              a.push({
+                i: i
+              });
+            };
+            return a;
+          }
+        },
+
+        lets: {
+          type: Array,
+          value:function(){
+            return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+          }
+        }
+
+      },
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      listeners:{
+        'delete': 'delete'
+      },
+
+      attached: function(){
+        const that = this;
+
+        this.fillObjects('Subjects/',function(subjects){
+
+          var Subjects = [];
+
+          subjects.forEach(function(sub){
+            var s = {
+              name: that.localize(sub.key),
+              key: sub.key
+            }
+
+            Subjects.push(s);
+          });
+
+          that.subjects = Subjects;
+        });
+
+        this.fillObjects('Users/' + Cookies.get('id') + '/classes',function(classes){
+          that.classes = classes;
+        });
+
+        this.fillObjects('Users/' + Cookies.get('id') + '/cclasses',function(cclasses){
+          that.cclasses = cclasses;
+        });
+
+        this.groups = [
+          {
+            name: this.localize('g1'),
+            key: 'g1'
+          },
+          {
+            name: this.localize('g2'),
+            key: 'g2'
+          },
+          {
+            name: this.localize('g3'),
+            key: 'g3'
+          }
+        ]
+      },
+
+      add: function(){
+
+        if(this.let && this.num && this.group && this.subject && this.let != '' && this.num != '' && this.group != '' && this.subject != ''){
+          this.db.ref('Users/' + Cookies.get('id') + '/classes').push({
+            group: this.group,
+            subject: this.subject,
+            class: this.num + '-' + this.let
+          });
+          this.db.ref('Users/' + Cookies.get('id') + '/subjects/' + this.subject).set(0);
+          this.num = '';
+          this.let = '';
+          this.group = '';
+        } else {
+          this.fire('open-toast',{
+            text:'Заполните все критерии чтобы добавить класс'
+          });
+        };
+      },
+
+      addChos: function(){
+
+        if(this.csub && this.cnum && this.cnum != '' && this.cnum != ''){
+          this.db.ref('Users/' + Cookies.get('id') + '/cclasses').push({
+            class: this.csub + '-' + this.cnum,
+            chos: true
+          });
+//          this.db.ref('Users/' + Cookies.get('id') + '/subjects/' + this.csub).set(0);
+          this.cnum = '';
+          this.csub = '';
+        } else {
+          this.fire('open-toast',{
+            text:'Заполните все критерии чтобы добавить предмет по выбору'
+          });
+        };
+      },
+
+      delete: function(e){
+
+        if(e.detail.chos){
+
+          this.db.ref('Users/' + Cookies.get('id') + '/cclasses/' + e.detail.key).set(null)
+        } else {
+          console.log('nchos')
+          this.db.ref('Users/' + Cookies.get('id') + '/classes/' + e.detail.key).set(null)
+        }
+//        this.db.ref('Users/' + Cookies.get('id') + '/subjects/' + e.detail.sub).set(null)
+
+      },
+
+
+    })
+  </script>
+</dom-module>

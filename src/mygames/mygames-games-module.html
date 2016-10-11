@@ -1,0 +1,53 @@
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="mygames-games-card-module.html">
+
+<dom-module id="mygames-games-module">
+  <template>
+    <style include="wrapper-module">
+      paper-fab{
+        margin: 10px;
+      }
+    </style>
+    <div style="right:10px;margin-top:10px;position:fixed">
+      <a href="/mygames/create">
+        <paper-fab icon="icons:add"></paper-fab>
+      </a>
+    </div>
+    <iron-list id="list" items="[[mygames]]" as="game" grid class="mw">
+      <template>
+        <mygames-games-card-module game="[[game]]"></mygames-games-card-module>
+      </template>
+    </iron-list>
+  </template>
+  <script>
+    Polymer({
+      is: 'mygames-games-module',
+
+      behaviors: [
+        DatabaseBehavior
+      ],
+
+      attached: function(){
+
+        const that = this;
+
+        this.fillOrder('Games/','auth',Cookies.get('id'),function(mygames){
+          that.mygames = mygames;
+        })
+
+//        this.db.ref('Games/').orderByChild('auth').equalTo(Cookies.get('id')).on('value',function(myGames){
+//          var games = [];
+//          myGames.forEach(function(game){
+//            var Game = {
+//              key: game.key,
+//              val: game.val()
+//            };
+//            games.push(Game);
+//          });
+//          that.games = games;
+//        });
+      },
+
+    });
+  </script>
+</dom-module>

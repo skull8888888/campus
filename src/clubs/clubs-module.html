@@ -1,0 +1,88 @@
+<link rel="import" href="clubs-club-module.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+
+<dom-module id="clubs-module">
+  <style include="wrapper-module">
+
+  </style>
+  <template>
+    <div style="right:10px;margin-top:10px;position:fixed">
+      <paper-fab icon="icons:add" on-click="open"></paper-fab>
+    </div>
+    <iron-grid>
+      <div class="l8 offset-l2 xs12 offset-xs0">
+        <iron-list items="[[clubs]]" as="club" grid style="width: 100vw">
+          <template>
+            <a class="link" href="/[[club.key]]">
+              <clubs-club-module club="[[club]]"></clubs-club-module>
+            </a>
+          </template>
+        </iron-list>
+      </div>
+    </iron-grid>
+    <paper-dialog id="dialog" entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation">
+      <h2>Название клуба</h2>
+      <paper-input value="{{clubName}}"></paper-input>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Закрыть</paper-button>
+        <paper-button on-tap="createClub">Готово</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+  <script>
+    Polymer({
+
+      is: 'clubs-module',
+
+      behaviors:[
+       DatabaseBehavior
+      ],
+
+      open: function(){
+        this.$.dialog.open();
+      },
+
+      attached: function(){
+        var that = this;
+        this.fillObjects('ClubsOfUsers/' + Cookies.get('id'),function(clubs){
+          that.clubs = clubs;
+        });
+      },
+
+      createClub: function(){
+
+        const that = this;
+        this.db.ref('Clubs').orderByChild('name').equalTo(this.clubName).once('value').then(function(child){
+        if(!child.exists()){
+
+          var id = that.db.ref('Clubs').push().key;
+          var data = {};
+          var admins = {};
+          admins[Cookies.get('id')] = 'admin';
+          data['Clubs/' + id] = {
+            info:{
+              name: that.clubName,
+              link: id,
+              members: 1,
+            },
+            name: that.clubName,
+            link: id,
+            admins: admins
+          };
+          data['Members/' + id + '/' + Cookies.get('id')] = 10;
+          data['ClubsOfUsers/' + Cookies.get('id') + '/' + id] = that.clubName;
+          that.db.ref().update(data);
+
+          window.location = '/' + id;
+        } else {
+          that.fire('open-toast',{
+            text: 'Клуб с таким именем уже существует'
+          })
+        }
+      })
+      },
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,109 @@
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+
+<dom-module id="profile-info-module">
+  <style include="wrapper-module">
+
+    .tag{
+      margin: 4px;
+      font-size: 18px;
+    }
+
+    .icon{
+      float: left;
+    }
+
+    .info-name {
+      @apply(--paper-font-headline)
+        }
+
+    .light {
+      color: var(--paper-grey-500);
+    }
+
+    .medium{
+      color: var(--paper-grey-700);
+    }
+
+    .info{
+      margin-top: 8px;
+      border-top: var(--paper-grey-300) 1px solid;
+      border-bottom: var(--paper-grey-300) 1px solid;
+    }
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card class="userInfo">
+        <div class="card-content">
+          <div class="layout horizontal justified">
+            <div class="layout vertical">
+              <div class="info-name">{{user.val.info.name}} {{user.val.info.surname}}</div>
+            </div>
+            <div class="medium">{{status}}</div>
+          </div>
+          <div class="medium">{{localize(user.val.info.type)}}</div>
+
+          <div class="layout vertical info" style="text-align:center">
+            <template is="dom-if" if="[[sh]]" restamp="true">
+              <div class="school tag">
+                <iron-icon icon="social:school" class="light icon"></iron-icon>
+                [[sh]]
+              </div>
+            </template>
+            <template is="dom-if" if="[[user.val.class]]" restamp="true">
+              <div class="subject tag">
+                <iron-icon icon="social:group" class="light icon"></iron-icon>
+                [[user.val.class]] {{localize(user.val.group)}}
+              </div>
+            </template>
+            <template is="dom-if" if="[[user.val.subject]]" restamp="true">
+              <div class="subject tag">
+                <iron-icon icon="icons:class" class="light icon"></iron-icon>
+                [[localize(user.val.subject)]]
+              </div>
+            </template>
+          </div>
+          <div class="about medium">
+            О себе
+            <paper-icon-button icon="icons:expand-{{active}}" on-tap="expand"></paper-icon-button>
+            <iron-collapse id="more">
+              <div class="aboutText">[[user.val.des]]</div>
+            </iron-collapse>
+          </div>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'profile-info-module',
+
+      behaviors:[
+        LocalizeBehavior,
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'userChanged(user)'
+      ],
+
+      userChanged: function(user){
+        this.active = 'more';
+
+        if(user.val.online == 'true'){
+          this.status = 'online'
+        } else {
+          this.status = 'offline'
+        };
+        const that = this;
+        this.getItemOnce('SchoolsName/' + user.val.school,function(sh){
+          that.sh = sh;
+        })
+      },
+
+      expand: function(){
+        this.active = this.$.more.opened ? 'more' : 'less';
+        this.$.more.toggle();
+      },
+    });
+  </script>
+</dom-module>

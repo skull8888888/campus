@@ -1,0 +1,104 @@
+<dom-module id="club-avatar-module">
+  <style include="wrapper-module">
+
+    iron-image{
+      height: 200px;
+      width: 100%;
+      border-top-left-radius: 2px;
+      border-top-right-radius: 2px
+    }
+
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card>
+        <iron-image src$="{{person.val.image}}" sizing="cover"></iron-image>
+        <div class="layout vertical justified">
+          <div hidden$="{{!isAdmin(person)}}">
+            <label for="load"><paper-icon-button icon="image:camera-alt"></paper-icon-button>Обновить</label><input type="file" value="upload" id="load" style="position:absolute; visibility:hidden"/>
+            <paper-progress value="{{progress}}" hidden$="{{progressHidden}}"></paper-progress>
+          </div>
+          <template is="dom-if" if="{{!isMine(person)}}">
+            <template is="dom-if" if="{{!subscribed}}">
+              <paper-button on-tap="subscribe">Подписаться</paper-button>
+            </template>
+            <template is="dom-if" if="{{subscribed}}">
+              <paper-button on-tap="unsubscribe">Вы подписаны</paper-button>
+            </template>
+          </template>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'club-avatar-module',
+
+      properties:{
+        progressHidden:{
+          type: Boolean,
+          value: true
+        }
+      },
+
+      observers:[
+        'clubChanged(club)'
+      ],
+
+      behaviors: [
+        Polymer.FirebaseDatabaseBehavior
+      ],
+
+      clubChanged: function(club){
+
+        var that = this;
+        this.db.ref('Followers/' + club.key + '/' + Cookies.get('id')).on('value',function(snapshot){
+          if(snapshot.exists()){
+            that.subscribed = true
+          } else {
+            that.subscribed = false
+          }
+        });
+        this.$.load.addEventListener('change',function(e){
+          that.progressHidden = false;
+          var file = e.target.files[0];
+          var task = that.app.storage().ref('Avatars/' + Cookies.get('id') + '/' + file.name).put(file);
+          task.on('state_changed',function(snapshot){
+            that.progress = snapshot.bytesTransferred / snapshot.totalBytes * 100
+          },function(err){
+            alert(err);
+          },function(){
+            that.progressHidden = true;
+            that.db.ref('Users/' + person.key  + '/image').set(task.snapshot.downloadURL);
+          });
+        });
+      },
+
+      isMine: function(person){
+        return person.key == Cookies.get('id')
+      },
+
+      subscribe: function(){
+        var data = {};
+        data['Following/' + Cookies.get('id') + '/' + this.person.key] = 'follow';
+        data['Followers/' + this.person.key + '/' + Cookies.get('id')] = 'followed';
+        this.db.ref().update(data);
+      },
+
+      unsubscribe: function(){
+        var data = {};
+        data['Following/' + Cookies.get('id') + '/' + this.person.key] = null;
+        data['Followers/' + this.person.key + '/' + Cookies.get('id')] = null;
+        this.db.ref().update(data);
+      },
+
+      newAvatar: function(){
+
+      },
+
+      delete: function(){
+
+      }
+    })
+  </script>
+</dom-module>

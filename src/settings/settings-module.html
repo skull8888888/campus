@@ -1,0 +1,57 @@
+<link rel="import" href="settings-account-module.html">
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+
+<dom-module id="settings-module">
+  <template>
+    <style>
+      iron-pages{
+        width: 100%
+      }
+    </style>
+    <iron-grid>
+      <div class="l4 offset-l4 xs12 offset-xs0">
+        <settings-account-module user="{{user}}"></settings-account-module>
+        <iron-pages selected="[[item]]" attr-for-selected="name" id="pages">
+          <settings-pupil-module name="pupil" user="{{user}}"></settings-pupil-module>
+          <settings-teacher-module name="teacher" user="{{user}}"></settings-teacher-module>
+          <settings-curator-module name="curator" user="{{user}}"></settings-curator-module>
+          <settings-admin-module name="admin" user="{{user}}"></settings-admin-module>
+        </iron-pages>
+        <div style="float:right;color:red;">
+          <paper-icon-button icon="icons:exit-to-app" on-tap="showExit" style="position:static"></paper-icon-button> Выйти
+        </div>
+      </div>
+    </iron-grid>
+    <paper-dialog id="dialog" style="padding:10px;">
+      Вы уверены что хотите выйти?
+      <paper-button on-tap="exit">Выйти</paper-button>
+    </paper-dialog>
+  </template>
+  <script>
+
+    Polymer({
+      is: 'settings-module',
+
+      observers:[
+        'userChanged(user)'
+      ],
+
+      showExit:function(){
+        this.$.dialog.open();
+      },
+
+      exit:function(){
+        this.fire('exi  t');
+      },
+
+      userChanged: function(user) {
+
+        this.importHref(this.resolveUrl('settings-' + user.val.info.type + '-module.html'), null, null, true);
+        this.$.pages.select(user.val.info.type);
+      },
+    });
+
+  </script>
+
+</dom-module>

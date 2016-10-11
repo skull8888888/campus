@@ -1,0 +1,62 @@
+<link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
+
+<dom-module id="learn-admin-module">
+  <style include="wrapper-module">
+
+    paper-tabs{
+      @apply(--tabs-theme);
+      position: fixed;
+      width: 100vw;
+      z-index: 1;
+      /*      --paper-tabs-selection-bar-color: #111111;*/
+    }
+
+    iron-pages{
+      position: relative;
+      top: 50px;
+    }
+  </style>
+  <template>
+    <app-location route="{{route}}" path="[[path]]"></app-location>
+    <app-route
+               route="{{route}}"
+               pattern="/learn/:page"
+               data="{{router}}"
+               >
+    </app-route>
+    <paper-tabs selected="{{selected}}" attr-for-selected="name" scrollable>
+      <paper-tab name="timetable">РАСПИСАНИЕ</paper-tab>
+      <paper-tab name="chos">ПРЕДМЕТЫ ПО ВЫБОРУ</paper-tab>
+      <paper-tab name="stuff">ПЕРСОНАЛ</paper-tab>
+    </paper-tabs>
+    <iron-pages selected="{{selected}}" attr-for-selected="name" class="mw">
+      <learn-admin-timetable-module name="timetable" user="[[user]]"></learn-admin-timetable-module>
+      <learn-admin-stuff-module user="[[user]]" name="stuff"></learn-admin-stuff-module>
+      <learn-admin-chos-module user='[[user]]' name="chos"></learn-admin-chos-module>
+    </iron-pages>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-admin-module',
+
+      properties:{
+        selected:String
+      },
+
+      observers: [
+        'pageChanged(router.page)',
+        'selectedChanged(selected)'
+      ],
+
+      pageChanged: function(page){
+        this.selected = page || 'timetable'
+        this.importHref(this.resolveUrl('learn-admin-' + this.selected + '-module.html'), null, null, true);
+      },
+
+      selectedChanged:function(selected){
+        this.path = '/learn/' + selected
+      }
+
+    })
+  </script>
+</dom-module>
