@@ -1,0 +1,114 @@
+<link rel="import" href="learn-pupil-journal-subjects-subject-module.html">
+<link rel="import" href="learn-pupil-journal-subject-module.html">
+<link rel="import" href="../learn-files-module.html">
+
+<dom-module id="learn-pupil-journal-module">
+  <template>
+    <style include="wrapper-module">
+
+      .left{
+/*        margin-top: 50px;*/
+        height: calc(100vh - 114px);
+        width: 100%;
+        position: fixed;
+      }
+
+      @media screen and (-webkit-min-device-pixel-ratio:0)
+        and (min-resolution:.001dpcm) {
+          .left{
+            margin-top: 50px;
+
+          }
+      }
+
+
+      paper-tabs{
+        @apply(--tabs-theme);
+        background-color: #0097A7
+      }
+
+      .filesTitle{
+        color:var(--paper-grey-500);
+        font-size:30px;
+        font-weight: 700;
+        margin-left: 8px
+      }
+
+    </style>
+      <app-location route="{{route}}"></app-location>
+      <app-route
+                 route="{{route}}"
+                 pattern="/learn/journal/:subject"
+                 data="{{router}}"
+                 tail="{{subroute}}"
+                 active="{{subjectActive}}"
+                 >
+      </app-route>
+    <iron-pages id="pages" class="mw">
+      <div>
+        <iron-list id="list" items="[[subjects]]" as="sub" class="mw" grid >
+          <template>
+            <a href$="/learn/journal/[[sub]]">
+              <learn-pupil-journal-subjects-subject-module sub="[[sub]]" user="[[user]]" class="mw"></learn-pupil-journal-subjects-subject-module>
+            </a>
+          </template>
+        </iron-list>
+      </div>
+
+      <learn-pupil-journal-subject-module user="[[user]]" sub="{{router.subject}}"></learn-pupil-journal-subject-module>
+    </iron-pages>
+    </template>
+    <script>
+      Polymer({
+        is: 'learn-pupil-journal-module',
+
+        behaviors:[
+          DatabaseBehavior
+        ],
+
+        observers:[
+          'activeChanged(subjectActive)',
+          'userChanged(user)',
+          'selChanged(sel)'
+        ],
+
+        selChanged:function(s){
+          this.$.list.clearSelection()
+        },
+
+        activeChanged: function(active){
+          if(active){
+            this.$.pages.select(1)
+          } else {
+            this.$.pages.select(0)
+          }
+        },
+
+
+        userChanged: function(u){
+          const that = this
+          var cl = u.val.class.split('-')
+
+          var Subjects = []
+
+          this.fillItems('SchoolSchedule/' + u.val.school + '/' + cl[0] + '/' + cl[1] , subjects =>{
+
+            subjects.forEach( (day,index) => {
+              day.forEach( sub => {
+
+                if(Subjects.indexOf(sub) == -1 && sub != 'chos' && sub != 'cur'){
+                  Subjects.push(sub)
+                }
+              })
+
+              if(index == subjects.length - 1){
+                that.subjects = Subjects
+
+              }
+            })
+          });
+
+        }
+      });
+    </script>
+</dom-module>

@@ -1,90 +1,154 @@
 <link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
-<link rel="import" href="learn-admin-chos-day-module.html">
+<link rel="import" href="learn-admin-chos-add-module.html">
+<link rel="import" href="learn-admin-chos-group-module.html">
 
 <dom-module id="learn-admin-chos-module">
   <template>
     <style include="wrapper-module">
-      #nums,#lets{
-        width: 100px
+      paper-fab{
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        background-color: var(--app-secondary-color)
       }
 
-      #sch{
-        width: 300px
+      paper-dialog{
+        width: 500px;
+        border-radius: 4px;
+        background-color: whitesmoke
+      }
+
+      .panel {
+        width: calc(20% - 16px);
+        position: fixed;
+      }
+      .main{
+        width: calc(80% - 16px);
+        margin-left: calc(20% - 16px);
+      }
+
+      .panel paper-card{
+        background-color: var(--app-b2c);
+        padding: 8px 0px 8px 0px
+      }
+
+      #sel .outer{
+        padding: 4px;
+        color: var(--paper-grey-300);
+        font-size: 18px;
+      }
+
+      #sel .outer .inner{
+        padding: 8px;
+      }
+
+      #sel .iron-selected .inner{
+        background-color: var(--app-secondary-color);
+        border-radius: 4px;
+        font-weight: 500;
+        color: white
+      }
+      .stuff{
+        color:#B0BEC5;
+        font-size:18px;
+        font-weight: 700;
+        padding-bottom: 4px;
+        border-bottom: solid 2px #B0BEC5;
+      }
+
+      .add{
+        margin: 0;
+        margin-top: 8px;background-color: var(--app-secondary-color)
+      }
+
+      @media screen and (-webkit-min-device-pixel-ratio:0)
+        and (min-resolution:.001dpcm) {
+          .panel{
+            margin-top: 50px;
+          }
       }
     </style>
-    <iron-grid>
-      <div class="l4 xs12 offset-xs0">
-        <learn-admin-chos-day-module></learn-admin-chos-day-module>
+    <div class="layout horizontal wrap">
+      <div class="wrapper panel">
+        <paper-card elevation=0>
+          <div class="wrapper">
+            <div class="stuff">
+              Предметы по выбору
+            </div>
+          </div>
+          <iron-selector id=sel selected={{day}} >
+            <div class="outer">
+              <div class="inner">[[localize('df0')]]</div>
+            </div>
+            <div class="outer">
+              <div class="inner">[[localize('df1')]]</div>
+            </div>
+            <div class="outer">
+              <div class="inner">[[localize('df2')]]</div>
+            </div>
+            <div class="outer">
+              <div class="inner">[[localize('df3')]]</div>
+            </div>
+            <div class="outer">
+              <div class="inner">[[localize('df4')]]</div>
+            </div>
+            <div class="outer">
+              <div class="inner">[[localize('df5')]]</div>
+            </div>
+          </iron-selector>
+        </paper-card>
+        <paper-button class="button mw add" noink on-tap="add">
+          Добавить группу
+        </paper-button>
       </div>
-      <div class="l4 xs12 offset-xs0">
-        <learn-admin-chos-day-module></learn-admin-chos-day-module>
+      <div class="main">
+        <iron-list id="list" items={{groups}} as=g class="mw" grid>
+          <template>
+            <learn-admin-chos-group-module group=[[g]]></learn-admin-chos-group-module>
+          </template>
+        </iron-list>
       </div>
-      <div class="l4 xs12 offset-xs0">
-        <learn-admin-chos-day-module></learn-admin-chos-day-module>
-      </div>
-    </iron-grid>
+    </div>
+
+    <paper-dialog
+
+                  id="dialog" entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation"
+                  with-backdrop
+                  >
+      <learn-admin-chos-add-module user="[[user]]"></learn-admin-chos-add-module>
+    </paper-dialog>
   </template>
   <script>
     Polymer({
       is: 'learn-admin-chos-module',
-
-      properties:{
-        nums: {
-          type: Array,
-          value: function(){
-            var a = [];
-            for(var i=7; i< 13;i++){
-              a.push({
-                i: i
-              });
-            };
-            return a;
-          }
-        },
-        lets: {
-          type: Array,
-          value:function(){
-            return 'ABCDEFKLMNO'.split('');
-          }
-        }
-      },
 
       behaviors:[
         DatabaseBehavior,
         LocalizeBehavior
       ],
 
-      observers:[
-        'fill(user,num,let)'
-      ],
-
-      attached:function(){
-
-        const that = this
-        this.fillObjects('Subjects/',function(subjects){
-          var Subjects = [];
-          subjects.forEach(function(subject){
-            Subjects.push({
-              sub: that.localize(subject.key),
-              key:subject.key
-            });
-          });
-          that.subjects = Subjects;
-        });
-
-        this.fillObjects('SchoolsName/',function(schools){
-          that.schools = schools;
-        });
+      add:function(){
+        this.$.dialog.open()
       },
 
-      fill:function(user,n,l){
-        if(n && l && n != '' && l != ''){
-          this.item = {
-            let: l,
-            num: n,
-            sch: user.val.school
-          }
-        }
+      observers:[
+        'fill(user,day)'
+      ],
+
+      listeners:{
+        'close':'close'
+      },
+
+      close:function(){
+        this.$.dialog.close()
+      },
+
+      fill:function(user,day){
+        const that = this
+        this.fillObjects('SchoolChos/' + user.val.school + '/' + this.getYear() + '/' + day, groups=>{
+          that.groups = groups
+        })
       }
 
     })

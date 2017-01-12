@@ -1,48 +1,97 @@
 <link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
-<link rel="import" href="learn-admin-day-module.html">
+<link rel="import" href="learn-admin-timetable-day-module.html">
 
 <dom-module id="learn-admin-timetable-module">
   <template>
     <style include="wrapper-module">
-      #nums,#lets{
-        width: 100px
+      .l2{
+        border: 1px solid var(--paper-grey-300);
+        width: 100%
       }
 
-      #sch{
-        width: 300px
+      .panel{
+        width: calc(18% - 16px)
       }
+
+
+      .panel paper-card {
+        background-color: var(--app-b2c)
+      }
+
+      .main{
+        width: calc(82% - 16px);
+      }
+
+      vaadin-combo-box{
+        background-color:  #546E7A;
+
+        --paper-input-container-input:{
+          padding-left: 4px;
+          color: var(--paper-grey-300);
+        }
+
+        --paper-input-container-label:{
+          color: #B0BEC5;
+          padding-left: 4px;
+        }
+
+      }
+
+      .label {
+        margin-top: 8px;
+        color: #B0BEC5;
+        margin-left: 4px
+      }
+
+      .stuff{
+        color:#B0BEC5;
+        font-size:18px;
+        font-weight: 700;
+        padding-bottom: 4px;
+        border-bottom: solid 2px #B0BEC5;
+      }
+
     </style>
-
-    <iron-grid>
-      <div class="l2 xs12 offset-xs0 wrapper">
-        <paper-card style="padding:10px">
-          <div class="layout horizontal center-center">
-            <vaadin-combo-box id="nums" always-float-label label="Парал." items="[[nums]]" item-label-path="i" item-value-path="i" value="{{num}}" id="nums"></vaadin-combo-box>
-            <vaadin-combo-box id="lets" always-float-label label="Буква" items="[[lets]]" value="{{let}}" id="lets"></vaadin-combo-box>
+    <div class="layout horizontal">
+      <div class="panel wrapper">
+        <paper-card elevation=0>
+          <div class="wrapper">
+            <div class="stuff">
+              Расписание класса
+            </div>
+          </div>
+          <div class="label"></div>
+          <vaadin-combo-box id="nums" no-label-float label="Номер параллели" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{num}}" id="nums"></vaadin-combo-box>
+          <div class="label"></div>
+          <vaadin-combo-box id="lets" no-label-float label="Буква класса" items="[[lets]]" value="{{let}}" id="lets"></vaadin-combo-box>
+          <div class="label"></div>
+        </paper-card>
+      </div>
+      <div class="wrapper main">
+        <paper-card elevation=0>
+          <div class="layout horizontal">
+            <div class="l2">
+              <learn-admin-timetable-day-module item="[[item]]" n="0"></learn-admin-timetable-day-module>
+            </div>
+            <div class="l2">
+              <learn-admin-timetable-day-module item="[[item]]" n="1"></learn-admin-timetable-day-module>
+            </div>
+            <div class="l2">
+              <learn-admin-timetable-day-module item="[[item]]" n="2"></learn-admin-timetable-day-module>
+            </div>
+            <div class="l2">
+              <learn-admin-timetable-day-module item="[[item]]" n="3"></learn-admin-timetable-day-module>
+            </div>
+            <div class="l2">
+              <learn-admin-timetable-day-module item="[[item]]" n="4"></learn-admin-timetable-day-module>
+            </div>
+            <div class="l2">
+              <learn-admin-timetable-day-module item="[[item]]" n="5"></learn-admin-timetable-day-module>
+            </div>
           </div>
         </paper-card>
       </div>
-    </iron-grid>
-    <iron-grid>
-      <div class="l2 xs12 offset-xs0">
-        <learn-admin-day-module item="[[item]]" n="0"></learn-admin-day-module>
-      </div>
-      <div class="l2 xs12 offset-xs0">
-        <learn-admin-day-module item="[[item]]" n="1"></learn-admin-day-module>
-      </div>
-      <div class="l2 xs12 offset-xs0">
-        <learn-admin-day-module item="[[item]]" n="2"></learn-admin-day-module>
-      </div>
-      <div class="l2 xs12 offset-xs0">
-        <learn-admin-day-module item="[[item]]" n="3"></learn-admin-day-module>
-      </div>
-      <div class="l2 xs12 offset-xs0">
-        <learn-admin-day-module item="[[item]]" n="4"></learn-admin-day-module>
-      </div>
-      <div class="l2 xs12 offset-xs0">
-        <learn-admin-day-module item="[[item]]" n="5"></learn-admin-day-module>
-      </div>
-    </iron-grid>
+    </div>
   </template>
   <script>
     Polymer({

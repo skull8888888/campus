@@ -1,0 +1,132 @@
+<link rel="import" href="/src/message/message-panel-module.html">
+<link rel="import" href="message-mobile-dialog-list-module.html">
+<link rel="import" href="/src/message/message-new-dialog-module.html">
+<link rel="import" href="../behaviors/message-behavior.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../../bower_components/neon-animation/neon-animated-pages.html">
+
+<dom-module id="message-mobile-module">
+  <template>
+    <style include="wrapper-module">
+
+      paper-fab {
+        position: fixed;
+        right:8px;
+        bottom:8px;
+        margin: 8px;
+        --paper-fab-background:var(--app-button-color);
+      }
+
+      paper-card{
+        height: 88vh;
+      }
+
+      #dialogs {
+        width: 25%;
+        height: 88vh;
+        background-color: var(--app-b2c)
+      }
+
+      #currentDialog{
+        width: 75%;
+        height: 100%;
+      }
+
+      #dialog {
+        width: 95vw;
+        background-color: var(--paper-grey-100);
+        border-radius: 4px;
+        padding: 0;
+      }
+
+      .wrapper {
+        position: fixed
+      }
+
+      .warning {
+        height: 88vh;
+        font-size: 24px
+      }
+
+
+/*
+      #list{
+        background-color: var(--paper-grey-200)
+      }
+*/
+    </style>
+    <app-location route="{{route}}" path="{{path}}"></app-location>
+
+    <iron-grid>
+      <iron-pages selected={{page}} entry-animation=[[entryAnimation]] exit-animation=[[exitAnimation]]>
+        <div style="position:fixed;width:100%">
+          <message-panel-module id="list" sel={{sel}} user=[[user]]></message-panel-module>
+          <paper-fab icon="create" style="display:absolute; bottom:0; right:0;" on-tap="openDialog"></paper-fab>
+        </div>
+        <div style="position:fixed;width:100%;background-color:white" id="list">
+          <message-mobile-dialog-list-module sel="{{sel}}" style="width:100%;"></message-mobile-dialog-list-module>
+        </div>
+      </iron-pages>
+    </iron-grid>
+
+    <paper-dialog id="dialog"
+                  entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation"
+                  with-backdrop>
+      <message-new-dialog-module></message-new-dialog-module>
+    </paper-dialog>
+    <a href="/message/id" id=link></a>
+  </template>
+  <script>
+    Polymer({
+      is: 'message-mobile-module',
+
+      observers:[
+        'pathChanged(path)',
+        'selChanged(sel)'
+      ],
+
+      pathChanged:function(p){
+        const l = p.split('/')
+        if(l.length > 2){
+          this.page = 1
+          this.left()
+        } else {
+          this.page = 0
+          this.right()
+        }
+
+      },
+
+      left: function(){
+        this.entryAnimation = 'slide-from-left-animation'
+        this.exitAnimation = 'slide-right-animation'
+      },
+
+      right: function(){
+        this.entryAnimation = 'slide-from-right-animation'
+        this.exitAnimation = 'slide-left-animation'
+      },
+
+      selChanged:function(s){
+        this.page = 1
+//        this.$.link.click()
+      },
+
+      listeners:{
+        'close-new': 'close',
+      },
+
+      close:function(){
+        this.$.dialog.close()
+      },
+
+
+      openDialog:function(){
+        this.$.dialog.open()
+      }
+
+    })
+  </script>
+</dom-module>

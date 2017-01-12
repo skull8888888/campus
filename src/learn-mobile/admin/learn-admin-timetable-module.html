@@ -1,0 +1,136 @@
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="learn-admin-timetable-day-module.html">
+
+<dom-module id="learn-admin-timetable-module">
+  <template>
+    <style include="wrapper-module">
+      #nums,#lets{
+        width: 100px
+      }
+
+      #sch{
+        width: 300px
+      }
+
+      .l2{
+        border: 1px solid var(--paper-grey-300);
+        width: 100%
+      }
+
+      .selector {
+        float:left;
+/*        background-color: #eee;*/
+      }
+
+      vaadin-combo-box{
+        background-color: white;
+        border: 1px solid var(--paper-grey-300);
+      }
+
+      #nums{
+        border-bottom-left-radius: 4px;
+        border-top-left-radius: 4px;
+      }
+
+      #lets{
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+
+      }
+    </style>
+
+    <div class="layout horizontal center-center selector wrapper">
+      <vaadin-combo-box id="nums" no-label-float label="Парал." items="[[nums]]" item-label-path="i" item-value-path="i" value="{{num}}" id="nums"></vaadin-combo-box>
+      <vaadin-combo-box id="lets" no-label-float label="Буква" items="[[lets]]" value="{{let}}" id="lets"></vaadin-combo-box>
+    </div>
+    <div class="wrapper">
+      <paper-card>
+        <div class="layout horizontal">
+          <div class="l2">
+            <learn-admin-timetable-day-module item="[[item]]" n="0"></learn-admin-timetable-day-module>
+          </div>
+          <div class="l2">
+            <learn-admin-timetable-day-module item="[[item]]" n="1"></learn-admin-timetable-day-module>
+          </div>
+          <div class="l2">
+            <learn-admin-timetable-day-module item="[[item]]" n="2"></learn-admin-timetable-day-module>
+          </div>
+          <div class="l2">
+            <learn-admin-timetable-day-module item="[[item]]" n="3"></learn-admin-timetable-day-module>
+          </div>
+          <div class="l2">
+            <learn-admin-timetable-day-module item="[[item]]" n="4"></learn-admin-timetable-day-module>
+          </div>
+          <div class="l2">
+            <learn-admin-timetable-day-module item="[[item]]" n="5"></learn-admin-timetable-day-module>
+          </div>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-admin-timetable-module',
+
+      properties:{
+        nums: {
+          type: Array,
+          value: function(){
+            var a = [];
+            for(var i=7; i< 13;i++){
+              a.push({
+                i: i
+              });
+            };
+            return a;
+          }
+        },
+        lets: {
+          type: Array,
+          value:function(){
+            return 'ABCDEFKLMNO'.split('');
+          }
+        }
+      },
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      observers:[
+        'fill(user,num,let)'
+      ],
+
+      attached:function(){
+
+        const that = this
+        this.fillObjects('Subjects/',function(subjects){
+          var Subjects = [];
+          subjects.forEach(function(subject){
+            Subjects.push({
+              sub: that.localize(subject.key),
+              key:subject.key
+            });
+          });
+          that.subjects = Subjects;
+        });
+
+        this.fillObjects('SchoolsName/',function(schools){
+          that.schools = schools;
+        });
+      },
+
+      fill:function(user,n,l){
+        if(n && l && n != '' && l != ''){
+          this.item = {
+            let: l,
+            num: n,
+            sch: user.val.school
+          }
+        }
+      }
+
+    })
+  </script>
+</dom-module>

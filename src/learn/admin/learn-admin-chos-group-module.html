@@ -1,14 +1,53 @@
 <dom-module id="learn-admin-chos-group-module">
   <template>
     <style include="wrapper-module">
+      :host{
+        width: auto
+      }
+
+      paper-card{
+        width: 18vw;
+/*        height: 100px*/
+      }
+
+      .auth {
+        position: absolute;
+        bottom: 0px;
+        margin: 8px;
+      }
+
+      paper-icon-button{
+        position: absolute;
+        top:8px;
+        right: 8px
+      }
+
+      .name{
+        font-size: 20px;
+        font-weight: 500
+      }
 
     </style>
+    <div class="wrapper">
+      <paper-card elevation=0>
+        <div class="wrapper">
+          <div class="name">[[group.key]]</div>
+          <div>Уроки [[group.val.n]]</div>
+          <paper-icon-button icon="icons:clear" on-tap="delete"></paper-icon-button>
+        </div>
+      </paper-card>
+    </div>
   </template>
   <script>
     Polymer({
       is: 'learn-admin-chos-group-module',
 
-
+      delete: function(){
+        this.fire('delete-group',{
+          id: this.group.key,
+          type: this.type
+        })
+      }
     })
   </script>
 </dom-module>

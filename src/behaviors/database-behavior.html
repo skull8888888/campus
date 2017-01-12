@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymerfire/firebase-database-behavior.html">
+<link rel="import" href="spinner-module.html">
 
 <script>
     DB = {
@@ -6,9 +7,32 @@
       behaviors:[
         Polymer.FirebaseDatabaseBehavior
       ],
+      startSpin:function(e){
+
+        const list = Polymer.dom(this.root).querySelector('iron-list')
+        const dr =  Polymer.dom(this.root).querySelector('template')
+        const spin = Polymer.dom(this.root).querySelector('spinner-module')
+
+        if(list && spin==undefined){
+          const spinner = document.createElement("spinner-module")
+          list.parentNode.insertBefore(spinner,list)
+        } else if(dr && spin==undefined){
+          if(dr.id == 'list'){
+            const spinner = document.createElement("spinner-module")
+            dr.parentNode.insertBefore(spinner,dr)
+          }
+
+        }
+      },
+
+      endSpin:function(e){
+        const spinner = Polymer.dom(this.root).querySelector('spinner-module')
+        if(spinner) spinner.parentNode.removeChild(spinner)
+      },
 
       fillObjects: function(ref,callback,push){
           var that = this;
+          this.startSpin()
           this.db.ref(ref).on('value',function(objects){
             var Objects = [];
             objects.forEach(function(object){
@@ -18,36 +42,43 @@
             };
             push ? Objects.push(Object) : Objects.unshift(Object);
             });
-            callback(Objects);
+            that.endSpin()
+            callback(Objects)
           });
       },
 
       fillItems: function(ref,callback,push){
         var that = this;
+        this.startSpin()
         this.db.ref(ref).on('value',function(objects){
           var Objects = [];
           objects.forEach(function(object){
             var Object = object.val();
             push ? Objects.push(Object) : Objects.unshift(Object);
           });
+          that.endSpin()
           callback(Objects);
         });
       },
 
       fillItemsOnce: function(ref,callback,push){
         var that = this;
+        this.startSpin()
         this.db.ref(ref).once('value',function(objects){
           var Objects = [];
           objects.forEach(function(object){
             var Object = object.val();
             push ? Objects.push(Object) : Objects.unshift(Object);
           });
+          that.endSpin()
           callback(Objects);
         });
       },
 
       fillOrder: function(ref,child,eq,callback,push){
-        var that = this;
+        var that = this
+        this.startSpin()
+        this.fire('start-spin')
         this.db.ref(ref).orderByChild(child).equalTo(eq).on('value',function(objects){
           var Objects = [];
           objects.forEach(function(object){
@@ -57,7 +88,8 @@
             };
             push ? Objects.push(Object) : Objects.unshift(Object);
           });
-          callback(Objects);
+          that.endSpin()
+          callback(Objects)
         });
       },
 
@@ -85,11 +117,12 @@
       getItemOnce: function(ref,callback){
         this.db.ref(ref).once('value',function(item){
           callback(item.val());
+
         })
       },
 
       getObject: function(ref,callback){
-        this.db.ref(ref).on('value',function(item){
+        this.db.ref(ref).on('value',(item) => {
           callback({
             val: item.val(),
             key: item.key
@@ -106,26 +139,55 @@
         })
       },
 
-//      sendNotifs:function(l,e,auth,text){
-//        const that = this;
-//        this.db.ref('Users/').orderBy(l).equalTo(e).once('value',function(items){
-//          items.forEach(function(item){
-//            that.db.ref('Notifs/' + item.key).push({
-//              auth:auth,
-//              text: text,
-//              time: Date.now()
-//            });
-//          });
-//        });
-//      },
-
       attached: function(){
         const list = Polymer.dom(this.root).querySelector('iron-list');
+
         if(list){
+
           list.scrollTarget = this.ownerDocument.documentElement;
         }
-      }
-    };
+
+      },
+
+      getYear: ()=>{
+        const date = new Date()
+        const month = date.getMonth()
+        const year = date.getFullYear()
+
+        if(month < 6){
+          return (year-1) + '-' + year
+        } else {
+          return (year) + '-' + (year + 1)
+        }
+      },
+
+      sendNotifs: function(school,cl,group,type,d,callback){
+
+        var data = {}
+        const that = this
+        this.db.ref('Users/').orderByChild('full').equalTo(cl + '_' + school).once('value',pupils=>{
+
+          pupils.forEach(pupil => {
+
+            if(pupil.val().group == group){
+
+              const id = that.db.ref('Notifs/' + pupil.key).push().key
+
+              data[pupil.key+ '/' + id] = {
+                type: type,
+                auth: Cookies.get('id'),
+                data: d,
+                read:0
+              }
+            }
+
+          })
+
+          that.db.ref('Notifs/').update(data)
+        })
+      },
+
+    }
 
     var DatabaseBehavior = [DB, Polymer.FirebaseDatabaseBehavior]
 </script>

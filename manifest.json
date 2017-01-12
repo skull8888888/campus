@@ -1,11 +1,11 @@
 {
-  "name": "Campus",
+  "name": "Campus - platform for education",
   "short_name": "Campus",
   "start_url": "/?homescreen=1",
   "display": "standalone",
   "theme_color": "#3f51b5",
-  "background_color": "#3f51b5",
-  "version":"0.0.2",
+  "background_color": "#3f51b6",
+  "version":"0.2.0",
   "icons": [
     {
       "src": "images/manifest/icon-192x192.png",

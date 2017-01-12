@@ -5,8 +5,15 @@
        padding: 8px
       }
 
+      .wrapper-mob {
+        padding: 4px
+      }
+
       paper-card{
-        width: 100%
+        width: 100%;
+/*        background-color: var(--paper-grey-100);*/
+        overflow: hidden;
+        border-radius: 4px
       }
 
       .mw{
@@ -16,11 +23,6 @@
       .link{
         text-decoration: none;
         color: black
-      }
-
-
-      :host{
-        width: 100%
       }
 
       .image{
@@ -34,6 +36,11 @@
         border-radius: 25px;
       }
 
+      .h1{
+        font-size: 22px;
+        font-weight: 600
+      }
+
       .light{
         color: var(--paper-grey-300)
       }
@@ -42,14 +49,138 @@
         color: var(--paper-grey-600)
       }
 
+
       .button {
-        background-color:  var(--app-primary-color);
+        background-color:  var(--app-b2c);
         color: white;
-        font-weight: 800;
+        margin: 0;
+        font-weight: 500
+        --paper-button:{
+/*          padding: 0;*/
+          font-weight: 600;
+          font-size: 14px;
+
+        }
+      }
+
+      .button2 {
+        background-color:  var(--app-secondary-color);
+        color: white;
+        margin: 0;
+        font-weight: 500;
+        --paper-button:{
+          margin: 0;
+          font-size: 14px;
+        }
+      }
+
+      paper-dialog{
+        border-radius: 4px
       }
 
       .mcolor{
         color: var(--app-primary-color)
+      }
+
+      .button-light {
+        font-weight: 400;
+        font-size: 14px;
+        margin: 8px 0px;
+
+        cursor: pointer;
+        color: var(--app-secondary-color);
+      }
+
+      .button-light-standart {
+        font-weight: 500;
+        margin:0px;
+        height: 30px;
+        color: var(--app-secondary-color);
+      }
+
+      .button-light-default {
+        font-weight: 400;
+        font-size: 14px;
+        margin: 8px 0px;
+        cursor: pointer;
+      }
+
+      .fw500{
+        font-weight: 500
+      }
+      .fw600{
+        font-weight: 600
+      }
+      .fw700{
+        font-weight: 700
+      }
+      .fw800{
+        font-weight: 800
+      }
+      .fs16{
+        font-size: 16px
+      }
+      .fs18{
+        font-size: 18px
+      }
+      .fs20{
+        font-size: 20px
+      }
+      .fs22{
+        font-size: 22px
+      }
+
+      .fc100{
+        color: var(--paper-grey-100)
+      }
+      .fc200{
+        color: var(--paper-grey-200)
+      }
+      .fc300{
+        color: var(--paper-grey-300)
+      }
+      .fc400{
+        color: var(--paper-grey-400)
+      }
+      .fc500{
+        color: var(--paper-grey-500)
+      }
+      .fc600{
+        color: var(--paper-grey-600)
+      }
+      .fc700{
+        color: var(--paper-grey-700)
+      }
+      .fc800{
+        color: var(--paper-grey-800)
+      }
+      .label {
+        margin-top: 16px;
+        color: var(--paper-grey-600);
+        margin-left: 4px
+      }
+      vaadin-combo-box, paper-textarea,paper-input{
+        width: 100%;
+
+        --paper-input-container-input:{
+          font-size: 16px;
+          padding-left: 4px;
+        }
+
+        --paper-input-container-label:{
+          font-size: 16px;
+          padding-left: 4px;
+        }
+
+        --paper-input-container-underline:{
+          display: none;
+          height:0px
+        }
+        --paper-input-container-focus-color:rgba(0, 0, 0, 0.0);
+      }
+
+      paper-tabs{
+        --paper-tabs-selection-bar-color:var(--app-button-color)
       }
     </style>
   </template>

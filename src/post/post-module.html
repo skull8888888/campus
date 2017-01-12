@@ -9,7 +9,7 @@
     }
 
     .content {
-      border-top:  1px solid  var(--paper-grey-300);
+/*      border-top:  1px solid  var(--paper-grey-300);*/
       padding: 10px;
     }
 
@@ -25,8 +25,8 @@
   </style>
   <template>
     <div class="wrapper">
-      <paper-card id="card">
-        <post-avatar-module r="[[r]]"></post-avatar-module>
+      <paper-card elevation=0>
+        <post-avatar-module r=[[r]] time=[[time]]></post-avatar-module>
         <div class="content">
           <div>
             {{post.val.text}}
@@ -35,7 +35,7 @@
             <iron-image src$="{{post.val.image}}" id="img" sizing="contain" height="{{height}}"></iron-image>
           </template>
         </div>
-        <div class="card-actions">
+        <div>
           <paper-icon-button icon="icons:favorite{{bordered}}" on-tap="like" id="heart"></paper-icon-button>
           {{likes}}
         </div>
@@ -47,12 +47,9 @@
       is: 'post-module',
 
       behaviors:[
-        Polymer.FirebaseDatabaseBehavior
+        Polymer.FirebaseDatabaseBehavior,
+        LocalizeBehavior
       ],
-
-      properties:{
-        r: String
-      },
 
       observers:[
         'postChanged(post)'
@@ -60,7 +57,11 @@
 
       postChanged: function(post){
         const that = this;
-        console.log(post);
+        this.r = post.val.type + '/' + post.val.auth + '/info'
+        const d = new Date(post.val.time)
+
+        this.time = this.localize('m' + d.getMonth()) + ', ' + d.getDate() + ' ' + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' + d.getMinutes(): d.getMinutes())
+
         if(post.val.image){
           this.showImage = true;
 
@@ -70,10 +71,10 @@
           this.showImage = false;
           this.height = 0;
         };
-        this.db.ref('Posts/' + post.key + '/liked').on('value',function(likes){
+        this.db.ref('Posts/' + Cookies.get('id') + '/' + post.key + '/liked').on('value',function(likes){
           that.likes = likes.numChildren();
         });
-        this.db.ref('Posts/' + post.key + '/liked/' + Cookies.get('id')).on('value',function(liked){
+        this.db.ref('Posts/' + Cookies.get('id') + '/' + post.key + '/liked/' + Cookies.get('id')).on('value',function(liked){
           if(liked.val() == 'liked'){
             that.bordered = '';
             that.$.heart.style.color = '#f44336';
@@ -86,9 +87,9 @@
 
       like:function(){
         if(this.bordered == ''){
-          this.db.ref('Posts/' + this.post.key + '/liked/' + Cookies.get('id')).set(null)
+          this.db.ref('Posts/' + Cookies.get('id') + '/' + this.post.key + '/liked/' + Cookies.get('id')).set(null)
         } else {
-          this.db.ref('Posts/' + this.post.key + '/liked/' + Cookies.get('id')).set('liked')
+          this.db.ref('Posts/' + Cookies.get('id') + '/' + this.post.key + '/liked/' + Cookies.get('id')).set('liked')
         }
       }
     })

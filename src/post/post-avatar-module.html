@@ -13,8 +13,8 @@
       }
 
       .name{
-        margin: 5px;
         color: black;
+        margin-left: 8px
       }
 
 
@@ -22,18 +22,18 @@
     <div class="layout horizontal justified">
       <a class="layout horizontal wrapper link" href="{{user.link}}">
         <iron-image id="av" src$="{{auth.image}}" sizing="cover"></iron-image>
-        <div class="layout vertical name">
+        <div class="layout vertical name fw500 fs18">
           <div>{{auth.name}} {{auth.surname}}</div>
+          <div class="time fc500 fs16">[[time]]</div>
         </div>
       </a>
       <template is="dom-if" if="mine(id)">
         <paper-menu-button>
-          <paper-icon-button icon="icons:more-vert" on-tap="delete"></paper-icon-button>
-          <paper-menu class="dropdown-content">
-            <paper-item>Share</paper-item>
-            <paper-item>Settings</paper-item>
-            <paper-item>Help</paper-item>
-          </paper-menu>
+          <paper-icon-button icon="icons:more-vert" class="dropdown-trigger medium"></paper-icon-button>
+          <div class="dropdown-content" style="height:100px">
+            <paper-button on-tap="showDelete">Удалить</paper-button>
+            <paper-button on-tap="edit">Редактировать</paper-button>
+          </div>
         </paper-menu-button>
       </template>
     </div>
@@ -43,7 +43,8 @@
       is: 'post-avatar-module',
 
       observers:[
-        'refChanged(r)'
+        'refChanged(r)',
+        'actionChanged(action)'
       ],
 
       behaviors:[
@@ -51,18 +52,26 @@
       ],
 
       refChanged:function(r){
-        const that = this;
 
-        this.db.ref(r).once('value',function(auth){
-          that.auth = auth.val()
-          that.id = auth.key
-        })
+        const that = this;
+        console.log(r)
+        if(r.length > 0){
+          this.db.ref(r).once('value',function(auth){
+            that.auth = auth.val()
+            that.id = auth.key
+          })
+        }
+
       },
 
       mine: function(id){
         if(id == Cookies.get('id')){
           return true
         }
+      },
+
+      actionChanged:function(e){
+        console.log(e)
       }
     });
   </script>

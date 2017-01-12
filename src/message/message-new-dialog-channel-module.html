@@ -1,0 +1,177 @@
+<dom-module id="message-new-dialog-channel-module">
+  <template>
+    <style include="wrapper-module">
+
+      .inner, paper-input,#wrap{
+        border-bottom: 1px solid var(--paper-grey-300)
+      }
+
+      iron-selector .iron-selected, iron-selector .iron-selected .type {
+        background-color: var(--app-secondary-color);
+        color: white; border-radius: 8px
+      }
+
+      paper-button{
+        color: var(--app-secondary-color)
+      }
+
+      .member{
+        color: white;
+        min-width: 100px;
+/*        width:100px;*/
+        padding: 4px;
+        background-color: var(--app-secondary-color);
+        border-radius: 4px
+      }
+
+      iron-grid{
+        width: 100%;
+        height: 10vh
+      }
+
+      paper-icon-button{
+        --paper-icon-button:{
+          padding: 0;
+          width: 15px;
+          height: 15px;
+        }
+      }
+
+    </style>
+    <div>
+
+      <paper-input no-label-float label="Название канала" value="{{channelName}}"></paper-input>
+      <paper-input no-label-float label="Имя пользователя" value="{{searchText}}">
+        <iron-icon class="medium" icon="icons:search" prefix></iron-icon>
+      </paper-input>
+      <div style="width:100%;max-height:10vh;overflow:auto" id="wrap">
+        <iron-list items=[[members]] as=member grid class="mw" scroll-target="wrap">
+          <template>
+            <div style="padding:4px">
+              <div class="member layout horizontal justified">
+                <div>
+                  [[member.name]] [[member.surname]]
+                </div>
+                <div>
+                  <paper-icon-button icon="icons:clear"></paper-icon-button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </iron-list>
+      </div>
+      <div style="overflow:auto; height:35vh" class="w">
+        <iron-selector selected="{{index}}">
+          <template is="dom-repeat" id="list" items=[[searchItems]] as=user initial-count=7>
+            <div class="wrap">
+              <div class="inner wrapper">
+                <div class="layout horizontal">
+                  <iron-image src="[[user.val.info.image]]" item-icon style="background-image:url([[user.val.info.image]])" class="ava" sizing="cover"></iron-image>
+                  <div class="layout vertical">
+                    <div class="name fs18 fw500" style="padding:4px 0px 2px 8px">
+                      [[user.val.info.name]] [[user.val.info.surname]]
+                    </div>
+                    <div class="fs16 fc600 type" style="padding-left:8px">
+                      [[localize(user.val.info.type)]]
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </template>
+        </iron-selector>
+      </div>
+      <div>
+        <paper-button on-tap="start" noink class="fw500">Создать канал</paper-button>
+      </div>
+    </div>
+    <iron-ajax
+               auto
+               url="https://campus-server.herokuapp.com/search/[[searchText]]"
+               id="xhr"
+               on-response="handleResponse"
+               loading="[[active]]"
+               ></iron-ajax>
+  </template>
+  <script>
+    Polymer({
+      is: 'message-new-dialog-channel-module',
+
+      properties:{
+        members:{
+          type: Array,
+          value:[]
+        },
+        membersId:{
+          type:Object,
+          value:{}
+        }
+      },
+
+      behaviors:[
+        DatabaseBehavior,
+        MessageBehavior,
+        LocalizeBehavior
+      ],
+
+      attached:function(){
+        this.membersId[Cookies.get('id')] = 0
+      },
+
+      observers:[
+        'selChanged(index)',
+      ],
+
+      selChanged: function(s){
+        this.push('members',this.searchItems[s].val.info)
+        this.membersId[this.searchItems[s].key] = 0
+      },
+
+      handleResponse:function(e){
+        this.endSpin()
+        this.searchItems = e.detail.__data__.response
+        console.log(e.detail.__data__.response)
+      },
+
+      start:function(){
+        if(this.channelName){
+
+          var data = {}
+          const cid = this.db.ref('Channels/').push().key
+
+          const mid = this.db.ref('Chats/').push().key
+
+          for(uid in this.membersId){
+            data['Chats/' + uid + '/chats/' + cid] = {
+              type: 'channel',
+              time: Date.now()
+            }
+
+            data['Chats/' + uid + '/messages/' + cid + '/' + mid ]={
+              auth: Cookies.get('id'),
+              text: 'Создатель каналa "' + this.channelName +  '"',
+              time: Date.now()
+            }
+          }
+
+          var admins = {}
+
+          admins[Cookies.get('id')] = 0
+
+          data['Channels/' + cid] = {
+            name: this.channelName,
+            members: this.membersId,
+            creator: Cookies.get('id'),
+            admins: admins
+          }
+
+
+
+          this.db.ref().update(data)
+          this.fire('close-new')
+        }
+      },
+    })
+  </script>
+</dom-module>

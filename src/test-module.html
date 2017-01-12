@@ -1,12 +1,17 @@
-<dom-module id="-module">
+<dom-module id="main-module">
   <template>
-    <style include="wrapper-module">
+    <style>
 
     </style>
+    <h1>It is working </h1>
+    <script>
+      Polymer({
+        is: 'main-module',
+        attached:function(){
+          console.log(12)
+        }
+
+      })
+    </script>
   </template>
-  <script>
-    Polymer({
-      is: '-module'
-    })
-  </script>
 </dom-module>

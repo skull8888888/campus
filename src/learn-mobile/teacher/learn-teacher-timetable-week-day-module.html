@@ -1,0 +1,230 @@
+<dom-module id="learn-teacher-timetable-week-day-module">
+  <template>
+    <style include="wrapper-module">
+
+      paper-card{
+
+        color: white;
+        padding: 8px;
+        font-weight: 500
+      }
+
+      .date{
+        padding: 8px;
+        border-bottom: solid 2px var(--paper-grey-200)
+      }
+
+      .day {
+        color: var(--paper-grey-600);
+        font-size: 19px;
+        font-weight: 500
+      }
+
+      .num{
+        color: var(--paper-grey-300);
+        font-size: 50px;
+      }
+
+      .wrap {
+        padding: 4px
+      }
+
+      paper-dialog{
+        border-radius: 2px;
+        width: 600px;
+      }
+
+      .l{
+        color:var(--paper-grey-500)
+      }
+
+      paper-textarea {
+        --iron-autogrow-textarea: {
+          font-size:22px !important;
+          font-weight: 500
+        };
+
+      }
+    </style>
+    <div class="mod" id="l">
+      <iron-list items="[[items]]" as="item" selection-enabled selected-item="{{selected}}" id="list">
+        <template>
+          <div class="wrap" onlclick="d.open()">
+            <paper-card elevation="0" style$="background-color:[[setColor(item.num)]]">
+              <div>
+                <div style="font-size:20px;font-weight:bolder">
+                  [[item.cl]], [[localize(item.group)]]
+
+                  <template is="dom-if" if="[[item.homework]]">
+                    <div style="float:right">
+                      <iron-icon icon="icons:description"></iron-icon>
+                    </div>
+                  </template>
+
+                </div>
+                <div style="font-size:18px;font-weight:500">[[localize(item.sub)]]</div>
+              </div>
+
+            </paper-card>
+          </div>
+        </template>
+      </iron-list>
+    </div>
+    <paper-dialog
+                  id="d" entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation"
+                  with-backdrop
+
+                  >
+      <div>
+        <h1 style="font-weight:bolder">
+          [[task.cl]], [[localize(task.group)]]
+        </h1>
+        <h2 class="l">
+          [[localize(task.sub)]]
+        </h2>
+        <h2 class="l">
+          [[localize(m)]], [[day.date]]
+        </h2>
+        <paper-textarea value="{{text}}" size="18" required max-rows="4"></paper-textarea>
+        <div>
+          <paper-button class="button" on-tap="send" style="font-size:18px;float:right;margin-bottom:8px">Отправить</paper-button>
+        </div>
+
+      </div>
+
+    </paper-dialog>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-timetable-week-day-module',
+
+      observers:[
+        'fill(n,user,day)',
+        'subjectsChanged(subjects)',
+        'selectedChanged(selected)',
+        'subjectsChanged(items)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior,
+        CardColorBehavior
+      ],
+
+      listeners:{
+        'homework':'homework'
+      },
+
+      send: function(){
+
+
+        const cl = this.task.class
+
+        if(this.text){
+
+          this.db.ref('SchoolHomework/-KRd7GFmIubUkuXP-Zmn/' + cl[0] + '/' + cl[1] + '/' + this.day.date + '-'  + this.day.month + '/' + this.task.sub + '/' + this.task.group).set({
+            text: this.text,
+            auth: Cookies.get('id'),
+            time: Date.now()
+          })
+          this.fire('open-toast',{text:'Домашнее задание отправленно'})
+          this.$.d.toggle()
+        } else {
+          this.fire('open-toast',{text:'Напишите домашнее задание'})
+        }
+
+      },
+
+      selectedChanged:function(s){
+        if(s){
+          this.text = s.homework;
+          this.$.d.open()
+          this.task = s;
+          this.$.list.clearSelection()
+        }
+      },
+
+      subjectsChanged:function(i){
+        this.items = i;
+      },
+
+      fill: function(n, user,day){
+
+        this.d = 'd' + n;
+        this.m = 'm' + day.month;
+
+        var date = new Date()
+        var d = date.getDate()
+
+        if(day.date == d){
+          this.color = 'indianred'
+        }
+
+        const that = this
+        var classes = []
+        var cclasses = []
+
+        for(var cl in user.val.classes)
+          classes.push(user.val.classes[cl])
+
+
+        for(var cl in user.val.cclasses)
+          cclasses.push(user.val.cclasses[cl])
+
+        var Subjects = []
+        var counter = 0
+
+        classes.forEach((cl,i)=>{
+
+          var c = cl.class.split('-')
+
+          that.fillItems('SchoolSchedule/'+ user.val.school +'/' +  c[0] + '/' + c[1] + '/' + n,subjects=>{
+            subjects.forEach((sub,index)=>{
+              if(sub == cl.subject){
+
+                Subjects[index] = {
+                  sub: sub,
+                  cl: c[0] + ' ' + c[1],
+                  num:c[0],
+                  class:c,
+                  group: cl.group
+                }
+
+                that.getItem('SchoolHomework/' + user.val.school +'/' + c[0] + '/' + c[1] + '/' + that.day.date + '-'  + that.day.month + '/' + cl.subject + '/' + cl.group, homework =>{
+
+                  if(homework)
+                    that.set('items.' + index + '.homework', homework.text)
+
+                })
+
+              } else if(Subjects[index] != 'окно' && !Subjects[index]) {
+                Subjects[index] = {
+                  sub: 'null',
+                  num: 'null'
+                }
+              }
+
+            })
+
+            var inc = Subjects.length - 1
+
+            while(Subjects[inc].sub == 'null'){
+
+                Subjects.splice(inc,1)
+
+                inc--
+
+            }
+
+            that.items = Subjects
+
+          },true);
+
+        })
+
+      },
+    });
+  </script>
+</dom-module>

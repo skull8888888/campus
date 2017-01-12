@@ -1,0 +1,128 @@
+<dom-module id="learn-pupil-timetable-week-day-module">
+  <template>
+    <style include="wrapper-module">
+
+      paper-card{
+
+        color: white;
+        padding: 8px;
+        font-weight: 500
+      }
+
+
+
+      .date{
+        padding: 8px;
+        border-bottom: solid 2px var(--paper-grey-200)
+      }
+
+      .day {
+        color: var(--paper-grey-600);
+        font-size: 19px;
+        font-weight: 500
+      }
+
+      .num{
+        color: var(--paper-grey-300);
+        font-size: 50px;
+      }
+
+      .wrap {
+        padding: 4px
+      }
+
+    </style>
+    <div class="mod">
+      <iron-list items="[[subjects]]" as="subject" selection-enabled selected-item="{{selected}}" id="list">
+        <template>
+          <div class="wrap">
+            <paper-card elevation="0" style$="background-color:[[setColor(subject.sub)]]">
+              [[localize(subject.sub)]]
+              <template is="dom-if" if="[[subject.homework]]">
+                <div style="float:right">
+                  <iron-icon icon="icons:description"></iron-icon>
+                </div>
+              </template>
+            </paper-card>
+          </div>
+        </template>
+      </iron-list>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-pupil-timetable-week-day-module',
+
+      observers:[
+        'fill(n,user,day)',
+        'selectedChanged(selected)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior,
+        CardColorBehavior
+      ],
+
+
+      fill: function(n,user,day){
+
+        this.d = 'd' + n
+        this.m = 'm' + day.month
+
+        var date = new Date();
+        var d = date.getDate();
+
+        if(day.date == d){
+          this.color = 'indianred'
+        }
+
+        var Subjects = []
+        const that = this
+
+
+        if(user.val.school && user.val.class && user.val.group){
+
+          var cl = user.val.class.split('-')
+
+          this.fillItems('SchoolSchedule/' + user.val.school + '/' + cl[0] + '/' + cl[1] + '/' + n,function(subjects){
+
+            var c = 0;
+            subjects.forEach(function(subject,index){
+              Subjects[index] = {
+                sub: subject
+              };
+              that.getItem('SchoolHomework/-KRd7GFmIubUkuXP-Zmn/' + cl[0] + '/' + cl[1] + '/' + that.day.date + '-'  + that.day.month + '/' + subject,function(homework){
+
+                if(homework){
+                  that.set('subjects.' + index + '.homework', homework[user.val.group] ? homework[user.val.group]: homework['g3'])
+                };
+              });
+              c++;
+              if(c == subjects.length){
+                that.subjects = Subjects;
+              }
+            });
+          },true);
+
+        }
+      },
+
+      selectedChanged:function(s){
+
+        if(s){
+          if(s.homework){
+            this.fire('show-homework',{task: s})
+          } else {
+            this.fire('open-toast',{text: 'По этому предмету пока нет домашнего задания'})
+          }
+
+          this.$.list.clearSelection()
+        }
+
+      }
+
+    });
+  </script>
+
+</dom-module>

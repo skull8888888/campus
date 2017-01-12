@@ -1,0 +1,88 @@
+<link rel="import" href="../../bower_components/polymerfire/firebase-database-behavior.html">
+
+<script>
+  M = {
+
+    behaviors:[
+      Polymer.FirebaseDatabaseBehavior
+    ],
+
+    sendMessageTo:function(id,text,file){
+
+      var data = {}
+
+      var me = this.db.ref("Chats/" + Cookies.get('id') + '/messages/' + id).push().key
+      var user = this.db.ref("Chats/" + id + '/messages/' + Cookies.get('id')).push().key
+
+
+      data["Chats/" + Cookies.get('id') + '/messages/' + id + '/' + me] = {
+        text: text ? text: null,
+        time: Date.now(),
+        auth: Cookies.get('id'),
+        file:file ? file: null,
+      }
+      data["Chats/" + id + '/messages/' + Cookies.get('id') + '/' + user] = {
+        text: text ? text: null,
+        time: Date.now(),
+        auth: Cookies.get('id'),
+        file:file ? file: null,
+        new:1
+      }
+
+
+
+      if(file){
+
+        const fid = this.db.ref('Chats/' + id + '/chats/' + Cookies.get('id') + '/files').push().key
+
+        data['Chats/' + id + '/chats/' + Cookies.get('id') + '/files/' + fid] = file
+        data['Chats/' + Cookies.get('id') + '/chats/' + id + '/files/' + fid] = file
+
+      }
+
+
+      data['Chats/' + id + '/chats/' + Cookies.get('id') + '/time'] = Date.now()
+      data['Chats/' + id + '/chats/' + Cookies.get('id') + '/type'] = 'private'
+
+      data['Chats/' + Cookies.get('id') + '/chats/' + id + '/time'] = Date.now()
+
+
+      this.db.ref().update(data);
+
+    },
+
+
+
+    sendMessageToChannel:function(id,members,text,file){
+
+      var data = {}
+
+      const mid = this.db.ref('Chats/').push().key
+
+      if(file){
+        const fid = this.db.ref('Channels/' + id + '/files').push().key
+        file.auth = Cookies.get('id')
+        data['Channels/' + id + '/files/' + fid] = file
+      }
+
+      for(member in members){
+        data['Chats/' + member + '/messages/' + id + '/' + mid] = {
+          text:text ? text: null,
+          auth:Cookies.get('id'),
+          time: Date.now(),
+          file: file ? file: null,
+          new: member == Cookies.get('id') ? null: 1
+        }
+
+        data['Chats/' + member + '/chats/' + id + '/time'] = Date.now()
+        data['Chats/' + member + '/chats/' + id + '/type'] = 'channel'
+
+      }
+
+      this.db.ref().update(data)
+    },
+
+  };
+
+  var MessageBehavior = [M, Polymer.FirebaseDatabaseBehavior]
+</script>

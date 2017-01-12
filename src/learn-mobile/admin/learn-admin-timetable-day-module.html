@@ -1,0 +1,125 @@
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+
+<dom-module id="learn-admin-timetable-day-module">
+  <template>
+    <style include="wrapper-module">
+      vaadin-combo-box{
+        margin: 4px;
+        border-radius: 4px;
+
+        --paper-input-container-input:{
+          font-size: 18px;
+          font-weight: 500;
+          padding-left: 8px;
+        }
+
+        --paper-input-container-input-color:white;
+      }
+
+
+      .day{
+        padding: 20px;
+        color: var(--paper-grey-400);
+        font-size:26px;
+        font-weight: 500;
+        border-bottom: solid var(--paper-grey-200) 2px;
+      }
+    </style>
+    <div class="">
+      <div class="day">
+        [[localize(d)]]
+      </div>
+      <vaadin-combo-box no-label-float style$="background-color:{{setColor(subs0)}}" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{subs0}}"></vaadin-combo-box>
+      <vaadin-combo-box no-label-float style$="background-color:{{setColor(subs1)}}" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{subs1}}"></vaadin-combo-box>
+      <vaadin-combo-box no-label-float style$="background-color:{{setColor(subs2)}}" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{subs2}}"></vaadin-combo-box>
+      <vaadin-combo-box no-label-float style$="background-color:{{setColor(subs3)}}" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{subs3}}"></vaadin-combo-box>
+      <vaadin-combo-box no-label-float style$="background-color:{{setColor(subs4)}}" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{subs4}}"></vaadin-combo-box>
+      <vaadin-combo-box no-label-float style$="background-color:{{setColor(subs5)}}" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{subs5}}"></vaadin-combo-box>
+      <vaadin-combo-box no-label-float style$="background-color:{{setColor(subs6)}}" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{subs6}}"></vaadin-combo-box>
+      <vaadin-combo-box no-label-float style$="background-color:{{setColor(subs7)}}" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{subs7}}"></vaadin-combo-box>
+      <vaadin-combo-box no-label-float style$="background-color:{{setColor(subs8)}}" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{subs8}}"></vaadin-combo-box>
+      <vaadin-combo-box no-label-float style$="background-color:{{setColor(subs9)}}" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{subs9}}"></vaadin-combo-box>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-admin-timetable-day-module',
+
+      observers:[
+        'fill(item,n)',
+      ],
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior,
+        CardColorBehavior
+      ],
+
+
+      attached:function(){
+        const that = this
+
+        this.fillObjects('Subjects/',function(subjects){
+          var Subjects = [];
+          Subjects.push({
+            sub: that.localize('chos'),
+            key:'chos'
+          })
+
+          Subjects.push({
+            sub: that.localize('cur'),
+            key:'cur'
+          })
+          subjects.forEach(function(subject){
+            Subjects.push({
+              sub: that.localize(subject.key),
+              key:subject.key
+            });
+          });
+          that.subjects = Subjects;
+        });
+      },
+
+      fill: function(i,n){
+        this.d = 'd' + n
+
+        const that = this
+
+        this.getItem('SchoolSchedule/' + i.sch+ '/' + i.num + '/' + i.let + '/' + n,function(subs){
+          if(subs){
+            subs.forEach(function(sub,index){
+              that['subs'+ index] = sub
+            })
+          }
+        })
+      },
+
+      save: function(){
+
+        if(this.item && this.n){
+          var n = this.n
+          var it = this.item
+
+          var data = {}
+
+          for(var i=0; i< 10;i++){
+            if(this['subs' + i] != ''){
+              data[i] = this['subs' + i]
+            }
+          };
+          const that = this
+          this.db.ref('SchoolSchedule/' + it.sch+ '/' + it.num + '/' + it.let + '/' + n).update(data).then(function(){
+            that.fire('open-toast',{
+              text: 'Новое расписание сохранено'
+            })
+          })
+        } else {
+          this.fire('open-toast',{
+            text: 'Выберите класс'
+          })
+        }
+      }
+    });
+  </script>
+
+</dom-module>

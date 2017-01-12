@@ -1,0 +1,201 @@
+<dom-module id="home-module">
+  <template>
+    <style include="wrapper-module">
+      .panel paper-card{
+        height: 89vh;
+        width: calc(18% - 16px);
+        position: fixed;
+        background-color: var(--app-b2c);
+        color: white;
+        padding: 8px 0px 8px 0px
+      }
+
+      .main {
+        width: calc(82%);
+        margin-left: calc(18% - 16px);
+      }
+
+      #sel .outer,.w{
+        padding: 0px 8px 0px 8px;
+/*        color: var(--paper-grey-300);*/
+        font-size: 16px;
+      }
+
+      #sel .outer a.inner,.i{
+        padding: 6px;
+        color: var(--paper-grey-200);
+      }
+
+      .t{
+        padding-left: 4px;
+      }
+
+      #sel .iron-selected a.inner{
+        background-color: var(--app-secondary-color);
+        border-radius: 4px;
+        font-weight: 600;
+        color: white
+      }
+
+      .club {
+        padding: 8px 0px 8px 8px;
+        border-bottom: 2px solid var(--app-b1c);
+        border-top: 2px solid var(--app-b1c);
+      }
+
+      #dialog{
+        width: 400px
+      }
+
+      .title{
+        border-bottom: 2px solid var(--paper-grey-300);
+      }
+
+      paper-input{
+        border: 2px solid var(--paper-grey-300);
+        border-radius: 4px;
+        margin-bottom: 8px
+      }
+
+      paper-icon-button{
+        --paper-icon-button:{
+          margin:0;
+          padding: 0;
+          height: 22px;
+          width: 22px
+        }
+      }
+
+      iron-icon{
+        width: 20px;
+        height: 20px;
+      }
+
+    </style>
+    <div class="layout horizontal">
+      <div class="panel wrapper">
+        <paper-card elevation=0>
+          <div class="head">
+            <iron-selector id=sel selected={{sel}} attr-for-selected=name>
+              <div class="outer" name=main>
+                <a class="inner layout horizontal link" href="/">
+                  <iron-icon icon="icons:home"></iron-icon><div class="t">Главная</div>
+                </a>
+              </div>
+              <div class="outer" name=[[user.val.info.link]]>
+                <a class="inner layout horizontal link" href$="/[[user.val.info.link]]">
+                  <iron-icon icon="social:person"></iron-icon><div class="t">Профиль</div>
+                </a>
+              </div>
+              <div class="outer" name=school>
+                <a class="inner layout horizontal link" href="/school">
+                  <iron-icon icon="icons:account-balance"></iron-icon><div class="t">Школа</div>
+                </a>
+              </div>
+            </iron-selector>
+            <div class="wrapper">
+              <div class="w club wrapper layout horizontal justified">
+                <div class=" layout horizontal ">
+                  <iron-icon icon="social:group"></iron-icon><div class="t">Клубы</div>
+                </div>
+                <paper-icon-button noink on-tap=openDialog icon="icons:add-circle-outline"></paper-icon-button>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="clubs">
+            <iron-selector id=sel selected={{day}} >
+            </iron-selector>
+          </div>
+        </paper-card>
+      </div>
+      <div class="main">
+        <iron-pages selected="{{sel}}" attr-for-selected=name>
+          <home-main-module name=main user=[[user]]></home-main-module>
+          <home-profile-module name=u user=[[u]]></home-profile-module>
+          <home-profile-module name=[[user.val.info.link]] user=[[user]]></home-profile-module>
+          <home-club-module club=[[club]] name=club></home-club-module>
+        </iron-pages>
+      </div>
+    </div>
+    <paper-dialog id="dialog"
+                  entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation"
+                  with-backdrop>
+      <div class="fw500 fs22 title wrapper">Новый клуб</div>
+      <div class="wrapper">
+        <div class="label">Hазвание</div>
+        <div style="padding:0px 4px 0px 0px">
+          <paper-input label="Новый клуб" no-label-float class="mw" value={{clubName}}></paper-input>
+        </div>
+        <paper-button class="button-light" on-tap=createClub>Создать</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'home-module',
+
+      properties:{
+        feed:{
+          type:Array,
+          value:[]
+        }
+      },
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      openDialog:function(){
+        this.$.dialog.open()
+      },
+
+      observers:[
+        'userChanged(user)',
+        'selChanged(sel)'
+      ],
+
+      selChanged:function(s){
+        console.log(s)
+        if(s == this.user.val.info.link)
+          this.importHref(this.resolveUrl('profile/home-profile-module.html'), null, null, true)
+        else
+         this.importHref(this.resolveUrl(s + '/home-' + s + '-module.html'), null, null, true)
+      },
+
+      createClub:function(){
+        const that = this
+        this.db.ref('Clubs/').orderByChild('info/name').equalTo(this.clubName).once('value',name=>{
+          if(!name.exists()){
+
+            var admins = {}
+            admins[Cookies.get('id')] = 0
+
+            const clubId = that.db.ref('Clubs').push().key
+
+            that.db.ref('Clubs/' + clubId).set({
+              info:{
+                name: that.clubName,
+                link: clubId
+              },
+              admins:admins,
+              creator: Cookies.get('id')
+            }).then(()=>{
+              window.location = '/' + clubId
+            })
+          } else {
+            this.fire('open-toast',{
+              text: 'Клуб с таким название уже существует'
+            })
+          }
+        })
+      }
+
+    });
+  </script>
+</dom-module>

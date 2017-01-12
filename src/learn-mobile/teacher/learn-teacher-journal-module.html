@@ -1,0 +1,256 @@
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="learn-teacher-journal-pupil-module.html">
+<link rel="import" href="learn-teacher-journal-create-module.html">
+<link rel="import" href="../learn-files-module.html">
+
+<dom-module id="learn-teacher-journal-module">
+  <style include="wrapper-module">
+
+    .class {
+      padding: 0px 0px 10px 10px;
+      background-color: white;
+      border-bottom: 1px solid var(--paper-grey-300)
+    }
+
+    vaadin-combo-box{
+      width: 100%;
+      border: solid 1px var(--paper-grey-200);
+      border-radius: 4px;
+      background-color: white
+    }
+
+    paper-fab{
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      --paper-fab-background: #3F51B5
+    }
+
+    .ava{
+      width: 60px;
+      height: 60px;
+      border-radius: 30px;
+    }
+
+    .name{
+      margin-left: 8px;
+      font-size: 18px;
+      font-weight: 500;
+      color:var(--paper-grey-700)
+    }
+
+    .sub{
+      width: 150px;
+      height: 200px;
+      color: white
+    }
+
+
+    .marks{
+      position: absolute;
+      bottom: 0;
+      margin: 8px
+    }
+
+    .t{
+      font-size: 16px;
+      font-weight: 500;
+      margin-left: 8px
+    }
+
+    #addGoal{
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+
+    }
+
+    .placeholder {
+       font-size: 28px;
+      font-weight: 600;
+      color: var(--paper-grey-400)
+    }
+
+    #dialog{
+      width: 400px;
+      background-color: var(--paper-grey-100);
+      border-radius: 4px
+    }
+
+    .l{
+      background-color:  var(--paper-grey-100);
+    }
+
+    .avatar {
+       width: 40px;height: 40px;border-radius: 20px;
+    }
+
+
+    iron-icon{
+      color: var(--paper-grey-500);
+    }
+  </style>
+  <template>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route
+               route="{{route}}"
+               pattern="/learn/journal/:page"
+               data="{{router}}"
+               tail="{{subroute}}"
+               active="{{subjectActive}}"
+               >
+    </app-route>
+    <div class="wrapper-mob">
+      <vaadin-combo-box label="Выберите класс" items="{{cls}}" item-label-path="name" item-value-path="key" value="{{v}}" no-label-float></vaadin-combo-box>
+    </div>
+
+    <iron-pages id="pages" class="mw">
+      <div id="wrap" style$="visibility:[[visible]]">
+        <iron-list items="[[items]]" as="user" id="list" class="mw" selection-enabled selected-item="{{pupil}}">
+          <template>
+            <a class="wrapper-mob link" href$="/learn/journal/[[user.key]]">
+              <paper-card class="pupil">
+                <div class="wrapper-mob layout horizontal">
+                  <iron-image src="[[user.val.info.image]]" class="avatar" sizing="cover"></iron-image>
+                  <div class="name"> [[user.val.info.name]]  [[user.val.info.surname]]</div>
+                </div>
+                <div class="layout horizontal">
+                  <div class="wrapper-mob layout horizontal">
+                    <iron-icon icon="icons:description"></iron-icon>
+                    <div class="t">
+                      8/18
+                    </div>
+                  </div>
+                  <div class="wrapper-mob layout horizontal">
+                    <iron-icon icon="icons:book"></iron-icon>
+                    <div class="t">
+                      8/18
+                    </div>
+                  </div>
+                </div>
+              </paper-card>
+            </a>
+          </template>
+        </iron-list>
+      </div>
+      <template is="dom-if" if="[[pl]]">
+        <div class="layout horizontal vertical center-center mh mw" style="height:80vh">
+          <div class="placeholder">
+            Выберите класс, чтобы увидеть оценки учеников
+          </div>
+        </div>
+      </template>
+      <learn-teacher-journal-pupil-module pupil="{{pupil}}" sel="{{v}}" user="[[user]]"></learn-teacher-journal-pupil-module>
+    </iron-pages>
+    <paper-fab id="addGoal" on-tap="opend" icon="icons:create"></paper-fab>
+    <paper-dialog
+                  id="dialog" entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation"
+                  with-backdrop>
+      <learn-teacher-journal-create-module u="[[user]]"></learn-teacher-journal-create-module>
+
+    </paper-dialog>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-journal-module',
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      observers:[
+        'clChanged(v)',
+        'activeChanged(subjectActive,router)',
+
+      ],
+
+      listeners:{
+        'close-add':'close'
+      },
+
+      opend:function(e){
+        this.$.dialog.toggle()
+      },
+
+      close:function(){
+        this.$.dialog.toggle()
+      },
+
+      activeChanged: function(active,r){
+
+        if(active && r.page != 'create'){
+          this.$.pages.select(1)
+        } else if(r.page == 'create' && active){
+          this.$.pages.select(2)
+        } else {
+          this.$.pages.select(0)
+        }
+
+      },
+
+      addFile:function(){
+
+      },
+
+      attached: function(){
+
+        var date = new Date();
+        var day = date.getDay();
+        var month = date.getMonth();
+        var da = date.getDate();
+
+        console.log(da,month)
+
+        const that = this;
+
+        this.db.ref('Users/' + Cookies.get('id') + '/classes').on('value',function(classes){
+          var cls = [];
+
+          classes.forEach(function(cl){
+            var c = cl.val();
+            cls.push({
+              name:c.class + ' - ' + that.localize(c.group) + ' - ' + that.localize(c.subject),
+              key:c.class + '.' + c.group + '.' + c.subject
+            });
+          });
+          that.cls = cls;
+        });
+
+      },
+
+      clChanged:function(c){
+
+        if(c){
+          var cl = c.split('.');
+
+          const that = this;
+          this.pl = false
+          this.visibile = '';
+
+          this.sub = cl[2]
+
+          this.fillOrder('Users/','class',cl[0],function(users){
+
+            that.items = users;
+
+//            if(cl[1] != 'g3'){
+//              that.items = users.filter(function(i){
+//                return i.val.group == c.group;
+//              });
+//            } else{
+//              that.items = users;
+//            }
+
+          });
+        } else {
+          this.visibile = 'hidden'
+          this.pl = true
+        }
+      }
+    })
+  </script>
+</dom-module>

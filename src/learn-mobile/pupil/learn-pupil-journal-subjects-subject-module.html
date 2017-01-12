@@ -1,0 +1,96 @@
+<dom-module id="learn-pupil-journal-subjects-subject-module">
+  <style include="wrapper-module">
+
+/*
+    .marks{
+      position: absolute;
+      bottom: 0;
+      margin: 8px
+    }
+*/
+
+    .t{
+      font-size: 15px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    iron-icon{
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .wrapper,paper-card{
+      width: 45vw;
+      height:16vh;
+      color: white;
+      padding: 4px;
+    }
+
+    .subTitle {
+     font-weight: 600;
+      font-size: 20px
+    }
+
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card style$="background-color:[[setColor(sub)]];">
+        <div style="padding-left:4px" class="subTitle">
+          [[localize(sub)]]
+        </div>
+
+        <div class="marks mw">
+          <div class="layout horizontal mw" style="margin-bottom:4px">
+            <iron-icon icon="icons:description"></iron-icon>
+            <div class="t mw">
+              [[aform]]/[[allform]]
+            </div>
+          </div>
+          <div class="layout horizontal" style="margin-bottom:4px">
+            <iron-icon icon="icons:book"></iron-icon>
+            <div class="t mw">
+              8/18
+            </div>
+          </div>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-pupil-journal-subjects-subject-module',
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior,
+        CardColorBehavior
+      ],
+
+      observers:[
+        'fill(user,sub)'
+      ],
+
+      fill:function(u,sub){
+
+        const that = this;
+
+        this.fillItems('PupilGoals/' + u.val.school + '/' + u.key + '/' + sub, goals => {
+
+          var c1=0,c2=0
+
+          goals.forEach(goal => {
+            c1++
+            if(goal == '1') c2++
+          })
+
+          that.allform = c1
+          that.aform = c2
+
+        })
+
+      }
+
+    })
+  </script>
+</dom-module>

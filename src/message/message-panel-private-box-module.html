@@ -1,0 +1,63 @@
+<dom-module id="message-panel-private-box-module">
+  <template>
+    <style include="wrapper-module">
+     .wrap{
+       padding: 4px 0px 4px 4px;
+       color: var(--paper-grey-200);
+       font-size: 18px;
+       font-weight: 400;
+       width: 100%;
+       cursor: pointer;
+      }
+
+      .newm{
+        float: right;
+        padding: 0px 8px 0px 8px;
+        background-color: #78909C;
+        border-radius: 4px;
+        margin-right: 12px
+      }
+    </style>
+
+    <div class="wrap layout horizontal justified">
+      <div>
+        # [[user.name]] [[user.surname]]
+      </div>
+<!--      <template is="dom-if" if></template>-->
+      <div class="newm" hidden$=[[!nm]]>
+        [[nm]]
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'message-panel-private-box-module',
+
+      properties:{
+        nm: {
+          type: Number,
+          value: 0
+        }
+      },
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'chatChanged(chat)',
+
+      ],
+
+      chatChanged:function(c){
+
+        this.getItemOnce('Users/' + c.key + '/info', user=>{
+          this.user = user
+        })
+        this.db.ref('Chats/' + Cookies.get('id') + '/messages/' + c.key).orderByChild('new').equalTo(1).on('value', snap=>{
+          this.nm = snap.numChildren()
+        })
+      }
+    })
+  </script>
+</dom-module>

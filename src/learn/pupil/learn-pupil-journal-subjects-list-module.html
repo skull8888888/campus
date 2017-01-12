@@ -1,0 +1,122 @@
+<link rel="import" href="learn-pupil-journal-subjects-list-subject-module.html">
+
+<dom-module id="learn-pupil-journal-subjects-list-module">
+  <template>
+    <style include="wrapper-module">
+
+      :host{
+        display: block;
+        height: 100%
+      }
+
+      .w{
+        background-color: #546E7A;
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+      }
+
+      iron-selector .iron-selected .inner{
+        background-color: var(--app-secondary-color)
+      }
+
+      .inner {
+        margin-left: 8px;
+        margin-right: 8px
+      }
+
+      .head{
+        background-color: #546E7A;
+        height: calc(5% - 16px);
+        padding: 8px 0px 8px 4px;
+        font-weight: 500;
+        font-size: 14px;
+        color: #78909C;
+        flex: 0 0 auto;
+        border-bottom: 2px solid #78909C;
+      }
+
+      .wrap{
+        overflow-y: auto;
+        flex: 1 1 auto
+      }
+    </style>
+    <div class="w">
+      <div class="wrapper">
+        <div class="layout horizontal head">
+          <div id=name style="width:40%">Предмет</div>
+          <div class="layout horizontal justified marks" style="width:60%">
+            <div id=goals style="width:35%">Форматив</div>
+            <div id=sum style="width:35%"> Сумматив</div>
+            <div id=result style="width:30%">Результат</div>
+          </div>
+        </div>
+
+      </div>
+      <div class="wrap">
+        <iron-selector selected={{subjectId}}>
+          <template is=dom-repeat items=[[subjects]] as=subject id="list">
+            <div>
+              <div style="border-radius:4px" class="inner wrapper">
+                <learn-pupil-journal-subjects-list-subject-module subject=[[subject]] term=[[term]] user=[[user]]></learn-pupil-journal-subjects-list-subject-module>
+              </div>
+            </div>
+          </template>
+        </iron-selector>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-pupil-journal-subjects-list-module',
+
+      properties:{
+        selsubject:{
+          notify:true,
+          reflectToAttributes:true
+        }
+      },
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'selChanged(subjectId)',
+        'fill(user)'
+      ],
+
+      fill: function(u){
+        const that = this
+        var cl = u.val.class.split('-')
+        console.log(u.val)
+        var Subjects = []
+
+        this.fillItems('SchoolSchedule/' + u.val.school + '/' + this.getYear() + '/' + cl[0] + '/' + cl[1] , subjects =>{
+
+          subjects.forEach( (day,index) => {
+            day.forEach( sub => {
+
+              if(Subjects.indexOf(sub) == -1 && sub != 'chos' && sub != 'cur'){
+                Subjects.push(sub)
+              }
+            })
+          })
+
+          for(let k in u.val.subs){
+            Subjects.push(u.val.subs[k].split('-')[0])
+          }
+          that.subjects = Subjects
+        });
+
+      },
+
+      selChanged: function(s){
+
+        if(s!=null)
+          this.selsubject = this.subjects[s]
+      },
+
+    })
+  </script>
+</dom-module>

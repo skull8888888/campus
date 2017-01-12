@@ -1,0 +1,102 @@
+<dom-module id="learn-files-module">
+  <template>
+    <style include="wrapper-module">
+
+      .filesTitle{
+        color:var(--paper-grey-600);
+        font-size:30px;
+        font-weight: 700;
+      }
+
+      #wrap,.warning{
+        height: 60vh;
+      }
+
+      .warningTitle {
+         color:var(--paper-grey-500);
+        font-size:22px;
+        font-weight: 600
+      }
+    </style>
+
+    <div class="filesTitle wrapper">Файлы</div>
+    <div style$="display:{{list}};overflow:auto" id="wrap">
+      <iron-list items="[[files]]" as="file" scroll-target="wrap">
+        <template>
+          <div class="wrapper">
+            <paper-card>
+              <div class="wrapper layout horizontal">
+                <div class="h1">[[file.name]]</div>
+                <a href$="[[file.link]]" download="name" target="_blank">
+                  <paper-icon-button icon="icons:file-download"></paper-icon-button>
+                </a>
+
+              </div>
+            </paper-card>
+          </div>
+        </template>
+      </iron-list>
+    </div>
+    <div class="layout horizontal vertical center-center warning" style$="display:{{warning}}">
+      <div class="warningTitle wrapper">
+        По этому предмету пока нет файлов
+      </div>
+    </div>
+    <div class="layout horizontal vertical center-center warning" style$="display:{{noSub}}">
+      <div class="warningTitle wrapper">
+        Выберите предмет, чтобы посмотреть файлы
+      </div>
+    </div>
+
+
+  </template>
+
+  <script>
+
+    Polymer({
+      is: 'learn-files-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'fill(user,sel,term)'
+      ],
+
+      attached:function(){
+        this.warning = 'none'
+        this.list = 'none'
+
+        if(this.sub == undefined) this.noSub = ''
+      },
+
+      fill:function(u,v,term){
+
+        const that = this;
+
+        this.fillItems('Files/' + u.val.school + '/' + term + '/' +  v.split('.')[0] + '/' + v.split('.')[2],files=>{
+
+          if(files.length != 0){
+
+            that.warning = 'none'
+            that.noSub = 'none'
+            that.list = ''
+
+
+          } else {
+            that.warning = ''
+            that.noSub = 'none'
+            that.list = 'none'
+          }
+
+          that.files = files
+
+        })
+
+      }
+
+    });
+  </script>
+
+</dom-module>

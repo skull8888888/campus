@@ -1,0 +1,112 @@
+<link rel="import" href="learn-teacher-journal-pupil-goals-goal-module.html">
+<link rel="import" href="../../../bower_components/paper-slider/paper-slider.html">
+
+<dom-module id="learn-teacher-journal-pupil-goals-module">
+  <style include="wrapper-module">
+
+    :host{
+      display: block;
+      height: 100%;
+    }
+
+    .sum{
+      border-bottom: 2px solid  var(--paper-grey-300);
+      flex: 0 0 auto;
+    }
+
+    #wrap{
+      flex: 1 1 auto;
+      overflow: auto
+    }
+
+    .result {
+      width: 25%;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--paper-grey-600);
+      padding: 16px 8px;
+      margin-top: 4px;
+    }
+
+    paper-slider{
+      width: 75%;
+      margin-top: 28px;
+      padding: 0px;
+      --paper-slider-container-color: var(--paper-grey-300);
+      --paper-slider-active-color: var(--app-primary-color);
+      --paper-slider-pin-color: var(--app-primary-color);
+      --paper-slider-knob-color: var(--app-primary-color);
+    }
+
+    .wrap{
+      display: flex;
+      flex-flow: column;
+      height: inherit;
+    }
+
+  </style>
+  <template>
+    <div class="wrap">
+      <div class="sum layout horizontal">
+        <div class="result" style="width:28%">Сумматив   [[result]] | [[sum]]</div>
+        <paper-slider style="width:72%" pin max=[[sum]] value={{result}} immediate-value></paper-slider>
+      </div>
+      <div id=wrap>
+        <template is=dom-repeat items=[[goals]] as="goal" id="list">
+          <learn-teacher-journal-pupil-goals-goal-module pupil=[[pupil]] user=[[user]] goal=[[goal]] sel=[[sel]] term=[[term]]></learn-teacher-journal-pupil-goals-goal-module>
+        </template>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-journal-pupil-goals-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'pupilChanged(user,sel,term,pupil)',
+        'resultChanged(result)'
+      ],
+
+      attached: ()=>{
+        console.log(13)
+      },
+
+      resultChanged:function(r){
+        if(r)
+          this.db.ref('PupilGoals/' + this.user.val.school + '/' + this.getYear() + '/' + this.term +  '/' + this.pupil + '/' + this.sel.split('.')[2] + '/sum').set(r)
+      },
+
+      pupilChanged:function(user,sel,term,pupil){
+        if(sel && user){
+
+          const that = this;
+
+          const p = sel.split('.')
+
+          this.getItem('PupilGoals/' + user.val.school + '/' + this.getYear() + '/' + term +  '/' + pupil + '/' + sel.split('.')[2] + '/sum', mysum=>{
+            if(mysum)
+              that.result = mysum
+              else
+                that.result = 0
+          })
+
+          console.log('PupilGoals/' + user.val.school + '/' + this.getYear() + '/' + term +  '/' + pupil + '/' + sel.split('.')[2])
+
+          this.getItemOnce('Goals/' + user.val.school + '/' + this.getYear() + '/' + term + '/' + p[2] + '/' + p[0].split('-')[0] + '/sum', sum =>{
+            that.sum = sum
+          },true)
+
+          this.fillObjects('Goals/' + user.val.school + '/' + this.getYear() + '/' + term + '/' + p[2] + '/' + p[0].split('-')[0] + '/goals', goals =>{
+            that.goals = goals;
+            console.log(goals)
+            that.all = goals.length;
+          },true)
+        }
+      }
+    })
+  </script>
+</dom-module>

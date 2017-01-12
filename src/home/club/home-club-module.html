@@ -1,0 +1,61 @@
+<link rel="import" href="../../post/post-create-module.html">
+<link rel="import" href="../../post/post-module.html">
+<link rel="import" href="home-club-avatar-module.html">
+<link rel="import" href="home-club-info-module.html">
+<link rel="import" href="home-club-panel-module.html">
+<link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
+
+<dom-module id="home-club-module">
+  <template>
+    <style include="wrapper-module">
+
+    </style>
+    <div>
+      <iron-grid>
+        <div class="l5 layout vertical">
+          <home-club-info-module club=[[club]]></home-club-info-module>
+          <iron-pages selected=[[sel]]>
+            <div>
+              <template is=dom-if if=true>
+                <post-create-module type="Clubs"></post-create-module>
+              </template>
+              <iron-list items=[[posts]] as=post class=mw>
+                <template>
+                  <post-module post=[[post]]></post-module>
+                </template>
+              </iron-list>
+            </div>
+          </iron-pages>
+        </div>
+        <div class="l3 layout vertical">
+          <home-club-avatar-module club=[[club]]></home-club-avatar-module>
+          <home-club-panel-module sel={{sel}}></home-club-panel-module>
+        </div>
+      </iron-grid>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'home-club-module',
+
+      observers:[
+        'clubChanged(club)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      clubChanged:function(club){
+
+        const that = this
+        this.fillObjects('Posts/' + club.key,posts=>{
+          that.posts = posts
+        })
+      }
+
+    });
+  </script>
+</dom-module>

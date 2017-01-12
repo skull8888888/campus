@@ -1,0 +1,30 @@
+<dom-module id="message-channel-info-module">
+  <template>
+    <style include="wrapper-module">
+
+    </style>
+    <paper-tabs selected={{sel}}>
+      <paper-tab>Канал</paper-tab>
+      <paper-tab>Файлы</paper-tab>
+      <paper-tab>Истории</paper-tab>
+      <paper-tab>Посты</paper-tab>
+      <paper-tab>Отмеченные</paper-tab>
+    </paper-tabs>
+    <iron-pages selected=[[sel]]>
+      <message-channel-info-channel-module></message-channel-info-channel-module>
+    </iron-pages>
+  </template>
+  <script>
+    Polymer({
+      is: 'message-channel-info-module',
+
+      properties:{
+        sel:{
+          type: Number,
+          value:0
+        }
+      }
+
+    })
+  </script>
+</dom-module>

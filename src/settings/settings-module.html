@@ -1,32 +1,60 @@
 <link rel="import" href="settings-account-module.html">
 <link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
-<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 
 <dom-module id="settings-module">
   <template>
-    <style>
+    <style include="wrapper-module">
+      :host{
+        display: block;
+        height: 100%;
+        width: 100%;
+        background-color: white
+      }
+
       iron-pages{
         width: 100%
       }
+
+      .image{
+        background-repeat: no-repeat;
+        background-size: cover;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin-top: 16px
+      }
+
+      paper-icon-button{
+        color: var(--paper-grey-300);
+        margin-top: 36px
+      }
     </style>
     <iron-grid>
-      <div class="l4 offset-l4 xs12 offset-xs0">
-        <settings-account-module user="{{user}}"></settings-account-module>
+      <div class="l6 offset-l3 xs12 offset-xs0">
+        <div class="layout horizontal wrapper justified mw">
+          <div class="name">
+            <h1>[[user.val.info.name]] [[user.val.info.surname]]</h1>
+            <div class="type fc400 fs18">[[localize(user.val.info.type)]]</div>
+            <div class="label"></div>
+            <div class="label"></div>
+            <paper-button class="button2" on-tap="exit">Выйти</paper-button>
+          </div>
+
+          <div class="layout horizontal">
+            <label for="load"><paper-icon-button icon="image:camera-alt">Обновить</paper-icon-button></label><input type="file" value="upload" id="load" style="position:absolute; visibility:hidden"/>
+            <div class="image" style$="background-image:url('[[user.val.info.image]]')"></div>
+          </div>
+
+        </div>
+        <settings-account-module user=[[user]]></settings-account-module>
         <iron-pages selected="[[item]]" attr-for-selected="name" id="pages">
           <settings-pupil-module name="pupil" user="{{user}}"></settings-pupil-module>
           <settings-teacher-module name="teacher" user="{{user}}"></settings-teacher-module>
           <settings-curator-module name="curator" user="{{user}}"></settings-curator-module>
           <settings-admin-module name="admin" user="{{user}}"></settings-admin-module>
         </iron-pages>
-        <div style="float:right;color:red;">
-          <paper-icon-button icon="icons:exit-to-app" on-tap="showExit" style="position:static"></paper-icon-button> Выйти
-        </div>
       </div>
     </iron-grid>
-    <paper-dialog id="dialog" style="padding:10px;">
-      Вы уверены что хотите выйти?
-      <paper-button on-tap="exit">Выйти</paper-button>
-    </paper-dialog>
   </template>
   <script>
 
@@ -34,18 +62,34 @@
       is: 'settings-module',
 
       observers:[
-        'userChanged(user)'
+        'set(user)'
       ],
 
-      showExit:function(){
-        this.$.dialog.open();
-      },
+      behaviors:[
+        LocalizeBehavior,
+        DatabaseBehavior
+      ],
 
       exit:function(){
-        this.fire('exi  t');
+        this.fire('exit')
       },
 
-      userChanged: function(user) {
+      set: function(user) {
+
+        this.$.load.addEventListener('change',(e)=>{
+          this.fire('toggle-ptoast');
+          var file = e.target.files[0];
+          var task = this.app.storage().ref('Avatars/' + Cookies.get('id') + '/' + file.name).put(file);
+          task.on('state_changed',(snapshot)=>{
+            this.fire('progressChanged',{p: snapshot.bytesTransferred / snapshot.totalBytes * 100});
+          },function(err){
+            alert(err);
+          },()=>{
+            this.fire('toggle-ptoast');
+            this.fire('userChanged');
+            this.db.ref('Users/' + this.user.key  + '/info/image').set(task.snapshot.downloadURL);
+          });
+        });
 
         this.importHref(this.resolveUrl('settings-' + user.val.info.type + '-module.html'), null, null, true);
         this.$.pages.select(user.val.info.type);

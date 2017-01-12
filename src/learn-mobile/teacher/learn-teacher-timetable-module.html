@@ -1,0 +1,224 @@
+<link rel="import" href="learn-teacher-timetable-week-day-module.html">
+<link rel="import" href="../../../bower_components/neon-animation/neon-animated-pages.html">
+
+<dom-module id="learn-teacher-timetable-module">
+
+  <template>
+    <style include="wrapper-module">
+      paper-icon-button{
+        color: var(--app-secondary-color);
+        width: 60px;
+        height: 60px;
+
+      }
+
+      .l{
+        position: fixed;
+        top: 50vh
+      }
+
+      div.iron-selected div{
+        background-color: black;
+        color:white;
+        border-radius: 15px;
+        width: 30px;
+        height: 30px;
+      }
+
+      div.iron-selected .today{
+        background-color: red;
+        color:white;
+        border-radius: 15px;
+        width: 30px;
+        height: 30px;
+      }
+
+      .today{
+        color:red
+      }
+
+      .weekday{
+        width: 60px;
+        height: 30px
+      }
+
+      .day{
+        width: 60px;
+        height: 30px;
+      }
+
+      .head{
+        background-color: white;
+        border-bottom: solid 1px var(--paper-grey-300);
+      }
+    </style>
+    <div class="head wrapper">
+      <div class="layout horizontal justified">
+        <div class="layout horizontal vertical center-center weekday">
+          П
+        </div>
+        <div class="layout horizontal vertical center-center weekday">
+          В
+        </div>
+        <div class="layout horizontal vertical center-center weekday">
+          С
+        </div>
+        <div class="layout horizontal vertical center-center weekday">
+          Ч
+        </div>
+        <div class="layout horizontal vertical center-center weekday">
+          П
+        </div>
+        <div class="layout horizontal vertical center-center weekday">
+          С
+        </div>
+      </div>
+      <iron-selector selected="{{day}}" attr-for-selected="name" class="layout horizontal justified">
+        <div name="0" class="layout horizontal vertical center-center day">
+          <div id="0" class="layout horizontal vertical center-center">
+            {{currentWeek.0.date}}
+          </div>
+        </div>
+        <div name="1" class="layout horizontal vertical center-center day">
+          <div id="1" class="layout horizontal vertical center-center">{{currentWeek.1.date}}</div>
+        </div>
+        <div name="2" class="layout horizontal vertical center-center day">
+
+          <div id="2" class="layout horizontal vertical center-center">{{currentWeek.2.date}}</div>
+        </div>
+        <div name="3" class="layout horizontal vertical center-center day">
+
+          <div id="3" class="layout horizontal vertical center-center">{{currentWeek.3.date}}</div>
+        </div>
+        <div name="4" class="layout horizontal vertical center-center day">
+
+          <div id="4" class="layout horizontal vertical center-center">{{currentWeek.4.date}}</div>
+        </div>
+        <div name="5" class="layout horizontal vertical center-center day">
+          <div id="5" class="layout horizontal vertical center-center">{{currentWeek.5.date}}</div>
+        </div>
+      </iron-selector>
+    </div>
+    <neon-animated-pages id="pages" entry-animation="[[entryAnimation]]" exit-animation="[[exitAnimation]]" class="mw">
+      <iron-grid>
+        <div class="xs12 offset-xs0">
+          <learn-teacher-timetable-week-day-module user="[[user]]" day="[[currentWeek.0]]" n="0"></learn-teacher-timetable-week-day-module>
+        </div>
+      </iron-grid>
+      <iron-grid>
+        <div class="xs12 offset-xs0">
+          <learn-teacher-timetable-week-day-module user="[[user]]" day="[[currentWeek.1]]" n="1"></learn-teacher-timetable-week-day-module>
+        </div>
+      </iron-grid>
+      <iron-grid>
+        <div class="xs12 offset-xs0">
+          <learn-teacher-timetable-week-day-module user="[[user]]" day="[[currentWeek.2]]" n="2"></learn-teacher-timetable-week-day-module>
+        </div>
+      </iron-grid>
+      <iron-grid>
+        <div class="xs12 offset-xs0">
+          <learn-teacher-timetable-week-day-module user="[[user]]" day="[[currentWeek.3]]" n="3"></learn-teacher-timetable-week-day-module>
+        </div>
+      </iron-grid>
+      <iron-grid>
+        <div class="xs12 offset-xs0">
+          <learn-teacher-timetable-week-day-module user="[[user]]" day="[[currentWeek.4]]" n="4"></learn-teacher-timetable-week-day-module>
+        </div>
+      </iron-grid>
+      <iron-grid>
+        <div class="xs12 offset-xs0">
+          <learn-teacher-timetable-week-day-module user="[[user]]" day="[[currentWeek.5]]" n="5"></learn-teacher-timetable-week-day-module>
+        </div>
+      </iron-grid>
+    </neon-animated-pages>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-timetable-module',
+
+      properties:{
+
+        months:{
+          type: Array,
+          value:[]
+        }
+      },
+
+      observers:[
+        'dayChanged(day)'
+      ],
+
+      dayChanged:function(d){
+
+        if(d > this.currentDay){
+          this.right()
+        } else {
+          this.left()
+        }
+        this.$.pages.selected = d;
+        this.currentDay = d;
+      },
+
+      left: function(){
+        this.entryAnimation = 'slide-from-left-animation'
+        this.exitAnimation = 'slide-right-animation'
+      },
+
+      right: function(){
+        this.entryAnimation = 'slide-from-right-animation'
+        this.exitAnimation = 'slide-left-animation'
+      },
+
+      attached: function(){
+
+        var date = new Date();
+        var day = date.getDay();
+        var month = date.getMonth();
+        var da = date.getDate();
+
+        this.currentDay = day - 1
+        this.day = day - 1
+
+        this.$[day - 1].className += ' today';
+
+        var currentDay = {};
+        var days = [];
+
+        for(i = month - 1; i < month + 2; i++){
+          var daysInMonth = new Date(date.getFullYear(),i + 1, 0).getDate();
+
+          for (d = 1; d < daysInMonth + 1; d++){
+            days.push({
+              month: i,
+              date: d
+            });
+            if(i == month && d == da){
+              currentDay = {
+                date: d,
+                month:i,
+                id: days.length
+              }
+            }
+          };
+        };
+
+        var diff = -(0 - day);
+        var differ = 6 - day;
+        var currentWeek = [];
+
+        for(i = currentDay.id - diff; i < currentDay.id + differ; i++){
+          currentWeek.push({
+            month: days[i].month,
+            date: days[i].date,
+            mn: days[i].month
+          });
+        };
+
+        this.currentWeek = currentWeek;
+
+      },
+
+    })
+  </script>
+</dom-module>
+

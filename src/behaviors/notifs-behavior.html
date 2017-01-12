@@ -1,0 +1,30 @@
+<link rel="import" href="../../bower_components/polymerfire/firebase-database-behavior.html">
+
+<script>
+  N = {
+
+    behaviors:[
+      Polymer.FirebaseDatabaseBehavior
+    ],
+
+    sendHomeworkNotifsTo:function(users,auth,sub,date){
+
+      var data = {}
+
+      users.forEach(user=>{
+        data['Notifs/' + user.key] = {
+          time: Date.now(),
+          sub: sub,
+          date: date,
+          auth: auth,
+          type:'homework'
+        }
+      })
+
+      this.db.ref().update(data)
+    }
+
+  };
+
+  var NotifsBehavior = [N, Polymer.FirebaseDatabaseBehavior]
+</script>

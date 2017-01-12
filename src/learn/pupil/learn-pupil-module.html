@@ -1,14 +1,13 @@
 <link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
 
 <dom-module id="learn-pupil-module">
-  <style include="iron-flex wrapper-module">
-
+  <style include="wrapper-module">
     paper-tabs{
-      @apply(--tabs-theme);
+      color: white;
+      background-color: var(--app-primary-color);
       position: fixed;
       width: 100vw;
       z-index: 1;
-/*      --paper-tabs-selection-bar-color: #111111;*/
     }
 
     iron-pages{
@@ -24,16 +23,14 @@
                data="{{router}}"
                >
     </app-route>
-    <paper-tabs selected="{{selected}}" attr-for-selected="name" scrollable id="tabs">
+    <paper-tabs selected="{{selected}}" attr-for-selected="name" scrollable id="tabs" noink>
       <paper-tab name="timetable">РАСПИСАНИЕ</paper-tab>
       <paper-tab name="journal">ЖУРНАЛ</paper-tab>
-      <paper-tab name="files">ФАЙЛЫ</paper-tab>
     </paper-tabs>
-  <iron-pages selected="{{selected}}" attr-for-selected="name" class="content">
-    <learn-pupil-timetable-module name="timetable" user="[[user]]"></learn-pupil-timetable-module>
-    <learn-pupil-journal-module name="journal" user="[[user]]"></learn-pupil-journal-module>
-    <learn-pupil-files-module name="files" user="[[user]]"></learn-pupil-files-module>
-  </iron-pages>
+    <iron-pages selected="{{selected}}" attr-for-selected="name" class="content" class="mw">
+      <learn-pupil-timetable-module name="timetable" user="[[user]]"></learn-pupil-timetable-module>
+      <learn-pupil-journal-module name="journal" user="[[user]]"></learn-pupil-journal-module>
+    </iron-pages>
   </template>
   <script>
     Polymer({

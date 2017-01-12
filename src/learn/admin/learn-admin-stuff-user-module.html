@@ -6,8 +6,8 @@
       }
 
       paper-card{
-        width: 200px;
-        height: 200px
+        width: 18vw;
+        height: 100px
       }
 
       .auth {
@@ -21,16 +21,19 @@
         top:8px;
         right: 8px
       }
+
+      .name{
+        font-size: 20px;
+        font-weight: 500
+      }
+
     </style>
     <div class="wrapper">
-      <paper-card>
+      <paper-card elevation=0>
         <div class="wrapper">
-          ИИН: [[user.key]]
-          ИМЯ: [[user.val.name]] [[user.val.surname]]
+          <div class="name">[[user.val]]</div>
+          <div class="pin medium">[[user.key]]</div>
           <paper-icon-button icon="icons:clear" on-tap="delete"></paper-icon-button>
-        </div>
-        <div class="auth">
-          Добавил(а) <a href$="/[[u.link]]">[[u.name]] [[u.surname]]</a>
         </div>
       </paper-card>
     </div>
@@ -39,26 +42,11 @@
     Polymer({
       is: 'learn-admin-stuff-user-module',
 
-      behaviors:[
-        DatabaseBehavior
-      ],
-
-      observers:[
-        'userChanged(user)'
-      ],
-
       delete: function(){
 
         this.fire('delete-user',{
           id: this.user.key,
           type: this.type
-        })
-      },
-
-      userChanged:function(u){
-        const that = this
-        this.getItem('Users/' + u.val.addedBy + '/info',function(user){
-          that.u = user
         })
       }
     })

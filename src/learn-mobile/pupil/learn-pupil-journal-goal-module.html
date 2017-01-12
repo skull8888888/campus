@@ -1,0 +1,68 @@
+<dom-module id="learn-pupil-journal-goal-module">
+  <style include="wrapper-module">
+    :host{
+      width: 100vh;
+    }
+
+    .title{
+      font-size: 18px;
+      font-weight: 600;
+      padding: 8px
+    }
+
+    .des{
+      color: var(--paper-grey-700);
+      font-size: 15px;
+    }
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card class="goal">
+        <div class="title" style$="[[achived]]">[[goal.key]]</div>
+        <div class="wrapper">
+
+          <div class="des">
+            [[goal.val.des]]
+          </div>
+
+        </div>
+
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-pupil-journal-goal-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'goalChanged(goal,user,sub)',
+      ],
+
+      goalChanged:function(goal,user,sub){
+        if(goal && sub){
+
+          const that = this;
+
+          that.achived = null;
+
+          this.getItem('PupilGoals/' + user.val.school + '/' + user.key + '/' + sub + '/' + goal.key, g =>{
+
+            if(g){
+
+              if(g == "0"){
+                that.achived = 'background-color: indianred;'
+              } else {
+                that.achived = 'background-color: #81C784'
+              }
+            }
+
+          },true)
+        }
+      }
+    })
+  </script>
+</dom-module>

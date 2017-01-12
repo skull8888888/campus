@@ -1,0 +1,90 @@
+<dom-module id="home-club-info-module">
+  <style include="wrapper-module">
+
+    .tag{
+      margin: 4px;
+      font-size: 18px;
+    }
+
+    .icon{
+      float: left;
+    }
+
+    .about{
+      padding: 8px 0px 0px 4px;
+
+    }
+
+    .info{
+      margin-top: 8px;
+      border-top: var(--paper-grey-300) 1px solid;
+      border-bottom: var(--paper-grey-300) 1px solid;
+    }
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card elevation=0>
+        <div class="card-content">
+          <div class="layout horizontal justified">
+            <div class="layout vertical">
+              <div class="info-name fw500" style="font-size:24px">{{club.val.info.name}}</div>
+            </div>
+            <div class="medium">{{status}}</div>
+          </div>
+          <div class="medium">{{localize(user.val.info.type)}}</div>
+
+          <div class="layout vertical info" style="text-align:center">
+            <template is="dom-if" if="[[sh]]" restamp="true">
+              <div class="school tag">
+                <iron-icon icon="social:school" class="fc500 icon"></iron-icon>
+                [[sh]]
+              </div>
+            </template>
+            <template is="dom-if" if="[[user.val.class]]" restamp="true">
+              <div class="subject tag">
+                <iron-icon icon="social:group" class="fc500 icon"></iron-icon>
+                [[user.val.class]] {{localize(user.val.group)}}
+              </div>
+            </template>
+            <template is="dom-if" if="[[user.val.subject]]" restamp="true">
+              <div class="subject tag">
+                <iron-icon icon="icons:class" class="fc500 icon"></iron-icon>
+                [[localize(user.val.subject)]]
+              </div>
+            </template>
+          </div>
+          <div class="about fc800 ">
+            [[user.val.des]]
+          </div>
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'home-club-info-module',
+
+      behaviors:[
+        LocalizeBehavior,
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'clubChanged(club)'
+      ],
+
+      clubChanged: function(club){
+
+        const that = this;
+//        this.getItemOnce('SchoolsName/' + user.val.school,function(sh){
+//          that.sh = sh;
+//        })
+      },
+
+      expand: function(){
+        this.active = this.$.more.opened ? 'more' : 'less';
+        this.$.more.toggle();
+      },
+    });
+  </script>
+</dom-module>

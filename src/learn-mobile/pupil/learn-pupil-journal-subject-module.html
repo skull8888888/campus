@@ -1,0 +1,61 @@
+<link rel="import" href="learn-pupil-journal-goal-module.html">
+
+<dom-module id="learn-pupil-journal-subject-module">
+  <style include="wrapper-module">
+    .goal{
+      width: 400px;
+    }
+
+    .title{
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .des{
+      color: var(--paper-grey-700)
+    }
+
+    paper-radio-button{
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+  </style>
+  <template>
+    <div>
+      <iron-list items="[[goals]]" as="goal" class="mw">
+        <template>
+          <learn-pupil-journal-goal-module user="[[user]]" goal="{{goal}}" sub="{{sub}}"></learn-pupil-journal-goal-module>
+        </template>
+      </iron-list>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-pupil-journal-subject-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'fill(user,sub)',
+      ],
+
+      fill:function(user,sub){
+        const that = this;
+        console.log(user,sub)
+        if(user && sub){
+
+
+          this.fillObjects('Goals/' + user.val.school + '/' + sub + '/' + user.val.class.split('-')[0] , goals =>{
+            that.goals = goals
+
+          },true)
+
+        }
+
+      }
+    })
+  </script>
+</dom-module>

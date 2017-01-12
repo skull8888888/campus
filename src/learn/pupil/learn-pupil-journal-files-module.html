@@ -1,0 +1,117 @@
+<dom-module id="learn-pupil-journal-files-module">
+  <template>
+    <style include="wrapper-module">
+
+      :host{
+        display: block;
+        height: 100%
+      }
+
+      #wrap,.warning{
+        height: 100%
+      }
+
+      .warningTitle {
+        color:var(--paper-grey-100);
+        font-size:22px;
+        font-weight: 600
+      }
+
+      .title{
+        width: calc(100% - 60px)
+      }
+
+      .file{
+        background-color: whitesmoke;
+        border-radius: 4px
+      }
+
+      #fileIcon{
+        height: 20px;
+        width: 20px
+      }
+
+      .size{
+        color: var(--paper-grey-400);
+        font-size: 16px
+      }
+
+
+      #download {
+        border-radius: 50%;
+        border: 1px solid var(--paper-grey-400);
+        width: 22px;
+        height: 22px
+      }
+
+      iron-icon{
+        color: var(--paper-grey-400);
+      }
+    </style>
+    <div class="w" style="height:100%">
+      <div style="overflow:auto" id="wrap">
+        <iron-list items="[[files]]" as="file" scroll-target="wrap">
+          <template>
+            <div class="wrapper">
+              <div class="wrapper file layout horizontal justified">
+                <iron-icon id=fileIcon icon="icons:description"></iron-icon>
+                <div class="title">
+                  <div>[[file.name]]</div>
+                  <div class="size">[[file.size]]</div>
+                </div>
+                <a href$="[[file.link]]" download="name" target="_blank" class="link">
+                  <iron-icon id=download icon="icons:file-download"></iron-icon>
+                </a>
+              </div>
+            </div>
+          </template>
+        </iron-list>
+      </div>
+    </div>
+  </template>
+
+  <script>
+
+    Polymer({
+      is: 'learn-pupil-journal-files-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'fill(user,subject,term)'
+      ],
+
+      setTime:function(t){
+        console.log(new Date(t))
+      },
+
+      attached:function(){
+        this.warning = 'Выберите предмет, чтобы посмотреть файлы'
+      },
+
+      fill:function(u,sub,term){
+
+        const that = this
+        const cl = u.val.class.split('-')
+
+        if(sub){
+          this.fillItems('SchoolFiles/' + u.val.school + '/' + this.getYear() + '/' + term + '/' +  cl[0] + '/' + cl[1] + '/' + u.val.group + '/' + sub,files=>{
+
+            if(files.length == 0){
+              that.warning = 'По этому предмету нет загруженных файлов'
+
+            }
+            that.files = files
+          })
+        } else {
+          this.warning = 'lego'
+        }
+
+      }
+
+    });
+  </script>
+
+</dom-module>

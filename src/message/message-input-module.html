@@ -1,0 +1,181 @@
+<link rel="import" href="../behaviors/message-behavior.html">
+<dom-module id="message-input-module">
+    <template>
+    <style include="wrapper-module">
+        paper-input{
+            width:100%;
+            background-color: white;
+          --paper-input-container-input:{
+            font-size: 18px;
+            padding-left: 4px;
+          }
+
+          --paper-input-container-label:{
+            font-size: 18px;
+            padding-left: 4px;
+          }
+          --paper-input-container-input-color:black;
+          border:2px solid var(--paper-grey-300);
+          border-radius: 4px 0px 0px 4px;
+          border-right:  1px solid var(--paper-grey-300);
+        }
+
+        #emojiTarget {
+            width:100px;
+            height:100px;
+        }
+
+      #attach{
+        background-color: white;
+        border:2px solid var(--paper-grey-300);
+        border-left: 1px solid var(--paper-grey-300);
+        border-radius: 0px 4px 4px 0px;
+        height: 100%;
+        color: var(--paper-grey-500);
+      }
+
+      .doc{
+        background-color: var(--paper-grey-300);
+        border-radius: 4px;
+        margin: 8px 0px 8px 0px
+      }
+
+      #image{
+        margin-top: 8px;
+        width: 200px;
+        border-radius: 4px
+      }
+
+      @keyframes a {
+        from {height: 0;}
+        to{height: 20px}
+      }
+
+      #typing{
+        animation: a 0.1s ease-in
+      }
+    </style>
+<!--      <div id=typing>Марк Цукерберг печатает сообщение</div>-->
+      <div class="wrapper" style="background-color:whitesmoke">
+        <div class="layout horizontal">
+          <paper-input label="Напишите сообщение" id="msg" no-label-float on-keydown="checkForEnter" value="{{text}}">
+          </paper-input>
+          <label for="file"><paper-icon-button noink id=attach icon="editor:attach-file"></paper-icon-button></label><input type="file" value="upload" id="file" style="position:absolute; visibility:hidden"/>
+        </div>
+
+        <template is=dom-if if=[[file]] restamp=true>
+          <div class="wrap layout horizontal">
+
+            <template is=dom-if if=[[image]]>
+              <div class="image">
+                <iron-image style$="height:[[height]]px" id=image src=[[file.link]] sizing=cover>
+
+                </iron-image>
+              </div>
+            </template>
+
+            <template is=dom-if if=[[doc]]>
+              <div class="layout horizontal doc wrapper justified">
+                <div class="layout horizontal">
+                  <iron-icon class="fc400" icon="icons:description">
+
+                  </iron-icon>
+
+                  <div style="margin-left:8px">
+                    [[file.name]]
+                  </div>
+                </div>
+
+              </div>
+            </template>
+
+            <paper-icon-button class="fc400" icon="icons:clear" on-tap=deleteFile></paper-icon-button>
+
+          </div>
+        </template>
+      </div>
+
+    </template>
+    <script>
+        Polymer({
+          is: 'message-input-module',
+
+          behaviors:[
+            MessageBehavior
+          ],
+
+          send: function(){
+            if(this.text.length > 0 || this.file)
+              this.type == 'channel' ? this.sendMessageToChannel(this.chatid,this.members,this.text,this.file) : this.sendMessageTo(this.chatid,this.text,this.file)
+            this.text = ''
+            this.file = null
+          },
+
+          attached:function(){
+            this.$.file.addEventListener('change',(e)=>{
+
+              if(e.target.files[0]){
+                this.fire('toggle-ptoast')
+
+                var file = e.target.files[0]
+                var task = this.app.storage().ref('Chats/' + Cookies.get('id') + '/' + this.chatid + '/messages/' + file.name).put(file)
+
+
+                task.on('state_changed', (snapshot) => {
+                  this.fire('progressChanged',{p:snapshot.bytesTransferred / snapshot.totalBytes * 100});
+                },(err)=>{
+
+                  alert(err)
+
+                },_=>{
+
+
+
+                  /image\/*/.test(file.type) ? this.image = true : this.doc = true
+
+                  this.getHeight(task.snapshot.downloadURL)
+
+                  this.file = {
+                    link: task.snapshot.downloadURL,
+                    type: /image\/*/.test(file.type) ? 'image' : 'doc',
+                    name: file.name,
+
+                    size: (file.size / 1000 /1000).toPrecision(2) + 'mb'
+                  }
+
+
+
+                  this.fire('toggle-ptoast')
+                })
+
+              }
+
+            })
+          },
+
+          getHeight:function(url){
+            var img = new Image();
+            const that = this
+            img.onload = function(){
+
+              var ratio = this.width / this.height
+              that.file.ratio = ratio
+              that.height = 200 / ratio
+
+            };
+            img.src = url;
+          },
+
+          deleteFile:function(){
+            this.file = null
+          },
+
+          checkForEnter: function(e) {
+            if (e.keyCode === 13) {
+              this.send();
+            }
+          },
+
+        })
+    </script>
+</dom-module>

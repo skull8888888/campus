@@ -1,104 +1,322 @@
-<link rel="import" href="learn-teacher-week-module.html">
+<link rel="import" href="learn-teacher-timetable-week-module.html">
+<link rel="import" href="../../../bower_components/neon-animation/neon-animated-pages.html">
 
 <dom-module id="learn-teacher-timetable-module">
-  <style>
-  </style>
   <template>
-    <iron-pages id="pages">
-      <learn-teacher-week-module user="[[user]]" week="{{lastWeek}}"></learn-teacher-week-module>
-      <learn-teacher-week-module user="[[user]]" week="{{currentWeek}}"></learn-teacher-week-module>
-      <learn-teacher-week-module user="[[user]]" week="{{nextWeek}}"></learn-teacher-week-module>
-    </iron-pages>
-    <iron-grid>
-      <div class="l4 offset-l6 xs12 offset-xs0">
-        <div style="width: 100%">
-          <div style="float: right">
-            <paper-icon-button icon="icons:chevron-left" on-tap="left"></paper-icon-button>
-            <paper-icon-button icon="icons:chevron-right" on-tap="right"></paper-icon-button>
+    <style include="wrapper-module">
+
+      :host{
+        display: block;
+        height: 100%
+      }
+
+      paper-icon-button{
+        color: var(--paper-grey-300);
+      }
+
+      .l{
+        position: fixed;
+        top: 50vh
+      }
+
+      paper-dialog{
+        width: 500px;
+        overflow: hidden
+      }
+
+      .ll{
+        color:var(--paper-grey-500);
+        font-size: 16px;
+        font-weight: 500
+      }
+
+      .b{
+        border-bottom: 1px solid var(--paper-grey-300)
+      }
+
+      paper-textarea {
+        border: 2px solid var(--paper-grey-300);
+        border-radius: 4px;
+        padding-left: 4px;
+        padding-right: 4px;
+        margin-top: 8px
+      }
+
+      .title{
+        border-bottom: 1px solid var(--paper-grey-300);
+        background-color: var(--paper-grey-100);
+      }
+
+
+      .body{
+        height: calc(100% - 38px);
+        overflow: auto;
+        background-color: white
+      }
+
+      neon-animated-pages{
+        height:100%
+      }
+
+      .head{
+        height: 38px;
+        background-color: white;
+        border-bottom: 1px solid var(--paper-grey-300);
+      }
+
+      .wrap{
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+    </style>
+    <div class="wrap">
+      <div class="head layout horizontal">
+        <paper-icon-button noink icon="icons:chevron-left" on-tap="left"></paper-icon-button>
+        <paper-icon-button noink icon="icons:chevron-right" on-tap="right"></paper-icon-button>
+      </div>
+      <div class="body">
+        <neon-animated-pages id="pages" entry-animation="[[entryAnimation]]" exit-animation="[[exitAnimation]]">
+          <learn-teacher-timetable-week-module week="{{week0}}" user="[[user]]"></learn-teacher-timetable-week-module>
+          <learn-teacher-timetable-week-module week="{{week1}}" user="[[user]]"></learn-teacher-timetable-week-module>
+        </neon-animated-pages>
+      </div>
+    </div>
+
+    <paper-dialog
+                  id="d" entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation"
+                  with-backdrop
+                  >
+      <div>
+
+        <div class="wrapper title layout horizontal justified">
+          <div class="fs20" style="padding-top:4px">Домашнее задание</div>
+          <paper-button class="button-light-standart" on-tap="send">Отправить</paper-button>
+        </div>
+        <div class="wrapper">
+          <div class="ll">
+            [[task.cl]], [[localize(task.group)]]
           </div>
+          <div class="ll">
+            [[localize(task.sub)]]
+          </div>
+          <div class="ll">
+            [[localize(m)]], [[day.date]]
+          </div>
+          <div style="padding-right:12px">
+            <paper-textarea value="{{text}}" rows=2 required max-rows=4 label="Домашняя работа" no-label-float></paper-textarea>
+          </div>
+
         </div>
       </div>
-    </iron-grid>
+
+    </paper-dialog>
   </template>
   <script>
     Polymer({
       is: 'learn-teacher-timetable-module',
 
       properties:{
-
         months:{
           type: Array,
           value:[]
         }
       },
 
-      attached: function(){
-        this.$.pages.selected = 1;
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
 
-
-        var date = new Date();
-        var day = date.getDay();
-        var month = date.getMonth();
-        var da = date.getDate();
-
-        var currentDay = {};
-        var days = [];
-
-
-        for(i = month - 1; i < month + 2; i++){
-          var daysInMonth = new Date(date.getFullYear(),i + 1, 0).getDate();
-          for (d = 1; d < daysInMonth + 1; d++){
-            days.push({
-              month: i,
-              date: d
-            });
-            if(i == month && d == da){
-              currentDay = {
-                date: d,
-                month:i,
-                id: days.length
-              }
-            }
-          };
-        };
-
-        var diff = -(0 - day);
-        var differ = 6 - day;
-        var lastWeek = [];
-        var currentWeek = [];
-        var nextWeek = [];
-        for(i = currentDay.id - diff; i < currentDay.id + differ; i++){
-          currentWeek.push({
-            month: days[i].month,
-            date: days[i].date,
-            mn: days[i].month
-          });
-        };
-        for(i = currentDay.id - diff - 7; i < currentDay.id - diff - 1; i++){
-          lastWeek.push({
-            month: days[i].month,
-            date: days[i].date,
-            mn: days[i].month
-          });
-        };
-        for(i = currentDay.id + differ + 1; i < currentDay.id + differ + 8; i++){
-          nextWeek.push({
-            month: days[i].month,
-            date: days[i].date,
-            mn: days[i].month
-          });
-        };
-        this.currentWeek = currentWeek;
-        this.nextWeek = nextWeek;
-        this.lastWeek = lastWeek;
+      listeners:{
+        'show-homework': 'showHomework'
       },
 
+      showHomework:function(e){
+        if(e.detail.s.sub !='null'){
+          this.text = e.detail.s.homework;
+          this.$.d.open()
+          this.task = e.detail.s
+          this.m = 'm' + e.detail.day.month
+          this.day = e.detail.day
+        }
+      },
+
+      send: function(){
+
+        const cl = this.task.cl.split('-')
+
+        if(this.text){
+          const that = this
+
+          if(this.task.type == 'chos'){
+            this.db.ref('SchoolHomework/-KRd7GFmIubUkuXP-Zmn/' + this.getYear() + '/' + this.task.cl + '/' + this.day.date + '-'  + this.day.month ).set({
+              text: this.text,
+              auth: Cookies.get('id'),
+              time: Date.now()
+            })
+          } else {
+            this.db.ref('SchoolHomework/-KRd7GFmIubUkuXP-Zmn/' + this.getYear() + '/' + cl[0] + '/' + cl[1] + '/' + this.day.date + '-'  + this.day.month + '/' + this.task.sub + '/' + this.task.group).set({
+              text: this.text,
+              auth: Cookies.get('id'),
+              time: Date.now()
+            })
+
+          }
+
+          this.fire('open-toast',{text:'Домашнее задание отправленно'})
+          this.$.d.toggle()
+        } else {
+          this.fire('open-toast',{text:'Напишите домашнее задание'})
+        }
+
+      },
+
+      attached:function(){
+
+        this.$.pages.selected = 0
+
+        const d = new Date()
+        this.date = d.getDate()
+        this.month = d.getMonth()
+        this.year = d.getFullYear()
+
+        const diff = d.getDay() - 1
+
+        if(diff < 0){
+
+          const daysInLastMonth = this.getDaysInMonth(this.month != 0 ? this.month - 1: 11,this.year)
+
+          this.date = daysInLastMonth - Math.abs(this.date - day)
+
+        } else {
+          this.date = this.date - diff
+        }
+
+        console.log(this.date,diff)
+
+        this.day = 0
+
+        this.week0 = this.getWeek({
+          day: this.day,
+          date: this.date,
+          year: this.year,
+          month: this.month
+        })
+
+      },
+
+
+      getWeek:function(cd){
+
+        var week = {}
+
+        for(var i = cd.day,inc=0,boost=1; i < 6; i++){
+
+          if(cd.date + inc > this.getDaysInMonth(cd.month,cd.year)){
+
+            week[i] = {
+              date: boost,
+              month:cd.month < 11 ? cd.month + 1: 0
+            }
+            boost++
+          } else {
+
+            week[i] = {
+              date: cd.date + inc,
+              month: cd.month
+            }
+            inc++
+          }
+        }
+
+        return week
+      },
+
+      getDaysInMonth: function(m,y){
+        return new Date(y,m + 1, 0).getDate();
+      },
+
+
       left: function(){
-        this.$.pages.selected = this.$.pages.selected == 0 ? 0: this.$.pages.selected - 1
+        this.entryAnimation = 'slide-from-left-animation'
+        this.exitAnimation = 'slide-right-animation'
+
+        const diff = 7 + this.day
+
+        if(this.date - diff < 0){
+
+          const prevMonth = this.month != 0 ? this.month - 1: 11
+
+          this.date = this.getDaysInMonth(this.month,this.year) - (diff - this.date)
+          this.day = 0
+
+          this.month = prevMonth
+
+          if(this.month == 11)
+            this.year = this.year - 1
+
+            } else {
+
+              this.date = this.date - diff
+              this.day = 0
+            }
+
+        const week = this.getWeek({
+          day: this.day,
+          month: this.month,
+          year: this.year,
+          date: this.date
+        })
+
+        if(this.$.pages.selected == 0)
+          this.week1 = week
+          else
+            this.week0 = week
+
+            this.$.pages.selected = this.$.pages.selected == 1 ? 0: 1
+
       },
 
       right: function(){
-        this.$.pages.selected = this.$.pages.selected == 2 ? 2: this.$.pages.selected + 1
+
+        this.entryAnimation = 'slide-from-right-animation'
+        this.exitAnimation = 'slide-left-animation'
+
+
+        const diff = 7 - this.day
+
+        if(this.date + diff > this.getDaysInMonth(this.month,this.year)){
+
+          this.date = diff - (this.getDaysInMonth(this.month,this.year) - this.date)
+          this.day = 0
+          this.month = this.month < 11 ? this.month + 1: 0
+          if(this.month == 0)
+            this.year = this.year + 1
+
+            } else {
+
+              this.date = this.date + diff
+              this.day = 0
+            }
+
+        const week = this.getWeek({
+          day: this.day,
+          month: this.month,
+          year: this.year,
+          date: this.date
+
+        })
+
+        if(this.$.pages.selected == 0)
+          this.week1 = week
+          else
+            this.week0 = week
+
+            this.$.pages.selected = this.$.pages.selected == 0 ? 1: 0
+
       },
 
     })

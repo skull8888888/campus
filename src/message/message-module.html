@@ -1,0 +1,86 @@
+<link rel="import" href="message-panel-module.html">
+<link rel="import" href="message-dialog-list-module.html">
+<link rel="import" href="message-new-dialog-module.html">
+<link rel="import" href="../behaviors/message-behavior.html">
+
+<dom-module id="message-module">
+  <template>
+    <style include="wrapper-module">
+
+      :host{
+        display: block;
+        height: 100%
+      }
+
+      paper-fab {
+        position: fixed;
+        margin: 0px 8px 68px 0px;
+        --paper-fab-background:var(--app-button-color);
+      }
+
+      #panel {
+        width: 22%;
+        height: 100%;
+      }
+
+      #body{
+        width: 78%;
+        height: 100%
+      }
+
+      #dialog {
+        width: 40vw;
+        background-color: var(--paper-grey-100);
+        border-radius: 4px;
+        padding: 0;
+      }
+
+      .warning {
+        height: 100%;
+        font-size: 24px
+      }
+
+      .wrap{
+        height: 100%;
+        width: 100vw;
+        background-color: white
+      }
+    </style>
+    <div class="wrap layout horizontal">
+      <div id=panel>
+        <message-panel-module sel={{sel}} user=[[user]]></message-panel-module>
+      </div>
+
+      <div id=body>
+        <message-dialog-list-module sel="{{sel}}"></message-dialog-list-module>
+      </div>
+
+    </div>
+    <paper-fab icon="create" style="display:absolute; bottom:0; right:0;" on-tap="openDialog"></paper-fab>
+
+    <paper-dialog id="dialog"
+                  entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation"
+                  with-backdrop>
+      <message-new-dialog-module></message-new-dialog-module>
+    </paper-dialog>
+  </template>
+  <script>
+    Polymer({
+      is: 'message-module',
+
+      listeners:{
+        'close-new': 'close',
+      },
+
+      close:function(){
+        this.$.dialog.close()
+      },
+
+      openDialog:function(){
+        this.$.dialog.open()
+      }
+
+      })
+  </script>
+</dom-module>

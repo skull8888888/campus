@@ -1,0 +1,132 @@
+<link rel="import" href="message-mobile-dialog-box-module.html">
+<link rel="import" href="/src/message/message-input-module.html">
+
+<dom-module id="message-mobile-dialog-list-module">
+  <template>
+    <style include="wrapper-module">
+
+      .head{
+        border-bottom: solid 1px var(--paper-grey-200);
+      }
+
+      .name{
+        font-size: 20px;
+        font-weight: 500;
+        color: #546E7A;
+        padding-left: 8px;
+      }
+
+      #itemicon {
+        width:50px;
+        height:50px;
+        background-repeat:no-repeat;
+        background-size:cover;
+        border-radius:50%;
+      }
+
+      paper-icon-button{
+        --paper-icon-button:{
+          width: 26px;
+          height: 26px;
+          padding: 0;
+          color: var(--paper-grey-400)
+        };
+      }
+
+      #wrap{
+        overflow: auto;
+        height: 77vh
+      }
+    </style>
+    <div class="w">
+      <div class="layout horizontal head wrapper justified">
+        <div class="name"># [[title]]</div>
+        <paper-icon-button icon="icons:more-vert" noink>
+
+        </paper-icon-button>
+      </div>
+      <div id="wrap">
+        <template is="dom-repeat" id="list" items={{messages}} as="message" initialCount="10">
+          <message-mobile-dialog-box-module message=[[message]] prev=[[prevMessage(index)]] sel=[[sel]]></message-mobile-dialog-box-module>
+        </template>
+      </div>
+      <message-input-module chatid=[[sel.key]] members=[[members]] type=[[type]]></message-input-module>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'message-mobile-dialog-list-module',
+
+      properties:{
+        messages: {
+          type: Array,
+          value:[]
+        },
+        type: String,
+        members: Array,
+        title: String
+      },
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      listeners:{
+        'scroll': 'scroll'
+      },
+
+      scroll:function(){
+        const that = this
+        that.async(()=> {
+          this.$.wrap.scrollTop = this.$.wrap.scrollHeight
+        }, 500)
+      },
+
+      observers:[
+        'selChanged(sel)',
+      ],
+
+      prevMessage:function(index){
+        if(index > 0)
+          return this.messages[index-1]
+          else return null
+      },
+
+      selChanged:function(c){
+
+        const that = this;
+        this.messages = []
+        this.type = c.type
+        if(this.pl)
+          this.pl.off()
+          this.db.ref('Chats/' + Cookies.get('id') + '/' + c.key).off()
+          if(c.type == 'channel'){
+            this.fillObjects('Channels/' + c.key +'/members', members=>{
+              that.members = members
+            })
+            this.getItemOnce('Channels/' + c.key +'/name', name=>{
+              that.title = name
+              console.log(name)
+            })
+          } else if(c.type == 'private'){
+            this.getItemOnce('Users/' + c.key + '/info',user=>{
+              that.title = user.name + ' ' + user.surname;
+            })
+          }
+
+
+        this.pl = this.db.ref('Chats/' + Cookies.get('id') + '/messages/' + c.key)
+
+        this.pl.on('child_added', message=>{
+          that.push('messages',{
+            val:message.val(),
+            key: message.key
+          })
+          that.scroll()
+        })
+
+      },
+    })
+  </script>
+</dom-module>

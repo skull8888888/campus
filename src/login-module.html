@@ -1,3 +1,11 @@
+<link rel="import" href="join-module.html">
+<link rel="import" href="../bower_components/iron-grid/iron-grid.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="behaviors/database-behavior.html">
+
 <dom-module id="login-module">
   <template>
   <style include="wrapper-module">
@@ -5,28 +13,86 @@
       text-decoration: none;
       color: black;
       text-align: center;
-      color: var(--app-primary-color);
+      color: white;
+/*      color: var(--app-secondary-color);*/
       font-size: 15px;
+      font-weight: 600
+    }
+
+    paper-input {
+      background-color: white;
+      --paper-input-container-focus-color:rgba(0, 0, 0, 0.0);
+    }
+
+    .wrap{
+      height: 91vh;
+    }
+
+    #email{
+      border-radius: 4px 4px 0px 0px;
+      border-bottom:2px solid var(--paper-grey-300);
+    }
+    #password{
+      border-radius: 0px 0px 4px 4px;
+    }
+    .button{
+      background-color: white;
+      background-color: var(--app-secondary-color);
+      margin-top: 8px;
+    }
+
+    .title{
+/*      position: absolute;*/
+      margin-top: 10vh;
+      margin-bottom: 16px;
+      color: white
+    }
+
+    .l4.offset-l4 .content{
+      margin: 0px 80px 0px 80px;
+      overflow: hidden;
+      height: 80vh
+    }
+
+    .offset-xs0-important.xs12-important .content{
+      margin: 0;
     }
 
     .button{
-      width: 200px;
+      width: 100%;
+      margin: 0;
+      margin-top: 8px
+    }
+
+    .create{
+      --paper-button:{
+        height: 40px;
+        font-weight: 500;
+        font-size: 14px;
+        padding: 4px 8px
+      }
     }
   </style>
   <iron-grid>
-    <div class="l4 offset-l4 offset-xs0 xs12 wrapper">
-      <paper-card>
-        <div class="card-content">
-          <form is="iron-form" id="form">
-            <paper-input name="email" label="email" value="{{email}}" required></paper-input>
-            <paper-input name="password" label="Пароль" type="password" value="{{password}}" required></paper-input>
-          </form>
+    <div class="l4 offset-l4 offset-xs0 xs12 wrap">
+      <div class="mw" style="overflow: hidden">
+        <div class="content">
+          <div class="title wrapper">
+            <div style="font-size:24px">Платформа.Революция.</div>
+          </div>
+          <neon-animated-pages selected={{page}} selected={{page}} entry-animation=[[entryAnimation]] exit-animation=[[exitAnimation]]>
+            <div class="wrapper">
+              <form is="iron-form" id="form">
+                <paper-input  on-keydown="checkForEnter" id="email" name="email" no-label-float label="Почта" value="{{email}}" required></paper-input>
+                <paper-input  on-keydown="checkForEnter" id="password" name="password" no-label-float label="Пароль" type="password" value="{{password}}" required></paper-input>
+              </form>
+              <paper-button on-tap="login" class="button">Войти</paper-button>
+              <paper-button on-tap=left class="mw create" style="color:white" noink>Создать аккаунт</paper-button>
+            </div>
+            <join-module></join-module>
+          </neon-animated-pages>
         </div>
-        <div class="card-actions layout vertical center">
-          <paper-button raised on-tap="login" class="button">Войти</paper-button>
-          <a href="/join"><paper-button>Нет аккаунта</paper-button></a>
-        </div>
-      </paper-card>
+      </div>
     </div>
   </iron-grid>
   <firebase-auth id="auth"></firebase-auth>
@@ -36,31 +102,62 @@
     Polymer({
       is: 'login-module',
 
-    behaviors: [
-      Polymer.FirebaseDatabaseBehavior
-    ],
+      properties:{
+        page:{
+          type: Number,
+          value: 0
+        },
+        entryAnimation: String,
+        exitAnimation: String,
+        email: String,
+        password: String
+      },
 
-    login: function(){
-      const that = this;
-      if(this.$.form.validate()){
-        this.$.auth.signInWithEmailAndPassword(this.email,this.password).then(function(user){
+      behaviors: [
+        Polymer.FirebaseDatabaseBehavior
+      ],
 
-          that.db.ref('Users/' + user.uid + '/info/link').once('value',function(item){
+      listeners:{
+        'back':'right'
+      },
 
-            Cookies.set('id',user.uid,{expires: 10000,path:''});
-            Cookies.set('link',item.val(),{expires: 10000,path:''});
-            window.location = 'feed';
-          },function(err){
+      checkForEnter: function(e) {
 
+        if (e.keyCode === 13) this.login()
+      },
+
+      right: function(){
+        this.entryAnimation = 'slide-from-left-animation'
+        this.exitAnimation = 'slide-right-animation'
+        this.page = 0
+      },
+
+      left: function(){
+        this.entryAnimation = 'slide-from-right-animation'
+        this.exitAnimation = 'slide-left-animation'
+        this.page = 1
+      },
+
+      login: function(){
+        const that = this;
+        if(this.$.form.validate()){
+          this.$.auth.signInWithEmailAndPassword(this.email,this.password).then(function(user){
+
+            that.db.ref('Users/' + user.uid + '/info/link').once('value',function(item){
+
+              Cookies.set('id',user.uid,{expires: 10000,path:''});
+              Cookies.set('link',item.val(),{expires: 10000,path:''});
+              window.location = '/message';
+            },function(err){
+
+            });
+          }).catch(function(error){
+            that.fire('open-toast',{
+              text: error
+            })
           });
-        }).catch(function(error){
-          alert(error);
-          that.fire('open-toast',{
-            text: error
-          })
-        });
-      }
-     }
+        }
+       }
     });
   </script>
 </dom-module>

@@ -1,0 +1,77 @@
+<dom-module id="learn-pupil-journal-subjects-list-subject-module">
+  <template>
+    <style include="wrapper-module">
+
+      :host{
+        width: 20vw;
+        font-size: 16px;
+        font-weight: 300;
+        color: var(--paper-grey-300)
+      }
+
+    </style>
+    <div class="layout horizontal">
+      <div id=name style="width:45%">[[localize(subject)]]</div>
+      <div class="layout horizontal justified marks" style="width:55%">
+        <div id=goals>[[af]] | [[allf]]</div>
+        <div id=sum>[[mysum]] | [[sum]]</div>
+        <div id=final>[[final]] | A</div>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-pupil-journal-subjects-list-subject-module',
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      observers:[
+        'fill(user,term,subject)',
+        'setMark(af,allf,mysum,sum)'
+      ],
+
+      setMark:function(a,a1,m,m1){
+        this.final = a / a1 * 18 + m / m1 * 42
+      },
+
+      fill:function(user,term,subject){
+
+        const that = this;
+        const cl = user.val.class.split('-')
+        console.log(subject)
+        this.fillItems('PupilGoals/' + user.val.school + '/' + this.getYear() + '/' + term +  '/' + user.key + '/' + subject + '/goals', goals =>{
+          var a=0
+          goals.forEach( goal => {
+
+            if(goal == '1') a++
+              })
+          that.af = a
+
+        },true)
+
+        this.getItemOnce('Goals/' + user.val.school + '/' + this.getYear() + '/' + term + '/' + subject + '/' + cl[0] + '/sum', sum =>{
+
+          if(sum)
+            that.sum = sum
+          else
+            that.sum = 0
+        })
+
+        this.getItem('PupilGoals/' + user.val.school + '/' + this.getYear() + '/' + term +  '/' + user.key + '/' + subject + '/sum', mysum=>{
+          if(mysum)
+            that.mysum = mysum
+            else
+              that.mysum = 0
+        })
+
+        this.fillObjects('Goals/' + user.val.school + '/' + this.getYear() + '/' + term + '/' + subject + '/' + cl[0] + '/goals', goals =>{
+          that.goals = goals;
+          that.allf = goals.length;
+        },true)
+      }
+    })
+  </script>
+</dom-module>

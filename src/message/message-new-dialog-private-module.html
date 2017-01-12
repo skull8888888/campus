@@ -1,0 +1,95 @@
+<dom-module id="message-new-dialog-private-module">
+  <template>
+    <style include="wrapper-module">
+      paper-input{
+        border-bottom: 1px solid var(--paper-grey-300)
+      }
+
+      .inner{
+        border-bottom: 1px solid var(--paper-grey-300)
+      }
+
+      iron-selector .iron-selected, iron-selector .iron-selected .type {
+        background-color: var(--app-secondary-color);
+        color: white
+      }
+
+      paper-button{
+        color: var(--app-secondary-color)
+      }
+    </style>
+    <div>
+      <paper-input id="combobox" no-label-float label="Имя пользователя" value="{{searchText}}">
+        <iron-icon class="medium" icon="icons:search" prefix></iron-icon>
+      </paper-input>
+      <div style="overflow:auto; height:40vh">
+        <iron-selector selected="{{index}}">
+          <template is="dom-repeat" id="list" items=[[searchItems]] as=user initial-count=10>
+            <div class="wrap">
+              <div class="inner wrapper">
+                <div class="layout horizontal">
+                  <iron-image src="[[user.val.info.image]]" item-icon style="background-image:url([[user.val.info.image]])" class="ava" sizing="cover"></iron-image>
+                  <div class="layout vertical">
+                    <div class="name fs18 fw500" style="padding:4px 0px 2px 8px">
+                      [[user.val.info.name]] [[user.val.info.surname]]
+                    </div>
+                    <div class="fs16 fc600 type" style="padding-left:8px">
+                      [[localize(user.val.info.type)]]
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </template>
+        </iron-selector>
+      </div>
+      <div>
+        <paper-button on-tap="start" noink class="fw500">Начать</paper-button>
+      </div>
+    </div>
+    <iron-ajax
+               auto
+               url="https://campus-server.herokuapp.com/search/[[searchText]]"
+               id="xhr"
+               on-response="handleResponse"
+               loading="[[active]]"
+               ></iron-ajax>
+  </template>
+  <script>
+    Polymer({
+      is: 'message-new-dialog-private-module',
+
+      behaviors:[
+        DatabaseBehavior,
+        MessageBehavior,
+        LocalizeBehavior
+      ],
+
+      observers:[
+        'selChanged(index)',
+        'searchChanged(searchText)'
+      ],
+
+      selChanged: function(s){
+        this.userid=this.searchItems[s].key
+      },
+
+      handleResponse:function(e){
+        this.endSpin()
+        this.searchItems = e.detail.__data__.response
+        console.log(e.detail.__data__.response)
+      },
+
+      start:function(){
+        if(this.userid){
+          this.db.ref('Chats/' + Cookies.get('id') +'/chats/' + this.userid).set({
+            type: 'private',
+            time: Date.now()
+          })
+          this.fire('close-new')
+        }
+      },
+    })
+  </script>
+</dom-module>

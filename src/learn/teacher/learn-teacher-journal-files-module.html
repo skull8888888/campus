@@ -1,0 +1,73 @@
+<link rel="import" href="learn-teacher-journal-files-file-module.html">
+
+<dom-module id="learn-teacher-journal-files-module">
+  <template>
+    <style include="wrapper-module">
+      :host{
+        display: block;
+        height: 100%
+      }
+    </style>
+    <div style="overflow:auto">
+      <template is=dom-repeat items="[[files]]" as="file">
+        <learn-teacher-journal-files-file-module file=[[file]]></learn-teacher-journal-files-file-module>
+      </template>
+    </div>
+  </template>
+
+  <script>
+
+    Polymer({
+      is: 'learn-teacher-journal-files-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'fill(user,sel,term)'
+      ],
+
+      listeners:{
+        'delete': 'delete'
+      },
+
+      delete:function(e){
+        const cl = this.sel.split('.');
+        this.db.ref('SchoolFiles/' + this.user.val.school + '/' + this.getYear()  + '/' + this.term + '/' +  cl[0].split('-')[0] + '/' + cl[0].split('-')[1] + '/' + cl[1] + '/' + cl[2] + '/' + e.detail.id).remove()
+      },
+
+      attached:function(){
+        console.log(this.style.height)
+        this.warning = 'Выберите класс, чтобы посмотреть файлы'
+      },
+
+      fill:function(u,sel,term){
+
+        const that = this;
+        const cl = sel.split('.');
+
+        if(sel){
+
+          this.fillObjects('SchoolFiles/' + u.val.school + '/' + this.getYear()  + '/' + term + '/' +  cl[0].split('-')[0] + '/' + cl[0].split('-')[1] + '/' + cl[1] + '/' + cl[2],files=>{
+            that.files =  null
+            if(files.length == 0){
+              that.showFiles = false
+              that.warning = 'Для этого класса вы пока не загружали файлы'
+            } else {
+              that.files = files
+              that.showFiles = true
+              that.warning = ''
+            }
+
+          })
+        } else {
+          this.warning = 'Выберите класс, чтобы посмотреть файлы'
+        }
+
+      }
+
+    });
+  </script>
+
+</dom-module>

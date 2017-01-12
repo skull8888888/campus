@@ -1,78 +1,64 @@
 <dom-module id="settings-pupil-module">
-  <style include="wrapper-module iron-flex">
-    .class {
-      width: 80px
+  <style include="wrapper-module">
+
+    :host{
+      display: block;
+      width: 100%
     }
 
-    .group {
-      width: 90px
+    paper-input,paper-textarea,vaadin-combo-box{
+      width:100%;
+/*      background-color: white;*/
+      border-radius: 4px;
+      border:2px solid var(--paper-grey-300);
     }
 
-    input{
-      border: 0px
+    .left{
+      border-radius: 4px 0px 0px 4px;
+      border-right: 1px solid var(--paper-grey-300);
     }
 
-    .subject {
-      position: relative;
-      left: 0
+    .right{
+      border-radius: 0px 4px 4px 0px;
+      border-left: 1px solid var(--paper-grey-300);
     }
-
-    .del{
-      margin: 0
-    }
-
-    .wrapper {
-      display:flex
-    }
-
-    #nums,#lets{
-      width: 50px
-    }
-
-    #group{
-      width: 120px
-    }
-
-    #fsub,#ssub,#tsub{
-      width: 140px;
-    }
-
   </style>
   <template>
     <div class="wrapper">
-      <paper-card>
-        <div class="card-content">
-          <div class="layout horizontal">
-            <vaadin-combo-box always-float-label label="Парал." items="[[nums]]" item-label-path="i" item-value-path="i" value="{{num}}" id="nums"></vaadin-combo-box>
-            <vaadin-combo-box always-float-label label="Буква" items="[[lets]]" value="{{let}}" id="lets"></vaadin-combo-box>
-            <vaadin-combo-box  always-float-label label="Группа" items="[[groups]]" item-label-path="name" item-value-path="key" value="{{user.val.group}}" id="group"></vaadin-combo-box>
+      <div class="label"> Класс</div>
+
+      <div class="layout horizontal input">
+        <vaadin-combo-box class="left" no-label-float label="Парал." items="[[nums]]" item-label-path="i" item-value-path="i" value="{{num}}" id="nums"></vaadin-combo-box>
+        <vaadin-combo-box class="left right" style="border-radius:0" no-label-float label="Буква" items="[[lets]]" value="{{let}}" id="lets"></vaadin-combo-box>
+        <vaadin-combo-box class="right" no-label-float label="Группа" items="[[groups]]" item-label-path="name" item-value-path="key" value="{{user.val.group}}" id="group"></vaadin-combo-box>
+      </div>
+      <template is="dom-if" if="[[high]]" restamp="true">
+        <div class="mw">
+          <div class="label">1 предмет по выб.</div>
+          <div class="layout horizontal input">
+            <vaadin-combo-box id="fsub" class="left" no-label-float label="Предмет" items="[[fsubs]]" item-label-path="name" item-value-path="key" value="{{fsub}}" id="nums"></vaadin-combo-box>
+            <vaadin-combo-box class="right" no-label-float label="Группа" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{fnum}}" ></vaadin-combo-box>
           </div>
-          <template is="dom-if" if="[[high]]" restamp="true">
-            <div class="mw">
-              <div class="layout horizontal">
-                <vaadin-combo-box id="fsub" always-float-label label="1 предмет по выб." items="[[fsubs]]" item-label-path="name" item-value-path="key" value="{{fsub}}" id="nums"></vaadin-combo-box>
-                <vaadin-combo-box always-float-label label="Группа" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{fnum}}" id="nums"></vaadin-combo-box>
-              </div>
-
-              <div class="layout horizontal">
-                <vaadin-combo-box id="ssub"  always-float-label label="2 предмет по выб." items="[[fsubs]]" item-label-path="name" item-value-path="key" value="{{ssub}}" id="nums"></vaadin-combo-box>
-                <vaadin-combo-box always-float-label label="Группа" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{snum}}" id="nums"></vaadin-combo-box>
-              </div>
-
-              <div class="layout horizontal">
-                <vaadin-combo-box id="tsub" always-float-label label="3 предмет по выб." items="[[tsubs]]" item-label-path="name" item-value-path="key" value="{{tsub}}" id="nums"></vaadin-combo-box>
-                <vaadin-combo-box always-float-label label="Группа" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{tnum}}" id="nums"></vaadin-combo-box>
-              </div>
-
-            </div>
-          </template>
-          <vaadin-combo-box label="Любимый предмет" items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{user.val.subject}}"></vaadin-combo-box>
+          <div class="label">2 предмет по выб.</div>
+          <div class="layout horizontal input">
+            <vaadin-combo-box id="ssub" class="left" no-label-float label="2 предмет по выб." items="[[fsubs]]" item-label-path="name" item-value-path="key" value="{{ssub}}" id="nums"></vaadin-combo-box>
+            <vaadin-combo-box class="right" no-label-float label="Группа" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{snum}}" ></vaadin-combo-box>
+          </div>
+          <div class="label">3 предмет по выб.</div>
+          <div class="layout horizontal input">
+            <vaadin-combo-box id="tsub" class="left" no-label-float label="3 предмет по выб." items="[[tsubs]]" item-label-path="name" item-value-path="key" value="{{tsub}}" id="nums"></vaadin-combo-box>
+            <vaadin-combo-box class="right" no-label-float label="Группа" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{tnum}}"></vaadin-combo-box>
+          </div>
         </div>
-        <div class="card-actions">
-          <paper-button on-tap="save" class="button" style="float: right; margin-bottom: 5px">Сохранить</paper-button>
-        </div>
-      </paper-card>
+      </template>
+      <div class="label">Любимый предмет</div>
+      <div style="padding-right:4px">
+        <vaadin-combo-box label="Предмет" no-label-float items="[[subjects]]" item-label-path="sub" item-value-path="key" class="subject" value="{{user.val.subject}}"></vaadin-combo-box>
+      </div>
+      <div class="label"></div>
+      <paper-button on-tap="save" class="button2" >Сохранить</paper-button>
     </div>
+
   </template>
   <script>
     Polymer({
@@ -168,6 +154,9 @@
       attached: function(){
 
         var that = this;
+        this.fillObjects('SchoolsName/',function(schools){
+          that.schools = schools;
+        });
 
 
 //        this.db.ref('Users/').once('value',function(users){
@@ -204,10 +193,7 @@
             name: this.localize('g2'),
             key: 'g2'
           },
-          {
-            name: this.localize('g3'),
-            key: 'g3'
-          }
+
         ]
 
         this.fsubs = [
@@ -251,20 +237,27 @@
 
       save: function(){
 
-        var data = {};
-        data.class = this.num &&  this.let ? this.num + '-' +  this.let : null;
-        data.subject = this.user.val.subject ? this.user.val.subject : null;
-        data.group = this.user.val.group ? this.user.val.group : null;
-        data.full = data.class && this.user.val.school ? data.class + this.user.val.school: null
+        var data = {}
 
-        data.subs =  this.fsub ||  this.ssub ||  this.tsub ? {}: null;
-        if(data.subs){
-          data.subs.fsub = this.fsub && this.fnum ? this.fsub + '-' + this.fnum: null
-          data.subs.ssub = this.ssub && this.snum ? this.ssub + '-' + this.snum: null
-          data.subs.tsub = this.tsub && this.tnum ? this.tsub + '-' + this.tnum: null
+        data['Users/' + Cookies.get('id') + '/class'] = this.num &&  this.let ? this.num + '-' +  this.let : null;
+        data['Users/' + Cookies.get('id') + '/subject'] = this.user.val.subject ? this.user.val.subject : null;
+        data['Users/' + Cookies.get('id') + '/group'] = this.user.val.group ? this.user.val.group : null;
+        data['Users/' + Cookies.get('id') + '/full'] = data['Users/' + Cookies.get('id') + '/class'] && this.user.val.school ? data['Users/' + Cookies.get('id') + '/class'] +'_'+ this.user.val.school: null
+
+//        data['Users/' + Cookies.get('id') + '/subs'] =  this.fsub ||  this.ssub ||  this.tsub ? {}: null;
+        if(this.fsub ||  this.ssub ||  this.tsub){
+          data['Users/' + Cookies.get('id') + '/subs/fsub'] = this.fsub && this.fnum ? this.fsub + '-' + this.fnum: null
+          data['Users/' + Cookies.get('id') + '/subs/ssub'] = this.ssub && this.snum ? this.ssub + '-' + this.snum: null
+          data['Users/' + Cookies.get('id') + '/subs/tsub']= this.tsub && this.tnum ? this.tsub + '-' + this.tnum: null
+
+          console.log('SchoolChosGroups/' + this.user.val.school + '/' + this.getYear() + '/' + this.fsub + '-' + this.fnum + '/' + Cookies.get('id'))
+          data['SchoolChosGroups/' + this.user.val.school + '/' + this.getYear() + '/' + this.fsub + '-' + this.fnum + '/' + Cookies.get('id')] = this.fsub && this.fnum ? 1: null
+          data['SchoolChosGroups/' + this.user.val.school + '/' + this.getYear() + '/' +  this.ssub +'-'+ this.snum  + '/' + Cookies.get('id')] = this.ssub && this.snum ? 1: null
+          data['SchoolChosGroups/' + this.user.val.school + '/' + this.getYear() + '/' + this.tsub +'-'+ this.tnum + '/' + Cookies.get('id')] = this.tsub && this.tnum ? 1: null
         }
         const that = this;
-        this.db.ref('Users/' + this.user.key).update(data).then(function(){
+        console.log(data)
+        this.db.ref().update(data).then(function(){
           that.fire('open-toast',{
             text: 'Изменения сохранены'
           });

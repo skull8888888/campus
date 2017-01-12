@@ -1,0 +1,101 @@
+<dom-module id="learn-teacher-journal-pupil-goals-goal-module">
+  <style include="wrapper-module">
+    .key{
+      font-size: 18px;
+      font-weight: 500;
+      padding: 0px 0px 8px 0px;
+      color: var(--paper-grey-700);
+      width: 8%
+    }
+
+    .des{
+      width: 52%;
+      padding: 0px 8px 8px 8px;
+      color: var(--paper-grey-800);
+/*
+      border-left: solid var(--paper-grey-300) 2px;
+      border-right: solid var(--paper-grey-300) 2px;
+*/
+/*      padding: 8px 8px 8px 4px*/
+    }
+
+    .tabs{
+      width: 40%;
+      background-color:var(--paper-grey-300);
+      --paper-tabs-selection-bar-color: rgba(0,0,0,0);
+    }
+
+    paper-tabs .iron-selected#achived{
+      background-color:  #81C784;
+      color:white
+    }
+
+    paper-tabs .iron-selected#wt{
+      background-color:  indianred;
+      color:white
+    }
+
+    .tabs paper-tab{
+      width: 50%
+    }
+
+    .goal{
+      border-bottom: solid var(--paper-grey-300) 2px;
+    }
+
+    .wrapper {
+       padding: 8px 12px 0px 12px
+    }
+
+  </style>
+  <template>
+    <div class="wrapper">
+      <div class="wrapper goal layout horizontal">
+        <div class="key">[[goal.key]]</div>
+        <div class="des">
+          [[goal.val.des]]
+        </div>
+        <paper-tabs selected={{achived}} noink class=tabs>
+          <paper-tab id="wt">Cтремится</paper-tab>
+          <paper-tab id="achived">Достиг</paper-tab>
+        </paper-tabs>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-journal-pupil-goals-goal-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'goalChanged(goal,user,pupil,sel,term)',
+        'achivedChanged(achived)'
+      ],
+
+      achivedChanged:function(a){
+
+        if(a != null) this.db.ref('PupilGoals/' + this.user.val.school + '/' + this.getYear() + '/' + this.term +  '/' + this.pupil + '/' + this.sel.split('.')[2] + '/goals/' + this.goal.key ).set(a)
+      },
+
+      goalChanged:function(goal,user,id,sel,term){
+        if(id && goal && sel){
+
+          console.log(123)
+
+          const that = this;
+
+          that.achived = null;
+
+          this.getItem('PupilGoals/' + user.val.school + '/' + this.getYear() +  '/'+ term + '/' + id + '/' + sel.split('.')[2] + '/goals/' + goal.key, g =>{
+
+            if(g != null)
+              that.achived = g;
+          },true)
+        }
+      }
+    })
+  </script>
+</dom-module>

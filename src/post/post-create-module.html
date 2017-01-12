@@ -1,4 +1,3 @@
-<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-database-behavior.html">
 
 <dom-module id="post-create-module">
@@ -6,31 +5,64 @@
     <style include="wrapper-module">
 
       paper-textarea{
+        width:100%;
         margin: 0;
-/*        width: 100px*/
+
+        --paper-input-container-input:{
+          font-size: 16px;
+          padding-left: 2px
+        }
+        --paper-input-container-label:{
+          font-size: 16px;
+          padding-left: 2px
+        }
+
+        --paper-input-container:{
+          margin: 0
+        }
+        --paper-input-container-input-color:black;
+        --paper-input-container-underline:{
+          display: none;
+          height:0px
+        }
+
+        --paper-input-container-focus-color:rgba(0, 0, 0, 0.0);
       }
 
       #content {
-       padding: 10px
+       padding: 8px
       }
 
-      paper-button{
-        --paper-button:{
-          height: 40px;
-        }
+
+      paper-icon-button{
+        background-color: var(--app-secondary-color);
+        color: white;
+        border-radius: 4px
       }
+
+      .button2, #imageButton {
+        margin-right: 8px
+      }
+
+      .buttons{
+        margin-top: 4px
+      }
+
     </style>
     <div class="wrapper">
-      <paper-card>
+      <paper-card elevation=0>
         <div id="content">
-          <paper-textarea label="Очень крутая новость" value="{{text}}" focused="{{focused}}" no-label-float></paper-textarea>
+          <paper-textarea label="Что-то очень интересное" value="{{text}}" focused="{{focused}}" no-label-float></paper-textarea>
+<!--
           <div id="imgdiv" hidden$="{{imageHidden}}">
             <paper-icon-button icon="icons:clear" on-tap="delete" style="float: right"></paper-icon-button>
           </div>
-        </div>
-        <div class="card-actions">
-          <label for="upload"><paper-icon-button icon="image:camera-alt"></paper-icon-button></label><input type="file" value="upload" id="upload" style="position:absolute; visibility:hidden"/>
-          <paper-button on-tap="done" class="button" style="float:right;position:relative;">Отправить</paper-button>
+-->
+          <div class="layout horizontal buttons">
+            <paper-button class="button2" on-tap=done style="width:150px" noink>Отправить</paper-button>
+            <label for="image"><paper-icon-button icon="image:camera-alt" id=imageButton></paper-icon-button></label><input type="file" value="upload" id="image" style="position:absolute; visibility:hidden"/>
+            <label for="file"><paper-icon-button icon="editor:attach-file"></paper-icon-button></label><input type="file" value="upload" id="file" style="position:absolute; visibility:hidden"/>
+          </div>
         </div>
       </paper-card>
     </div>
@@ -44,16 +76,8 @@
           type: Boolean,
           value: true
         },
-
-        progressHidden:{
-          type: Boolean,
-          value: true
-        }
+        type: String
       },
-
-      observers:[
-        'focusedChanged(focused)'
-      ],
 
       behaviors:[
         Polymer.FirebaseDatabaseBehavior
@@ -61,7 +85,7 @@
 
       attached: function(){
         const that = this;
-        this.$.upload.addEventListener('change',function(e){
+        this.$.image.addEventListener('change',function(e){
           that.id = that.db.ref('Posts/').push().key;
           that.fire('toggle-ptoast');
           var file = e.target.files[0];
@@ -71,7 +95,6 @@
           },function(err){
             alert(err);
           },function(){
-
             that.getHeight(task.snapshot.downloadURL,function(ratio){
               that.$.imgdiv.style.height = (that.$.content.clientWidth - 20) * ratio + 'px';
               that.$.imgdiv.style.width = (that.$.content.clientWidth - 20) + 'px';
@@ -96,11 +119,6 @@
         img.src = url;
       },
 
-      focusedChanged:function(focused){
-        if(focused){
-          this.id = this.db.ref('Posts/').push().key;
-        }
-      },
 
       delete: function(){
         this.imageHidden = true;
@@ -109,24 +127,25 @@
 
       done: function(){
 
-        var image = this.src != undefined ? this.src : null;
-        var text = this.text != undefined ? this.text : null;
-        var ratio = this.ratio || null;
+        var image = this.src != undefined ? this.src : null
+        var text = this.text != undefined ? this.text : null
+        var ratio = this.ratio || null
 
         if(this.text != undefined || image){
-          this.db.ref('Posts/' + this.id).set({
+          this.db.ref('Posts/' + Cookies.get('id') + '/'+ this.id).push({
             text: text,
             time: Date.now(),
             image: image,
-            auth: this.auth,
-            ratio: ratio
-          });
-          this.src = null;
-          this.text = null;
-          this.imageHidden = true;
+            auth: Cookies.get('id'),
+            ratio: ratio,
+            type: this.type
+          })
+          this.src = null
+          this.text = null
+          this.imageHidden = true
           this.progressHidden = true
         } else {
-          this.fire('open-toast',{text: 'Напишите что-нибудь, или прикрепите фото-мото'});
+          this.fire('open-toast',{text: 'Напишите что-нибудь, или прикрепите изображение'})
         };
       },
 

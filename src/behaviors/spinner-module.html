@@ -1,0 +1,24 @@
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+
+<dom-module id="spinner-module">
+  <style include="wrapper-module">
+    #wrap{
+      height: 200px
+    }
+
+    paper-spinner-lite{
+      --paper-spinner-color: var(--app-button-color)
+    }
+  </style>
+
+  <template>
+    <div class="wrapper layout horizontal vertical center-center" id="wrap">
+      <paper-spinner-lite active></paper-spinner-lite>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'spinner-module',
+    })
+  </script>
+</dom-module>

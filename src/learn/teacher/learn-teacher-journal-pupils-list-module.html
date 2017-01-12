@@ -1,0 +1,120 @@
+<link rel="import" href="learn-teacher-journal-pupils-list-pupil-module.html">
+
+<dom-module id="learn-teacher-journal-pupils-list-module">
+  <template>
+    <style include="wrapper-module">
+
+      :host{
+        display: block;
+        height: 100%
+      }
+
+      .wrap{
+        background-color: #546E7A;
+        height: 100%;
+        display: flex;
+        flex-flow: column;
+      }
+
+      iron-selector .iron-selected .inner{
+        background-color: var(--app-secondary-color)
+      }
+
+      .inner {
+        margin-left: 8px;
+        margin-right: 8px
+      }
+
+      .head{
+        background-color: #546E7A;
+        flex: 0 0 auto;
+        padding-left: 4px;
+        padding-right: 4px;
+        font-weight: 500;
+        font-size: 14px;
+        color: #78909C;
+        border-bottom: 2px solid #78909C;
+        margin-bottom: 4px;
+      }
+
+      .body{
+        flex: 1 1 auto;
+        overflow-y: auto
+      }
+    </style>
+    <div class="wrap">
+      <div class="layout horizontal head wrapper inner">
+        <div id=name style="width:40%">Ученик</div>
+        <div class="layout horizontal justified marks" style="width:60%">
+          <div id=goals style="width:33%">Форматив</div>
+          <div id=sum style="width:33%"> Сумматив</div>
+          <div id=result style="width:33%">Результат</div>
+        </div>
+      </div>
+      <div class="body">
+        <iron-selector selected={{pupilId}}>
+          <template is=dom-repeat items=[[pupils]] as=pupil id="list">
+            <div>
+              <div style="border-radius:4px" class="inner wrapper">
+                <learn-teacher-journal-pupils-list-pupil-module pupil=[[pupil]] user=[[user]] term=[[term]] sel=[[sel]]></learn-teacher-journal-pupils-list-pupil-module>
+              </div>
+            </div>
+          </template>
+        </iron-selector>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-journal-pupils-list-module',
+
+      properties:{
+        selpupil:{
+          notify:true,
+          reflectToAttributes:true
+        }
+      },
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      observers:[
+        'fill(sel,user)',
+        'selChanged(pupilId)'
+      ],
+
+      fill:function(c,user){
+
+        if(c){
+          var cl = c.split('.');
+
+          const that = this;
+
+          if(cl[0] =='chos' ){
+
+          } else {
+            this.fillOrder('Users/','full',cl[0] +'_' + user.val.school ,function(users){
+
+
+              if(cl[1] != 'g3'){
+                that.pupils = users.filter((i)=>{
+                  return i.val.group == cl[1];
+                });
+              } else{
+                that.pupils = users;
+              }
+
+            });
+          }
+        }
+      },
+
+      selChanged: function(p){
+        if(p!=null)
+          this.selpupil = this.pupils[p].key
+      },
+    })
+  </script>
+</dom-module>

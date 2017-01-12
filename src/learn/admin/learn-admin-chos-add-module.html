@@ -1,0 +1,225 @@
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+
+<dom-module id="learn-admin-chos-add-module">
+  <template>
+    <style include="wrapper-module">
+      paper-input {
+        width:100%;
+        background-color: white;
+        border-bottom: 1px solid var(--paper-grey-200);
+        border-top: 1px solid var(--paper-grey-200);
+      }
+
+      paper-tabs .iron-selected{
+        background-color: var(--app-secondary-color);
+        color: white
+      }
+
+      paper-tabs{
+        background-color: white;
+        border-bottom:1px solid var(--paper-grey-300);
+      }
+
+      vaadin-combo-box{
+        background-color: white
+      }
+
+      .button{
+        margin: 8px 0px 8px 4px
+      }
+
+
+      #sel .outer{
+        padding: 2px;
+        font-size: 16px;
+      }
+
+      #sel .outer .inner{
+        padding: 4px;
+        background-color: var(--paper-grey-300);
+        border-radius: 4px;
+      }
+
+      #sel .iron-selected .inner{
+        background-color: var(--app-secondary-color);
+        font-weight: 500;
+        color: white
+      }
+
+      .left{
+        border-right: 2px solid var(--paper-grey-300);
+        padding-right: 4px
+      }
+
+      .w{
+        border-bottom: 2px solid var(--paper-grey-300);
+      }
+    </style>
+    <div class="layout horizontal w">
+      <div style="width:60%" class="left">
+        <h2 style="margin-left:4px">Новая группа</h2>
+        <form is="iron-form" id="form">
+          <div class="label">Предмет</div>
+          <vaadin-combo-box no-label-float items="[[subs]]" item-label-path="name" item-value-path="key" value="{{sub}}" label="Предмет по выбору" required></vaadin-combo-box>
+          <div class="label">Группа</div>
+          <vaadin-combo-box no-label-float items="[[nums]]" item-label-path="i" item-value-path="i" value="{{num}}" label="Номер группы" required></vaadin-combo-box>
+          <div class="label">День</div>
+          <vaadin-combo-box no-label-float items="[[days]]" item-label-path=name item-value-path=key value="{{day}}" label="День недели" required></vaadin-combo-box>
+        </form>
+      </div>
+      <div style="width:40%">
+        <iron-selector id=sel selected-values={{lessons}} multi>
+          <div class="outer">
+            <div class="inner">1 урок</div>
+          </div>
+          <div class="outer">
+            <div class="inner">2 урок</div>
+          </div>
+          <div class="outer">
+            <div class="inner">3 урок</div>
+          </div>
+          <div class="outer">
+            <div class="inner">4 урок</div>
+          </div>
+          <div class="outer">
+            <div class="inner">5 урок</div>
+          </div>
+          <div class="outer">
+            <div class="inner">6 урок</div>
+          </div>
+          <div class="outer">
+            <div class="inner">7 урок</div>
+          </div>
+          <div class="outer">
+            <div class="inner">8 урок</div>
+          </div>
+          <div class="outer">
+            <div class="inner">9 урок</div>
+          </div>
+          <div class="outer">
+            <div class="inner">10 урок</div>
+          </div>
+        </iron-selector>
+      </div>
+    </div>
+    <paper-button class="button" on-tap="add" >Добавить</paper-button>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-admin-chos-add-module',
+
+      properties:{
+        subs:Array,
+        days: Array,
+        nums: {
+          type: Array,
+          value: function(){
+            var a = [];
+            for(var i=1; i< 20;i++){
+              a.push({
+                i: i
+              });
+            };
+            return a;
+          }
+        },
+
+      },
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      attached:function(){
+        this.subs = [
+          {
+            name: this.localize('phys'),
+            key: 'phys'
+          },
+          {
+            name: this.localize('chem'),
+            key: 'chem'
+          },
+          {
+            name: this.localize('bio'),
+            key: 'bio'
+          },
+          {
+            name: this.localize('ict'),
+            key: 'ict'
+          },
+          {
+            name: this.localize('econ'),
+            key: 'econ'
+          },
+          {
+            name: this.localize('kaz'),
+            key: 'kaz'
+          },
+          {
+            name: this.localize('rus'),
+            key: 'rus'
+          },
+          {
+            name: this.localize('geo'),
+            key: 'geo'
+          },
+        ]
+
+        this.days = [
+          {
+            name: this.localize('df0'),
+            key: '0'
+          },
+          {
+            name: this.localize('df1'),
+            key: '1'
+          },
+          {
+            name: this.localize('df2'),
+            key: '2'
+          },
+          {
+            name: this.localize('df3'),
+            key: '3'
+          },
+          {
+            name: this.localize('df4'),
+            key: '4'
+          },
+          {
+            name: this.localize('df5'),
+            key: '5'
+          },
+        ]
+      },
+
+      add:function(){
+
+        if(this.$.form.validate() && this.lessons.length > 0){
+          const that = this
+
+          var data = {},ar = ''
+
+          for(let i = 0; i< this.lessons.length; i++ ){
+            if(i != this.lessons.length-1)
+              ar += this.lessons[i] + ','
+            else
+              ar += this.lessons[i]
+
+          }
+          data['SchoolChos/' + this.user.val.school + '/' +  this.getYear() + '/' +this.day+ '/'+ this.sub + '-' + this.num] = ar
+
+          this.db.ref().update(data).then(()=>{
+            that.fire('close')
+          })
+        } else {
+          this.fire('toggle-toast',{
+            text: 'Заполните всю форму'
+          })
+        }
+      },
+    })
+  </script>
+</dom-module>

@@ -1,0 +1,66 @@
+<dom-module id="home-profile-posts-module">
+  <template>
+    <style include="wrapper-module">
+    </style>
+    <div>
+      <template is=dom-if if=[[showCreate]]>
+        <post-create-module type="Users"></post-create-module>
+      </template>
+      <iron-list items=[[posts]] as=post class=mw>
+        <template>
+          <post-module post=[[post]]></post-module>
+        </template>
+      </iron-list>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'home-profile-posts-module',
+
+      properties:{
+        sel:{
+          type:Number,
+          value:0
+        },
+        posts:{
+          type: Array,
+          value: []
+        },
+        ref:{
+          type: Boolean,
+          value: false
+        }
+      },
+
+      observers:[
+        'userChanged(user)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      userChanged:function(u){
+        if(u.key == Cookies.get('id'))
+          this.showCreate = true
+        else
+          this.showCreate = false;
+
+        this.set('posts',[])
+
+        this.db.ref('Posts/' + u.key).on('child_added', snap => {
+          this.unshift('posts',{
+            val: snap.val(),
+            key: snap.key
+          })
+        })
+
+
+
+      }
+
+    });
+  </script>
+</dom-module>

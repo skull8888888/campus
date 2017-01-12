@@ -1,0 +1,269 @@
+<dom-module id="learn-pupil-timetable-week-day-module">
+  <template>
+    <style include="wrapper-module">
+
+      .card{
+        color: white;
+        padding: 8px;
+        font-size: 16px;
+        font-weight: 400
+      }
+
+      .bottom {
+         padding: 0px 4px 2px 4px
+      }
+
+      .middle {
+         padding: 0px 4px 0px 4px;
+        color: transparent
+      }
+
+      .middle .card{
+        color: transparent;
+      }
+
+      .middle .card .text{
+        margin: 2px 0px 2px 0px
+      }
+
+      .none{
+        padding: 2px 4px 2px 4px;
+      }
+
+      .none .card{
+        border-radius: 4px
+      }
+
+      .bottom .card{
+        border-radius: 0px 0px 4px 4px;
+        color: transparent
+      }
+
+      .bottom .card .text{
+        margin-top: 2px;
+      }
+
+      .top{
+        padding: 2px 4px 0px 4px
+      }
+
+      .top .card{
+        border-radius: 4px 4px 0px 0px
+      }
+
+      .top .card .text{
+        margin-bottom: 2px;
+      }
+
+      .date{
+        padding: 8px;
+        border-bottom: solid 2px var(--paper-grey-300)
+      }
+
+      .day {
+       color: var(--paper-grey-600);
+        font-size: 19px;
+        font-weight: 500
+      }
+
+      .num{
+        color: var(--paper-grey-300);
+        font-size: 50px;
+      }
+
+      .wrap {
+        padding: 2px 4px 2px 4px
+      }
+
+      .w{
+        padding: 4px 0px 1px 0px;
+
+      }
+
+      paper-dialog{
+        border-radius: 5px;
+        width: 400px;
+      }
+
+      iron-icon{
+        height: 18px
+      }
+    </style>
+    <div class="mod" style="background-color: white">
+      <div class="date">
+        <div class="day">
+          [[localize(d)]]
+        </div>
+        <div class="num" style$="color:[[color]]">
+          [[day.date]]
+        </div>
+      </div>
+      <div class=w>
+        <iron-list items="[[subjects]]" as="subject" selection-enabled selected-item="{{selected}}" id="list">
+          <template>
+            <div class$="[[setClass(index)]]">
+              <div class="card layout horizontal justified" style$="background-color:[[setColor(subject.sub)]]">
+                <div class="text">[[localize(subject.sub)]]</div>
+
+                <template is="dom-if" if=[[subject.homework]] restamp=true>
+                  <iron-icon icon="icons:description"></iron-icon>
+                </template>
+              </div>
+            </div>
+          </template>
+        </iron-list>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-pupil-timetable-week-day-module',
+
+      properties:{
+        subjects:{
+          type: Array,
+          value:[]
+        }
+      },
+
+      observers:[
+        'fill(n,user,day)',
+        'selectedChanged(selected)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior,
+        CardColorBehavior
+      ],
+
+      setClass:function(i){
+
+        if(i + 1 >= this.subjects.length){
+
+          if(this.subjects[i - 1].sub == this.subjects[i].sub)
+            return 'bottom'
+          else
+            return 'none'
+
+
+        } else if(i != 0){
+
+          if(this.subjects[i - 1].sub == this.subjects[i].sub && this.subjects[i + 1].sub == this.subjects[i].sub)
+            return 'middle'
+
+          if(this.subjects[i - 1].sub == this.subjects[i].sub)
+            return 'bottom';
+          if(this.subjects[i + 1].sub == this.subjects[i].sub)
+            return 'top';
+          if(this.subjects[i - 1].sub != this.subjects[i].sub && this.subjects[i + 1].sub != this.subjects[i].sub)
+            return 'none'
+
+        } else {
+          if(this.subjects[i + 1].sub == this.subjects[i].sub)
+            return 'top';
+          else
+            return 'none'
+        }
+
+      },
+
+
+      fill: function(n,user,day){
+
+        this.d = 'd' + n
+        this.m = 'm' + day.month
+
+        const d = new Date()
+        const date = d.getDate()
+        const month = d.getMonth()
+
+        if(day.date == date && day.month == month) this.color = 'indianred'
+
+
+        if(this.homeworkRef) this.homeworkRef.off()
+
+        var Subjects = []
+
+        if(user.val.school && user.val.class && user.val.group){
+
+          var cl = user.val.class.split('-')
+
+          this.fillItemsOnce('SchoolSchedule/' + user.val.school + '/' + this.getYear() + '/' + cl[0] + '/' + cl[1] + '/' + n,(subjects)=>{
+
+            subjects.forEach((subject,index)=>{
+
+              Subjects[index] = {
+                sub: subject
+              }
+
+
+              this.homeworkRef = this.db.ref('SchoolHomework/' + user.val.school + '/' + this.getYear() +'/' + cl[0] + '/' + cl[1] + '/' + this.day.date + '-'  + this.day.month + '/' + subject)
+
+              this.homeworkRef.on('value',(homework)=>{
+                if(homework.exists()){
+                  this.async(()=>{
+                    this.set('subjects.' + index + '.homework', homework.val()[user.val.group] ? homework.val()[user.val.group]: homework.val()['g3'])
+                  },300)
+                }
+              })
+
+            })
+
+            if(Number(cl[0]) >= 11){
+              var c = 0
+              for(sub in user.val.subs){
+                this.getObjectOnce('SchoolChos/' + user.val.school + '/' + this.getYear() + '/' + n + '/' + user.val.subs[sub], s=>{
+                  if(s.val){
+                    var ar = s.val.split(',')
+                    ar.forEach(i =>{
+                      Subjects[i] = {
+                        sub: s.key.split('-')[0]
+                      }
+
+                      const ind = i
+                      this.getItem('SchoolHomework/' + user.val.school + '/' + this.getYear() +'/' + s.key + '/' + this.day.date + '-'  + this.day.month, homework => {
+
+                        if(homework){
+
+                          this.set('subjects.' + ind + '.homework', homework)
+                        }
+                      })
+                    })
+                  }
+                  c++
+                  if(Object.keys(user.val.subs).length == c)
+                    this.set('subjects',Subjects)
+                })
+              }
+
+            } else {
+              this.set('subjects',Subjects)
+            }
+
+
+          },true)
+
+        }
+      },
+
+      selectedChanged:function(s){
+
+        if(s){
+          if(s.homework){
+            this.fire('show-homework',{
+              s: s,
+              day: this.day
+            })
+          } else {
+            this.fire('open-toast',{text: 'По этому предмету пока нет домашнего задания'})
+          }
+          this.$.list.clearSelection()
+        }
+
+      }
+
+    });
+  </script>
+
+</dom-module>

@@ -1,0 +1,87 @@
+<link rel="import" href="../../../bower_components/paper-radio-group/paper-radio-group.html">
+
+<dom-module id="learn-teacher-journal-goal-module">
+  <style include="wrapper-module">
+    :host{
+      width: 400px;
+    }
+
+    .title{
+      font-size: 24px;
+      font-weight: 600;
+      padding: 8px
+    }
+
+    .des{
+      color: var(--paper-grey-700)
+    }
+
+    paper-radio-button{
+      font-size: 18px;
+      font-weight: 600;
+    }
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card class="goal">
+        <div class="title" style$="[[setBorder(achived)]]">[[goal.key]]</div>
+        <div class="wrapper">
+
+          <div class="des">
+            [[goal.val.des]]
+          </div>
+          <div>
+            <paper-radio-group aria-labelledby="label1" selected="{{achived}}">
+              <paper-radio-button name="1">Достиг</paper-radio-button>
+              <paper-radio-button name="0">Стремится</paper-radio-button>
+            </paper-radio-group>
+          </div>
+        </div>
+
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-journal-goal-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'goalChanged(goal,user,pupil,sel)',
+        'achivedChanged(achived)'
+      ],
+
+      setBorder:function(a){
+        if(a)
+          if(a==0){
+            return 'background-color: indianred;'
+          } else {
+            return 'background-color: #81C784'
+          }
+      },
+
+      achivedChanged:function(a){
+
+        if(a) this.db.ref('PupilGoals/' + this.user.val.school + '/' + this.pupil + '/' + this.sel.split('.')[2] + '/' + this.goal.key ).set(a)
+      },
+
+      goalChanged:function(goal,user,id,sel){
+        if(id && goal && sel){
+
+          const that = this;
+
+          that.achived = null;
+
+          this.getItem('PupilGoals/' + user.val.school + '/' + id + '/' + sel.split('.')[2] + '/' + goal.key, g =>{
+
+            if(g)
+              that.achived = g;
+          },true)
+        }
+      }
+    })
+  </script>
+</dom-module>

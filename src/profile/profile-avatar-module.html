@@ -1,13 +1,9 @@
-<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
-
 <dom-module id="profile-avatar-module">
   <style include="wrapper-module">
 
     iron-image#ava{
-      height: 220px;
+      height: 300px;
       width: 100%;
-      border-top-left-radius: 2px;
-      border-top-right-radius: 2px;
     }
 
     paper-button{
@@ -32,13 +28,13 @@
     }
   </style>
   <template>
-    <div class="wrapper">
-      <paper-card>
-        <iron-image id="ava" src$="[[user.val.info.image]]" sizing="cover"></iron-image>
+    <div class="wrapper mw">
+      <paper-card elevation=0>
+        <div class="wrapper">
+          <iron-image id=ava src="[[user.val.info.image]]" sizing="cover"></iron-image>
+        </div>
+
         <div class="layout vertical justified">
-          <div hidden$="[[!isMine(user)]]">
-            <label for="load"><paper-icon-button icon="image:camera-alt"></paper-icon-button>Обновить</label><input type="file" value="upload" id="load" style="position:absolute; visibility:hidden"/>
-          </div>
           <template is="dom-if" if="{{!isMine(user)}}">
             <div class="layout horizontal center-justified center">
               <template is="dom-if" if="{{!subscribed}}">
@@ -52,6 +48,9 @@
           </template>
         </div>
       </paper-card>
+      <div hidden$="[[!isMine(user)]]">
+        <label for="load"><paper-button>Обновить</paper-button></label><input type="file" value="upload" id="load" style="position:absolute; visibility:hidden"/>
+      </div>
     </div>
     <paper-dialog id="dialog">
       <paper-textarea label="сообщение" max-rows="4" value="{{text}}"></paper-textarea>
@@ -79,15 +78,15 @@
 
       attached: function(){
         const that = this;
-        this.$.load.addEventListener('change',function(e){
+        this.$.load.addEventListener('change',(e)=>{
           that.fire('toggle-ptoast');
           var file = e.target.files[0];
           var task = that.app.storage().ref('Avatars/' + Cookies.get('id') + '/' + file.name).put(file);
-          task.on('state_changed',function(snapshot){
+          task.on('state_changed',(snapshot)=>{
             that.fire('progressChanged',{p: snapshot.bytesTransferred / snapshot.totalBytes * 100});
           },function(err){
             alert(err);
-          },function(){
+          },(){
             that.fire('toggle-ptoast');
             that.fire('userChanged');
             that.db.ref('Users/' + that.user.key  + '/info/image').set(task.snapshot.downloadURL);
@@ -130,11 +129,11 @@
       },
 
       send:function(){
-        console.log('leo',this.text);
+
         if(this.text){
 
           var data = {};
-          console.log('leo');
+
 
           var me = this.db.ref("Chats/" + Cookies.get('id') + '/' + this.user.key).push().key;
           var user = this.db.ref("Chats/" + this.user.key + '/' + Cookies.get('id')).push().key;

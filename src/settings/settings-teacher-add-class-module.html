@@ -1,0 +1,188 @@
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+
+<dom-module id="settings-teacher-add-class-module">
+  <template>
+    <style include="wrapper-module">
+
+      .left{
+        border-radius: 4px 0px 0px 4px;
+        border-right: 1px solid var(--paper-grey-300);
+      }
+
+      .right{
+        border-radius: 0px 4px 4px 0px;
+        border-left: 1px solid var(--paper-grey-300);
+      }
+
+      .middle{
+        border: 2px solid var(--paper-grey-300);
+        border-left: 1px solid var(--paper-grey-300);
+        border-right: 1px solid var(--paper-grey-300);
+
+      }
+
+      #parals,#lets{
+        width: 70px
+      }
+
+      #group{
+        width: 120px
+      }
+
+      vaadin-combo-box{
+        width: 140px;
+        background-color: white;
+        border: 2px solid  var(--paper-grey-300)
+      }
+
+
+      .title,paper-tabs{
+        border-bottom: 1px solid var(--paper-grey-300);
+        background-color: var(--paper-grey-100);
+      }
+    </style>
+    <paper-tabs selected={{page}}>
+      <paper-tab>Мои классы</paper-tab>
+      <paper-tab>Предметы по выбору</paper-tab>
+    </paper-tabs>
+    <iron-pages selected=[[page]]>
+      <div>
+        <div class="wrapper title layout horizontal justified">
+          <div class="fs18" style="padding-top:4px">Новый класс</div>
+          <paper-button noink class="button-light-standart" on-tap=add>Добавить класс</paper-button>
+        </div>
+        <div class="wrapper">
+          <div class="label">Мой класс</div>
+          <div class="layout horizontal">
+            <vaadin-combo-box class="left" no-label-float label="Парал" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{num}}" id="parals"></vaadin-combo-box>
+            <vaadin-combo-box class="middle"  no-label-float label="Буква" items="[[lets]]" value="{{let}}" id="lets"></vaadin-combo-box>
+            <vaadin-combo-box class="middle"  no-label-float label="Группа" items="[[groups]]" item-label-path="name" item-value-path="key" value="{{group}}" id="group"></vaadin-combo-box>
+            <vaadin-combo-box class="right"  no-label-float label="Предмет" items="[[subjects]]" item-label-path="name" item-value-path="key" value="{{subject}}"></vaadin-combo-box>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="wrapper title layout horizontal justified">
+          <div class="fs18" style="padding-top:4px">Новый предмет</div>
+          <paper-button noink class="button-light-standart" on-tap=addChos>Добавить предмет</paper-button>
+        </div>
+        <div class="wrapper">
+          <div class="label">Мой предмет по выбору</div>
+          <div class="layout horizontal mw">
+            <vaadin-combo-box class="left" style="width:50%"  no-label-float label="Предмет" items="[[subjects]]" item-label-path="name" item-value-path="key" value="{{csub}}"></vaadin-combo-box>
+            <vaadin-combo-box class="right" style="width:50%" no-label-float label="Группа" items="[[nums]]" item-label-path="i" item-value-path="i" value="{{cnum}}" ></vaadin-combo-box>
+          </div>
+        </div>
+
+      </div>
+    </iron-pages>
+  </template>
+  <script>
+    Polymer({
+      is: 'settings-teacher-add-class-module',
+
+      properties:{
+        page:{
+          type: Number,
+          value:0
+        },
+        nums: {
+          type: Array,
+          value: function(){
+            var a = [];
+            for(var i=1; i< 13;i++){
+              a.push({
+                i: i
+              });
+            };
+            return a;
+          }
+        },
+
+        lets: {
+          type: Array,
+          value:function(){
+            return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+          }
+        }
+      },
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      attached:function(){
+        const that = this
+        this.fillObjects('Subjects/',function(subjects){
+
+          var Subjects = [];
+
+          subjects.forEach(function(sub){
+            var s = {
+              name: that.localize(sub.key),
+              key: sub.key
+            }
+
+            Subjects.push(s);
+          });
+
+          that.subjects = Subjects;
+        })
+
+        this.groups = [
+          {
+            name: this.localize('g1'),
+            key: 'g1'
+          },
+          {
+            name: this.localize('g2'),
+            key: 'g2'
+          },
+          {
+            name: this.localize('g3'),
+            key: 'g3'
+          }
+        ]
+      },
+
+      add: function(){
+
+        if(this.let && this.num && this.group && this.subject && this.let != '' && this.num != '' && this.group != '' && this.subject != ''){
+          this.db.ref('Users/' + Cookies.get('id') + '/classes').push({
+            group: this.group,
+            subject: this.subject,
+            class: this.num + '-' + this.let
+          });
+          this.db.ref('Users/' + Cookies.get('id') + '/subjects/' + this.subject).set(0);
+          this.num = '';
+          this.let = '';
+          this.group = '';
+          this.fire('close-new')
+        } else {
+          this.fire('open-toast',{
+            text:'Заполните все критерии чтобы добавить класс'
+          });
+
+        };
+      },
+
+      addChos: function(){
+
+        if(this.csub && this.cnum && this.cnum != '' && this.cnum != ''){
+          this.db.ref('Users/' + Cookies.get('id') + '/cclasses').push({
+            class: this.csub + '-' + this.cnum,
+            chos: true
+          });
+
+          this.cnum = '';
+          this.csub = '';
+        } else {
+          this.fire('open-toast',{
+            text:'Заполните все критерии чтобы добавить предмет по выбору'
+          });
+        };
+      },
+    })
+  </script>
+</dom-module>

@@ -1,12 +1,35 @@
-<link rel="import" href="games-subjects-module.html">
-<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<!--<link rel="import" href="games-subjects-module.html">-->
+<link rel="import" href="games-card-module.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-request.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
 
 <dom-module id="games-module">
   <template>
-    <style>
+    <style include="wrapper-module">
+      paper-tabs{
+        @apply(--tabs-theme);
+        position: fixed;
+        width: 100vw
+      }
+
+      .left{
+
+        height: calc(100vh - 114px);
+        width: 100%;
+        position: fixed;
+
+      }
+
+      @media screen and (-webkit-min-device-pixel-ratio:0)
+        and (min-resolution:.001dpcm) {
+          .left{
+            margin-top: 50px;
+
+          }
+      }
 
     </style>
+<!--
     <app-location route="{{route}}" id="location"></app-location>
     <app-route
       route="{{route}}"
@@ -24,17 +47,33 @@
                active="{{gameIdActive}}"
                >
     </app-route>
+-->
+
+    <paper-tabs scrollable selected="{{selected}}" attr-for-selected="name">
+      <paper-tab name="all">ИГРЫ</paper-tab>
+      <paper-tab name="mine">МОИ ИГРЫ</paper-tab>
+    </paper-tabs>
+    <iron-pages id="pages" selected="[[selected]]" attr-for-selected="name">
+      <div class="mw" name="all">
+        <iron-list items="[[games]]" as="game" grid class="mw">
+          <template>
+            <div>
+              <games-card-module game="[[game]]"></games-card-module>
+            </div>
+
+          </template>
+        </iron-list>
+      </div>
+    </iron-pages>
+
+
+<!--
     <iron-pages id="pages">
       <iron-grid>
         <div class="offset-l2 l8 offset-xs0 xs12">
           <games-subjects-module></games-subjects-module>
         </div>
       </iron-grid>
-<!--
-      <template id="subjectTemplate" is="dom-if" if="true" restamp="true">
-        <games-subject-module subject="{{router.subject}}" id="subject"></games-subject-module>
-      </template>
--->
       <games-subject-module subject="{{router.subject}}" id="subject"></games-subject-module>
       <template is="dom-if" if="true" id="prepareTemplate">
         <iron-grid>
@@ -44,15 +83,7 @@
         </iron-grid>
       </template>
     </iron-pages>
-    <paper-dialog id="dialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
-      <div>
-        <p>Вам понравилась игра?</p>
-        <div>
-          <paper-button onclick="dialog.close()">Закрыть</paper-button>
-          <paper-button raised on-tap="liked">Понравилась</paper-button>
-        </div>
-      </div>
-    </paper-dialog>
+-->
     <iron-request id="xhr"></iron-request>
   </template>
   <script>
@@ -76,7 +107,11 @@
       ],
 
       attached: function(){
-        this.$.xhr.send({url: 'https://campus-server.herokuapp.com', body: {}});
+        const that = this;
+        this.fillObjects('Games/',games=>{
+          that.games = games;
+        })
+//        this.$.xhr.send({url: 'https://campus-server.herokuapp.com', body: {}});
       },
 
       toSubject: function(router){
@@ -89,20 +124,20 @@
 
       fromSubject: function(router,active){
 //        if(this.$.subjectTemplate.ctor)
-//          restamp(this.$.subjectTemplate);
-        if(!active && router.subject){
-          this.$.pages.selected = 0;
-        } else if(!active && !router.subject){
-          this.$.pages.selected = 0;
-        }
+////          restamp(this.$.subjectTemplate);
+//        if(!active && router.subject){
+//          this.$.pages.selected = 0;
+//        } else if(!active && !router.subject){
+//          this.$.pages.selected = 0;
+//        }
       },
 
       toGameId: function(router,active){
         const that = this;
 
         if(router.gameId && !active){
-          if(this.$.prepareTemplate.ctor)
-            restamp(this.$.prepareTemplate);
+//          if(this.$.prepareTemplate.ctor)
+//            restamp(this.$.prepareTemplate);
           this.getObjectOnce('Games/' + router.gameId,function(game){
             that.game = game;
           });
@@ -114,15 +149,15 @@
           ref.set('searching');
           ref.onDisconnect().set(null);
           this.importHref(this.resolveUrl('games-prepare-module.html'), null, null, true);
-          this.$.pages.selected = 2;
+//          this.$.pages.selected = 2;
         }
       },
 
       backFromGameId: function(router,active){
-        if(!active && router.gameId){
-          this.$$("#prepare").fire('meLeft');
-          this.$.pages.selected = 1;
-        }
+//        if(!active && router.gameId){
+//          this.$$("#prepare").fire('meLeft');
+//          this.$.pages.selected = 1;
+//        }
       },
 
       ended: function(){

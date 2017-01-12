@@ -1,0 +1,97 @@
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="message-panel-channels-module.html">
+<link rel="import" href="message-panel-private-module.html">
+
+<dom-module id="message-panel-module">
+  <template>
+    <style include="wrapper-module">
+
+      :host{
+        display: block;
+        height: 100%
+      }
+
+      #wrap{
+        overflow: auto;
+        flex: 1 0 auto;
+      }
+
+      paper-input{
+        width: 100%;
+        background-color: #78909C;
+        border-radius: 4px;
+        --paper-input-container-input:{
+          font-size: 18px;
+          font-weight: 400;
+          padding-left: 4px;
+          color: var(--paper-grey-200)
+        }
+
+
+        --paper-input-container-label:{
+          font-size: 18px;
+          font-weight: 400;
+          color: #546E7A;
+          padding-left: 4px;
+        }
+        --paper-input-container-input-color:var(--paper-grey-100);
+
+        --paper-input-container-underline:{
+          display: none;
+          height:0px
+        }
+
+        --paper-input-container-focus-color:rgba(0, 0, 0, 0.0);
+      }
+
+      .w{
+        background-color: var(--app-b2c);
+        display: flex;
+        flex-flow: column;
+        height: 100%;
+      }
+
+      .head{
+        flex: 0 0 auto;
+      }
+    </style>
+    <div class="w">
+      <div class="wrapper head">
+        <paper-input label="Поиск" no-label-float value={{searchText}}>
+          <iron-icon prefix icon="icons:search" style="color:#546E7A">
+          </iron-icon>
+        </paper-input>
+      </div>
+      <div id="wrap">
+        <message-panel-channels-module id="channel" user=[[user]] sel={{sel}} search=[[searchText]]></message-panel-channels-module>
+        <message-panel-private-module id="private" user="[[user]]" sel={{sel}} search=[[searchText]]></message-panel-private-module>
+      </div>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'message-panel-module',
+      properties:{
+        sel:{
+          reflectToAttributes:true,
+          notify:true
+        },
+      },
+
+      listeners:{
+        'channel-selected': 'channelSelected',
+        'private-selected': 'privateSelected'
+      },
+
+      channelSelected:function(){
+        this.$.private.deselect()
+      },
+      privateSelected:function(){
+        this.$.channel.deselect()
+      },
+
+    })
+  </script>
+</dom-module>
+

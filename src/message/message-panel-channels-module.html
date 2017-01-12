@@ -1,0 +1,117 @@
+<link rel="import" href="message-panel-channels-channel-module.html">
+
+<dom-module id="message-panel-channels-module">
+  <template>
+    <style include="wrapper-module">
+      iron-selector .iron-selected .inner{
+        background-color: var(--app-secondary-color)
+      }
+
+      .wrap{
+        padding: 4px 8px 0px 8px;
+      }
+
+      .inner{
+        border-radius: 4px;
+
+      }
+
+      .title{
+        color: #90A4AE;
+        padding:0px 0px 0px 12px;
+        font-size: 20px;
+        font-weight: 500
+      }
+    </style>
+    <template is=dom-if if=[[showChannels]] restamp=true>
+      <div class="title">Каналы</div>
+      <iron-selector id=selector selected="{{index}}">
+        <template is="dom-repeat" id="list" items=[[channels]] as=channel>
+          <div class="wrap">
+            <div class="inner">
+              <message-panel-channels-channel-module channel="[[channel]]"></message-panel-channels-channel-module>
+            </div>
+          </div>
+        </template>
+      </iron-selector>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      is: 'message-panel-channels-module',
+
+      properties:{
+        sel:{
+          notify:true,
+          reflectToAttributes:true
+        }
+      },
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      deselect:function(){
+        this.index = null
+        console.log(12)
+      },
+
+      observers:[
+        'userChanged(user)',
+        'channelChanged(index)'
+      ],
+
+      channelChanged:function(i){
+        if(i != null){
+          this.sel = {
+            key: this.channels[i].key,
+            type: 'channel'
+          }
+          this.fire('channel-selected')
+        }
+
+      },
+
+
+      userChanged: function(u){
+
+        this.startSpin()
+        this.db.ref('Chats/' + Cookies.get('id') + '/chats').orderByChild('type').equalTo('channel').on('value', (snap)=>{
+
+          var items = []
+
+          snap.forEach((item)=>{
+            items.push({
+              val: item.val(),
+              key: item.key
+            })
+          })
+
+          items = items.sort( (a,b) =>{
+            if (a.val.time > b.val.time) {
+              return -1;
+            }
+            if (a.val.time < b.val.time) {
+              return 1;
+            }
+
+            return 0;
+          })
+
+          if(items.length == 0)
+            this.showChannels = false
+          else
+            this.showChannels = true
+
+
+          this.channels = items
+          this.endSpin()
+        })
+
+
+      }
+
+
+    })
+  </script>
+</dom-module>

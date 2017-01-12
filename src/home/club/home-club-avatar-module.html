@@ -1,0 +1,115 @@
+<dom-module id="home-club-avatar-module">
+  <style include="wrapper-module">
+
+    iron-image#ava{
+      height: 300px;
+      width: 100%;
+      margin: 0
+    }
+
+    paper-button{
+      --paper-button:{
+        height: 40px;
+        margin-bottom: 8px;
+      }
+    }
+
+    paper-icon-button{
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    paper-dialog{
+      width: 300px
+    }
+
+    #sender{
+      float: right;
+      margin-right: 18px;
+    }
+
+    .button2 {
+      margin-top: 4px;
+    }
+  </style>
+  <template>
+    <div class="wrapper mw">
+      <paper-card elevation=0 class="wrapper">
+        <iron-image id=ava src="[[club.val.info.image]]" sizing="cover"></iron-image>
+      </paper-card>
+      <template is="dom-if" if="{{!isMine(user)}}">
+        <template is="dom-if" if="{{!subscribed}}">
+          <paper-button on-tap="subscribe" class="button2 mw">Подписаться</paper-button>
+        </template>
+        <template is="dom-if" if="{{subscribed}}">
+          <paper-button on-tap="unsubscribe" class="button1 mw">Вы подписаны</paper-button>
+        </template>
+      </template>
+      <div hidden$="[[!isMine(club)]]">
+        <label for="load"><paper-button class="button2 mw">Обновить</paper-button></label><input type="file" value="upload" id="load" style="position:absolute; visibility:hidden"/>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'home-club-avatar-module',
+
+      observers:[
+        'clubChanged(club)'
+      ],
+
+      behaviors: [
+        Polymer.FirebaseDatabaseBehavior
+      ],
+
+      attached: function(){
+        const that = this;
+        this.$.load.addEventListener('change',function(e){
+          that.fire('toggle-ptoast');
+          var file = e.target.files[0];
+          var task = that.app.storage().ref('Avatars/' + Cookies.get('id') + '/' + file.name).put(file);
+          task.on('state_changed',function(snapshot){
+            that.fire('progressChanged',{p: snapshot.bytesTransferred / snapshot.totalBytes * 100});
+          },function(err){
+            alert(err);
+          },function(){
+            that.fire('toggle-ptoast');
+            that.fire('userChanged');
+            that.db.ref('Users/' + that.user.key  + '/info/image').set(task.snapshot.downloadURL);
+          });
+        });
+      },
+
+      clubChanged: function(club){
+
+        var that = this;
+        this.db.ref('Followers/' + club.key + '/' + Cookies.get('id')).on('value',function(snapshot){
+          if(snapshot.exists()){
+            that.subscribed = true
+          } else {
+            that.subscribed = false
+          }
+        });
+      },
+
+      isMine: function(club){
+        return club.val.admins[Cookies.get('id')] == '0'
+      },
+
+      subscribe: function(){
+        var data = {};
+        data['Following/' + Cookies.get('id') + '/' + this.club.key] = 'follow';
+        data['Followers/' + this.club.key + '/' + Cookies.get('id')] = 'followed';
+        this.db.ref().update(data);
+      },
+
+      unsubscribe: function(){
+        var data = {};
+        data['Following/' + Cookies.get('id') + '/' + this.club.key] = null;
+        data['Followers/' + this.club.key + '/' + Cookies.get('id')] = null;
+        this.db.ref().update(data);
+      }
+
+    })
+  </script>
+</dom-module>

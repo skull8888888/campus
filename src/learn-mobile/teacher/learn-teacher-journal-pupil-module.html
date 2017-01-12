@@ -1,0 +1,81 @@
+<link rel="import" href="learn-teacher-journal-goal-module.html">
+
+
+<dom-module id="learn-teacher-journal-pupil-module">
+  <style include="wrapper-module">
+    .goal{
+      width: 400px;
+    }
+
+    .title{
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .des{
+      color: var(--paper-grey-700)
+    }
+
+    paper-radio-button{
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .name{
+
+    }
+
+  </style>
+  <template>
+    <div>
+
+      <div>
+        <div class="name">[[pupil.val.info.name]] [[pupil.val.info.surname]]</div>
+        <div>[[a]]/[[all]]</div>
+      </div>
+
+      <iron-list items="[[goals]]" as="goal" id="list" class="mw">
+        <template>
+          <learn-teacher-journal-goal-module pupil="{{pupil.key}}" user="[[user]]" goal="{{goal}}" sel="{{sel}}"></learn-teacher-journal-goal-module>
+        </template>
+      </iron-list>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-journal-pupil-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'pupilChanged(sel,user)',
+      ],
+
+      pupilChanged:function(sel,user){
+        if(sel && user){
+
+          const that = this;
+
+          const p = sel.split('.')
+
+          this.fillItems('PupilGoals/' + user.val.school + '/' + this.pupil + '/' + sel.split('.')[2], goals =>{
+
+            goals.forEach( goal => {
+              that.all++
+              if(goal == '1')
+                that.a++
+            });
+
+          },true)
+
+          this.fillObjects('Goals/' + user.val.school + '/' + p[2] + '/' + p[0].split('-')[0], goals =>{
+            that.goals = goals;
+            that.all = goals.length;
+          },true)
+        }
+      }
+    })
+  </script>
+</dom-module>

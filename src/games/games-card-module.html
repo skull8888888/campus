@@ -1,0 +1,40 @@
+<dom-module id="games-card-module">
+  <style include="wrapper-module">
+    paper-card{
+      width: 220px;
+      height:280px
+    }
+  </style>
+  <template>
+    <div class="wrapper">
+      <paper-card>
+        <div class="wrapper head" style$="background-color:[[setColor(game.val.subject)]]">
+          [[localize(game.val.subject)]]
+        </div>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'games-card-module',
+
+      observers:[
+        'gameChanged(game)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior,
+        CardColorBehavior,
+        LocalizeBehavior
+      ],
+
+      gameChanged: function(game){
+        var that = this;
+        console.log(game.val)
+        this.getItemOnce('Users/' + game.val.auth + '/info',function(user){
+          that.user = user;
+        })
+      }
+    })
+  </script>
+</dom-module>

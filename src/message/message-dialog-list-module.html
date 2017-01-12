@@ -1,0 +1,189 @@
+<link rel="import" href="message-dialog-box-module.html">
+<link rel="import" href="message-input-module.html">
+<link rel="import" href="message-channel-info-module.html">
+
+<dom-module id="message-dialog-list-module">
+    <template>
+    <style include="wrapper-module">
+
+      :host{
+        display: block;
+        height: 100%;
+      }
+
+      .head{
+        border-bottom: solid 1px var(--paper-grey-200);
+        flex: 0 0 26px;
+      }
+
+      .name{
+        font-size: 20px;
+        font-weight: 500;
+        color: #546E7A;
+        padding-left: 8px;
+
+      }
+
+      #itemicon {
+        width:50px;
+        height:50px;
+        background-repeat:no-repeat;
+        background-size:cover;
+        border-radius:50%;
+      }
+
+      paper-icon-button{
+        --paper-icon-button:{
+          width: 26px;
+          height: 26px;
+          padding: 0;
+          color: var(--paper-grey-400)
+        };
+      }
+
+      #wrap{
+        -webkit-flex: 1 1 auto;
+        overflow-y: auto;
+        -moz-transform: scaleY(-1);
+        -webkit-transform: scaleY(-1);
+        -ms-transform: scaleY(-1);
+        -o-transform: scaleY(-1);
+        transform: scaleY(-1);
+      }
+
+      .w{
+        display: flex;
+        flex-flow: column;
+        width: 100%;
+        height: 100%;
+      }
+
+      #input{
+        flex: 0 0 auto;
+        margin-top: auto;
+        width: 100%
+      }
+
+      paper-dialog{
+        width: 500px
+      }
+
+      #list{
+        height: 100%
+      }
+    </style>
+      <div class="w">
+        <div class="layout horizontal head wrapper justified">
+
+          <template is=dom-if if=[[channel]] restamp=true>
+            <div class="layout horizontal">
+              <div class="name"># [[channel.name]]</div>
+              <div class="members fc500 fs16 fw500" style="padding:2px 0px 0px 16px">Участников: [[members]]</div>
+            </div>
+
+
+          </template>
+          <template is=dom-if if=[[user]] restamp=true>
+            <div class="name"># [[user.name]] [[user.surname]]</div>
+          </template>
+          <paper-icon-button icon="icons:more-vert" on-tap=showInfo noink>
+
+          </paper-icon-button>
+        </div>
+        <div id="wrap">
+          <template is="dom-repeat" id="list" items=[[messages]] as="message" initialCount="10">
+            <message-dialog-box-module message=[[message]] prev=[[prevMessage(index)]] sel=[[sel]] members=[[members]]></message-dialog-box-module>
+          </template>
+        </div>
+        <div id="input">
+          <message-input-module id=input chatid=[[sel.key]] members=[[channel.members]] type=[[sel.type]]></message-input-module>
+        </div>
+      </div>
+
+      <paper-dialog id=privateInfo>
+
+      </paper-dialog>
+
+      <paper-dialog id=channelInfo
+                    entry-animation="scale-up-animation"
+                    exit-animation="fade-out-animation"
+                    with-backdrop>
+        <message-channel-info-module chatid=[[sel.key]] channel=[[channel]]></message-channel-info-module>
+      </paper-dialog>
+
+
+    </template>
+    <script>
+        Polymer({
+          is: 'message-dialog-list-module',
+
+          properties:{
+            messages: {
+              type: Array,
+              value:[]
+            },
+            type: String,
+            members: Array,
+            title: String
+          },
+
+          behaviors:[
+            DatabaseBehavior
+          ],
+
+          observers:[
+            'selChanged(sel)',
+          ],
+
+          prevMessage:function(index){
+            if(index < this.messages.length - 1)
+              return this.messages[index+1]
+            else return null
+          },
+
+          showInfo: function(){
+
+            console.log(this.sel)
+
+            if(this.sel.type == "channel")
+              this.$.channelInfo.open()
+          },
+
+          selChanged:function(c){
+
+            this.messages = []
+            this.channel = null
+            this.user = null
+
+            if(this.pl)
+              this.pl.off()
+
+            if(c.type == 'channel'){
+
+              this.getItem('Channels/' + c.key, channel=>{
+                this.channel = channel
+                this.members = Object.keys(channel.members).length
+              })
+
+            } else if(c.type == 'private'){
+              this.getItemOnce('Users/' + c.key + '/info',user=>{
+                this.user = user
+                this.members[c.key] = user
+              })
+            }
+
+            this.pl = this.db.ref('Chats/' + Cookies.get('id') + '/messages/' + c.key)
+
+            this.pl.limitToLast(100).on('child_added', (message)=>{
+
+              this.unshift('messages',{
+                val:message.val(),
+                key: message.key
+              })
+
+            })
+
+          },
+        })
+    </script>
+</dom-module>

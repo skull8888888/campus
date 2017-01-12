@@ -1,0 +1,65 @@
+<link rel="import" href="learn-pupil-journal-pupil-goals-goal-module.html">
+<dom-module id="learn-pupil-journal-pupil-goals-module">
+  <style include="wrapper-module">
+
+    :host{
+      display: block;
+      height: 100%
+    }
+
+    .goal{
+      width: 400px;
+    }
+
+    .title{
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .des{
+      color: var(--paper-grey-700)
+    }
+
+    .wrap{
+      height: 100%;
+      overflow: auto
+    }
+
+  </style>
+  <template>
+    <div id=wrap>
+      <iron-list items=[[goals]] as="goal" id="list" class="mw" scroll-target=wrap>
+        <template>
+          <learn-pupil-journal-pupil-goals-goal-module user=[[user]] goal=[[goal]] term=[[term]] subject=[[subject]]></learn-pupil-journal-pupil-goals-goal-module>
+        </template>
+      </iron-list>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-pupil-journal-pupil-goals-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'pupilChanged(user,subject,term)',
+      ],
+
+
+      pupilChanged:function(user,subject,term){
+        if(subject && user){
+
+          const that = this;
+
+          const cl = user.val.class.split('-')
+
+          this.fillObjects('Goals/' + user.val.school + '/' + this.getYear() + '/' + term + '/' + subject + '/' + cl[0] + '/goals', goals =>{
+            that.goals = goals;
+          },true)
+        }
+      }
+    })
+  </script>
+</dom-module>

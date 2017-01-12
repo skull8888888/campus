@@ -1,0 +1,67 @@
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+
+<dom-module id="learn-admin-stuff-add-module">
+  <template>
+    <style include="wrapper-module">
+      paper-input {
+        width:100%;
+        background-color: white;
+        border-bottom: 1px solid var(--paper-grey-200);
+        border-top: 1px solid var(--paper-grey-200);
+      }
+
+      paper-tabs .iron-selected{
+        background-color: var(--app-secondary-color);
+        color: white
+      }
+
+      paper-tabs{
+        background-color: white;
+        border-bottom:1px solid var(--paper-grey-300);
+      }
+
+      .button{
+        margin: 8px 0px 8px 4px
+      }
+    </style>
+    <div>
+      <h2 style="margin-left:4px">Новый персонал</h2>
+      <form is="iron-form" id="form">
+        <div class="label">Имя и Фамилия</div>
+        <paper-input no-label-float required value="{{name}}" label="Полное имя персонала"></paper-input>
+        <div class="label">ИИН</div>
+        <paper-input no-label-float required allowed-pattern="[0-9]" maxlength="12" value="{{pin}}" label="Подлинный ИИН"></paper-input>
+        <div class="label">Тип</div>
+        <paper-tabs selected="{{type}}" attr-for-selected="name" noink no-bar>
+          <paper-tab name="teacher">[[localize('teacher')]]</paper-tab>
+          <paper-tab name="curator">[[localize('curator')]]</paper-tab>
+          <paper-tab name="admin">[[localize('admin')]]</paper-tab>
+        </paper-tabs>
+      </form>
+      <paper-button class="button" on-tap="add" >Добавить</paper-button>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-admin-stuff-add-module',
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      add:function(){
+        if(this.$.form.validate() && this.type){
+          const that = this
+          this.db.ref('SchoolStuff/' + this.user.val.school + '/' + this.type + '/' + this.pin).set(this.name).then(()=>{
+            that.fire('close')
+          })
+        } else {
+          that.fire('toggle-toast',{
+            text: 'Заполните всю форму'
+          })
+        }
+      },
+    })
+  </script>
+</dom-module>

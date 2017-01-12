@@ -1,17 +1,37 @@
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+
 
 <dom-module id="join-module">
 <template>
     <style include="wrapper-module">
-      paper-card{
-          width: 100%
-      }
 
       a{
         text-decoration: none;
         color: black;
         text-align: center;
-        color: var(--app-primary-color)
+        font-weight: 400;
+        margin-top: 8px;
+        color: white
+      }
+
+      paper-input, vaadin-combo-box {
+/*        margin-top: 8px;*/
+        width:100%;
+        background-color: white;
+        border-bottom:1px solid var(--paper-grey-300);
+      }
+
+      .wrap{
+        height: 91vh
+      }
+
+      .button{
+
+        background-color: var(--app-secondary-color);
+        width: 100%;
+        margin: 0;
+        margin-top: 8px;
       }
 
       .join {
@@ -19,30 +39,71 @@
         color: white;
         width: 200px;
       }
+
+      paper-card{
+        background-color: #eee
+      }
+
+      paper-tabs .iron-selected{
+        background-color: var(--app-secondary-color);
+        color: white
+      }
+
+      paper-tabs{
+        background-color: white;
+        border-bottom:1px solid var(--paper-grey-300);
+      }
+
+      .title{
+/*        text-align: center;*/
+        padding: 4px;
+        font-size: 30px;
+        font-weight: 500;
+        color: white
+      }
+
+      .content{
+        padding: 0px 80px 0px 80px
+      }
+
+      .enter {
+        --paper-button:{
+          height: 40px;
+          font-weight: 500;
+          font-size: 14px;
+          padding: 4px 8px
+        }
+      }
     </style>
-   <iron-grid>
-    <div class="xs12 offset-xs0 l4 offset-l4 wrapper">
-      <paper-card>
-        <div class="card-content">
-          <form is="iron-form" id="form">
-            <vaadin-combo-box items="[[types]]" label="Кто вы?" required item-label-path="name" item-value-path="key" value="{{type}}"></vaadin-combo-box>
-            <paper-input name="name" label="Имя" value="{{Name}}" required></paper-input>
-            <paper-input name="surname" label="Фамилия" value="{{surname}}" required></paper-input>
-            <paper-input name="email" label="Email" value="{{email}}" required></paper-input>
-            <paper-input name="password" label="Пароль" type="password" value="{{password}}" required></paper-input>
-            <paper-input name="password" label="Повторите пароль" type="password" pattern="{{password}}" error-message="пароли не совпадают" required></paper-input>
-            </form>
-          </div>
-          <div class="card-actions layout vertical center">
-            <paper-button raised on-tap="join" class="join">Готово</paper-button>
-            <a href="/login">
-              <paper-button on-tap="hasAccount">Есть аккаунт</paper-button>
-            </a>
-          </div>
-        </paper-card>
-    </div>
-    </iron-grid>
-    <firebase-auth id="auth"></firebase-auth>
+  <div class="wrap wrapper">
+    <paper-tabs style="border-radius: 4px 4px 0px 0px" selected="{{type}}" attr-for-selected="name" noink no-bar>
+      <paper-tab name="pupil">[[localize('pupil')]]</paper-tab>
+      <paper-tab name="teacher">[[localize('teacher')]]</paper-tab>
+      <paper-tab name="curator">[[localize('curator')]]</paper-tab>
+      <paper-tab name="admin">[[localize('admin')]]</paper-tab>
+    </paper-tabs>
+
+    <form is="iron-form" id="form">
+      <vaadin-combo-box label="Школа" no-label-float items="[[schools]]" item-label-path="val" item-value-path="key" value="{{school}}"></vaadin-combo-box>
+      <template is="dom-if" if="{{showPin(type,school)}}">
+        <paper-input on-keydown="checkForEnter" name="name" no-label-float label="ИИН" required value="{{pin}}" required allowed-pattern="[0-9]" maxlength="12" error-message="вы не {{localize(type)}}">
+          <paper-spinner-lite suffix active="[[active]]" style="margin-right:8px"></paper-spinner-lite>
+          <template is="dom-if" if="{{ended}}">
+            <iron-icon suffix icon="[[icon]]" style$="color:{{color}}"></iron-icon>
+          </template>
+        </paper-input>
+      </template>
+      <paper-input on-keydown="checkForEnter"  name="name" no-label-float label="Имя" value="{{Name}}" required></paper-input>
+      <paper-input on-keydown="checkForEnter" name="surname" no-label-float  label="Фамилия" value="{{surname}}" required></paper-input>
+      <paper-input on-keydown="checkForEnter" name="email" no-label-float  label="Почта" value="{{email}}" required></paper-input>
+      <paper-input on-keydown="checkForEnter" name="password" no-label-float  label="Пароль" type="password" value="{{password}}" required></paper-input>
+      <paper-input on-keydown="checkForEnter" style="border-radius: 0px 0px 4px 4px" name="password" no-label-float  label="Повторите пароль" type="password" pattern="{{password}}" error-message="пароли не совпадают" required></paper-input>
+
+    </form>
+    <paper-button on-tap="join" class="button">Создать</paper-button>
+    <paper-button on-tap="back" class="mw enter" noink style="color:white">Войти</paper-button>
+  </div>
+  <firebase-auth id="auth"></firebase-auth>
 </template>
 <script>
   Polymer({
@@ -57,50 +118,77 @@
 
     behaviors:[
       LocalizeBehavior,
-      Polymer.FirebaseDatabaseBehavior
+      DatabaseBehavior
     ],
 
-    attached: function(){
-      this.types = [
-        {
-          name: this.localize('teacher'),
-          key: 'teacher'
-        },
-        {
-          name: this.localize('curator'),
-          key: 'curator'
-        },
-        {
-          name: this.localize('pupil'),
-          key: 'pupil'
-        },
-        {
-          name: this.localize('admin'),
-          key: 'admin'
-        }
-      ]
+    observers:[
+      'pinChanged(pin)'
+    ],
+
+    showPin:function(s,p){
+      if(s && p) return true
+      else return false
+    },
+
+    back:function(){
+      this.fire('back')
 
     },
 
-    join: function(){
+    checkForEnter: function(e) {
+      if (e.keyCode === 13) this.join()
+    },
+
+    pinChanged:function(p){
+      if(p.length == 12 && this.type != 'pupil'){
+
+        const that = this
+        this.active = 'true'
+        this.db.ref('SchoolStuff/' + this.school + '/' + this.type + '/' + this.pin).once('value',pin=>{
+          that.ended = true
+          if(pin.exists()){
+            that.icon = 'icons:check'
+            that.color = 'green'
+            that.ok = true
+          } else {
+            that.icon = 'icons:clear'
+            that.color = 'red'
+            that.ok = false
+          }
+          that.active = false
+        })
+      }
+    },
+
+    attached: function(){
       const that = this;
+      this.fillObjects('SchoolsName/',function(schools){
+        that.schools = schools;
+      });
+    },
+
+    join: function(){
+
       if(this.$.form.validate()){
-        this.$.auth.createUserWithEmailAndPassword(this.email,this.password).then(function(user){
-          that.db.ref('Users/' + user.uid).set({
+        this.$.auth.createUserWithEmailAndPassword(this.email,this.password).then( (user)=>{
+
+          this.db.ref('Users/' + user.uid).set({
             info:{
               link: user.uid,
-              name: that.Name,
-              surname: that.surname,
+              name: this.Name,
+              surname: this.surname,
               image: 'https://firebasestorage.googleapis.com/v0/b/campus-3320b.appspot.com/o/Avatars%2FDeelProfile.png?alt=media&token=64c39a16-6de9-469a-be69-9f429af21a54',
-              type: that.type,
+              type: this.type,
             },
-            online: true
-          });
+            online: true,
+            school:this.school,
+            pin:this.pin
+          })
           Cookies.set('id',user.uid,{expires: 10000,path:''});
           Cookies.set('link',user.uid,{expires: 10000,path:''});
-          window.location = 'feed'
+          window.location = '/settings'
         }).catch(function(error){
-          that.fire('open-toast',{
+          this.fire('open-toast',{
             text: error
           })
         });

@@ -1,0 +1,82 @@
+<dom-module id="learn-mobile-module">
+  <template>
+    <style is="custom-style">
+    </style>
+    <iron-pages id="pages" attr-for-selected="name">
+      <learn-teacher-module name="teacher" user="[[user]]"></learn-teacher-module>
+      <learn-pupil-module name="pupil" user="[[user]]"></learn-pupil-module>
+      <learn-curator-module name="curator" user="[[user]]"></learn-curator-module>
+      <learn-admin-module name="admin" user="[[user]]"></learn-admin-module>
+    </iron-pages>
+
+  </template>
+
+  <script>
+
+    Polymer({
+      is: 'learn-mobile-module',
+
+      observers:[
+        'userChanged(user)'
+      ],
+
+      listeners:{
+        'check': 'check'
+      },
+
+      userChanged: function(user){
+
+        this.importHref(this.resolveUrl(user.val.info.type + '/learn-' + user.val.info.type + '-module.html'), null, null, true)
+        this.$.pages.select(user.val.info.type)
+
+      },
+
+//      check:function(){
+//
+//        var user = this.user
+//        var ver = this.verified
+//        console.log('check',ver)
+//        switch(user.val.info.type){
+//          case 'pupil':
+//            if(user.val.school && user.val.class && user.val.group && user.val.school != '' && user.val.class != '' && user.val.group != ''){
+//              this.import(user)
+//            } else {
+//              this.fire('access-denied',{
+//                text: 'Ууупс, что-то пошло не так. Для того, чтобы воспользоваться данными функциями в разделе "НАСТРОЙКИ" выберите свою школу, класс и группу(если класс не делиться по группам, то выберите "ВСЯ ГРУППА") и подтвердите свой ИИН'
+//              })
+//            }
+//            break
+//            case 'teacher':
+//            if(user.val.school && user.val.classes && user.val.school != '' && ver){
+//              this.import(user)
+//            } else {
+//              this.fire('access-denied',{
+//                text: 'Ууупс, что-то пошло не так. Для того, чтобы воспользоваться данными функциями в разделе "НАСТРОЙКИ" выберите свою школу, классы у которых вы ведете(предметы по выбору, если есть) и подтвердите свой ИИН'
+//              })
+//            }
+//            break
+//            case 'admin':
+//            console.log(user.val.school,ver)
+//            if(user.val.school && user.val.school != '' && ver){
+//              this.import(user)
+//            } else {
+//              this.fire('access-denied',{
+//                text: 'Ууупс, что-то пошло не так. Для того, чтобы воспользоваться данными функциями в разделе "НАСТРОЙКИ" выберите свою школу и подтвердите свой ИИН'
+//              })
+//            }
+//            break
+//            default:
+//            break
+//        }
+//      },
+//
+//      import:function(user){
+//        this.importHref(this.resolveUrl(user.val.info.type + '/learn-' + user.val.info.type + '-module.html'), null, null, true);
+//        this.$.pages.select(user.val.info.type);
+//      }
+
+
+    });
+  </script>
+
+</dom-module>

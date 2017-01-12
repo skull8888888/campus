@@ -1,28 +1,92 @@
 <script>
   CardColorBehavior = {
-    setColor: function(index){
-      var colors = ['#64b5f6','#ffab91','#a7ffeb','#ddc9e6','#ffb74d','#cfd8dc','#ffffff','#009688','#5C6BC0'];
-      return 'background-color:' + colors[index] + '; color:' + this._darken(colors[index],-0.65);
-    },
+    setColor: function(sub){
 
-    _darken: function (hex, lum) {
 
-      // validate hex string
-      hex = String(hex).replace(/[^0-9a-f]/gi, '');
-      if (hex.length < 6) {
-        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+      var c = ''
+
+      switch(sub){
+        case 'art': c = '#F57C00'
+        break
+        case 'bio': c = '#00897B'
+        break
+        case 'chem':c = '#1A237E'
+        break
+        case 'econ':c = '#ac3cb9'
+        break
+        case 'eng': c = 'indianred'
+        break
+        case 'gp':case '11': c = '#00a888'
+        break
+        case 'his': c = '#00b860'
+        break
+        case 'hiskaz': c = '#f8c800'
+        break
+        case 'kaz': c = '#a00db0'
+        break
+        case 'kazlit': c = '#81C784'
+        break
+        case 'math': c = '#2196F3'
+        break
+        case 'mili': c = '#f87700'
+        break
+        case 'self': c = '#80DEEA'
+        break
+        case 'ict': c = '#673AB7'
+        break
+        case 'cur': c = '#9E9E9E'
+        break
+        case'null': c = 'whitesmoke'
+        break
+        case 'pe': c = '#ff9900'
+        break
+        case 'phys': c = '#3F51B5'
+        break
+        case 'law':c = '#d61800'
+        break
+        case 'ruslit': c = '#bdc3c7'
+        break
+        case 'lit': c= "#FBC02D"
+        break
+        case 'rus': c = '#8BC34A'
+        break
+        case 'geo': c = '#795548'
+        break
+        case 'kimw': c = '#FF8A65'
+        break
+        case 'lit': c = '#FF8A65'
+        break
+        case 'chos': c = '#9575CD'
+        break
+
+        default: break
       }
-      lum = lum || 0;
 
-      // convert to decimal and change luminosity
-      var rgb = "#", c, i;
-      for (i = 0; i < 3; i++) {
-        c = parseInt(hex.substr(i*2,2), 16);
-        c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
-        rgb += ("00"+c).substr(c.length);
-      }
+      return c//'background-color:' + colors[index] + '; color:' + this._darken(colors[index],-0.65);
+    }
 
-      return rgb;
-    },
+
+
+
+
+//    _darken: function (hex, lum) {
+//
+//      // validate hex string
+//      hex = String(hex).replace(/[^0-9a-f]/gi, '');
+//      if (hex.length < 6) {
+//        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+//      }
+//      lum = lum || 0;
+//
+//      // convert to decimal and change luminosity
+//      var rgb = "#", c, i;
+//      for (i = 0; i < 3; i++) {
+//        c = parseInt(hex.substr(i*2,2), 16);
+//        c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+//        rgb += ("00"+c).substr(c.length);
+//      }
+//
+//      return rgb;
+//    },
   }
 </script>

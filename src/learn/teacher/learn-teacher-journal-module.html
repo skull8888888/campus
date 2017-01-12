@@ -1,55 +1,329 @@
-<link rel="import" href="learn-teacher-journal-pupil-module.html">
-<link rel="import" href="learn-teacher-journal-pupils-module.html">
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
+
+<link rel="import" href="learn-teacher-journal-pupils-list-module.html">
 <link rel="import" href="learn-teacher-journal-create-module.html">
+<link rel="import" href="learn-teacher-journal-files-module.html">
+<link rel="import" href="learn-teacher-journal-pupil-goals-module.html">
 
 <dom-module id="learn-teacher-journal-module">
-  <template>
+  <style include="wrapper-module">
 
-    <app-location route="{{route}}"></app-location>
-    <app-route
-               route="{{route}}"
-               pattern="/learn/journal/:page"
-               data="{{router}}"
-               tail="{{subroute}}"
-               active="{{subjectActive}}"
-               >
-    </app-route>
-    <iron-pages id="pages" style="width:100%">
-      <iron-grid>
-        <div class="offset-l3 l6 xs12 offset-xs0">
-          <learn-teacher-journal-pupils-module></learn-teacher-journal-pupils-module>
+    :host{
+      display: block;
+/*      height: 100%;*/
+    }
+
+    vaadin-combo-box{
+      width: 100%;
+      background-color: #607D8B;
+      border-radius: 4px;
+
+      --paper-input-container-input:{
+        font-size: 18px;
+        font-weight: 500;
+        padding-left: 4px;
+        color: var(--paper-grey-300);
+      }
+
+      --paper-input-container-label:{
+        font-size: 18px;
+        font-weight: 500;
+        color: #B0BEC5;
+        padding-left: 4px;
+      }
+      --paper-input-container-underline:{
+        display: none;
+        height:0px
+      }
+
+      --paper-input-container-input-color:var(--paper-grey-100);
+/*      --paper-input-container-focus-color:rgba(0, 0, 0, 0.0);*/
+    }
+
+    paper-fab{
+      position: absolute;
+      background-color: var(--app-secondary-color)
+    }
+
+    #addGoal{
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+    }
+
+    .wrap{
+      height: 40%;
+      width: 100vw
+    }
+
+    #dialog{
+      width: 500px;
+      border-radius: 4px
+    }
+    .panel{
+      background-color: #546E7A;
+      width:30%;
+      height: calc(100vh - 64px);
+    }
+    .main{
+      width:70%;
+      height: 100%;
+      background-color: white;
+    }
+
+    #t .outer{
+      width: 25%;
+      color: white;
+      font-size: 10pt;
+      text-align: center;
+      padding: 8px;
+      color: var(--paper-grey-300)
+    }
+
+    #t .inner{
+      padding: 12px 2px 12px 2px
+    }
+
+    #t .iron-selected .inner{
+      background-color: var(--app-secondary-color);
+      border-radius: 4px;
+      color: white
+    }
+
+    .pupils{
+      height: calc(100vh - 174px)
+    }
+
+    .sel{
+      height: 110px
+    }
+
+    .head{
+      border-bottom: 1px solid var(--paper-grey-300);
+      height:26px;
+      background-color: whitesmoke;
+/*      font-size: 22px*/
+    }
+
+    .body{
+      height: calc(100vh - 107px)
+    }
+
+    .left{
+      border-right: 2px solid var(--paper-grey-300)
+    }
+
+    iron-icon{
+      border-radius: 50%;
+      border: 2px solid var(--paper-grey-400);
+      height: 16px;
+      width: 16px;
+      margin: -2px 0px 0px 8px;
+      cursor: pointer
+    }
+  </style>
+  <template>
+    <div class="wrap layout horizontal">
+      <div class="panel">
+        <div class="sel">
+          <iron-selector id="t" selected="{{term}}" attr-for-selected="name" noink class="layout horizontal">
+            <div name="1" class="outer">
+              <div class="inner">1 четверть</div>
+            </div>
+            <div name="2" class="outer">
+              <div class="inner">2 четверть</div>
+            </div>
+            <div name="3" class="outer">
+              <div class="inner">3 четверть</div>
+            </div>
+            <div name="4" class="outer">
+              <div class="inner">4 четверть</div>
+            </div>
+          </iron-selector>
+          <div class="wrapper w">
+            <vaadin-combo-box label="Выберите класс" items=[[cls]] item-label-path="name" item-value-path="key" value={{sel}} no-label-float></vaadin-combo-box>
+          </div>
         </div>
-      </iron-grid>
-      <iron-grid>
-        <div class="offset-l3 l6 xs12 offset-xs0">
-          <learn-teacher-journal-pupil-module></learn-teacher-journal-pupil-module>
+        <div class="pupils">
+          <learn-teacher-journal-pupils-list-module sel=[[sel]] term=[[term]] user=[[user]] selpupil={{pupil}}></learn-teacher-journal-pupils-list-module>
         </div>
-      </iron-grid>
-      <iron-grid>
-        <div class="offset-l4 l4 xs12 offset-xs0">
-          <learn-teacher-journal-create-module></learn-teacher-journal-create-module>
+      </div>
+      <div class="main layout horizontal">
+        <div style="width:64%" class="left">
+          <div class="head wrapper fs20 fc500">
+            Цели
+          </div>
+          <div class="body">
+            <learn-teacher-journal-pupil-goals-module user=[[user]] sel=[[sel]] term=[[term]] pupil=[[pupil]]></learn-teacher-journal-pupil-goals-module>
+          </div>
         </div>
-      </iron-grid>
-    </iron-pages>
+        <div style="width:36%">
+          <div class="head wrapper fs20 fc500 layout horizontal">
+            <div>
+              Файлы
+            </div>
+            <label for="file"><iron-icon icon="icons:add"></iron-icon></label><input type="file" value="upload" id="file" style="position:absolute; visibility:hidden"/>
+
+          </div>
+          <div class="body">
+            <learn-teacher-journal-files-module user="[[user]]" term="[[term]]" sel="[[sel]]"></learn-teacher-journal-files-module>
+          </div>
+        </div>
+      </div>
+    </div>
+    <paper-fab id="addGoal" on-tap="opend" icon="icons:create"></paper-fab>
+    <paper-dialog
+                  id="dialog" entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation"
+                  with-backdrop>
+      <learn-teacher-journal-create-module u="[[user]]"></learn-teacher-journal-create-module>
+    </paper-dialog>
   </template>
   <script>
     Polymer({
       is: 'learn-teacher-journal-module',
 
-      observers:[
-        'activeChanged(subjectActive,router)'
+      properties:{
+        cls:{
+          type:Array,
+          value:[]
+        }
+      },
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
       ],
 
-      activeChanged: function(active,r){
+      observers:[
+        'userChanged(user)',
+        'allowAddFiles(term,sel)'
+      ],
 
-        if(active && r.page != 'create'){
-          this.$.pages.select(1)
-        } else if(r.page == 'create' && active){
-          this.$.pages.select(2)
+      listeners:{
+        'close-add': 'close'
+      },
+
+      setHidden: function(p){
+        if(p)
+          return false
+        return true
+      },
+
+      allowAddFiles:function(t,s){
+        if(t && s){
+          this.show = 'visible'
         } else {
-          this.$.pages.select(0)
+          this.show = 'hidden'
         }
-      }
-    });
+      },
+
+      opend:function(e){
+        this.$.dialog.toggle()
+      },
+
+      close:function(){
+        this.$.dialog.toggle()
+      },
+
+      getTerm:function(){
+        const d = new Date()
+        const month = d.getMonth()
+        const day = d.getDate()
+
+        if(month == 8){
+          return 1
+        } else if(month == 9){
+          if(day <= 23)
+            return 1
+          else
+            return 2
+        } else if(month == 10){
+          return 2
+        } else if(month == 11){
+          if(day <= 21)
+            return 2
+          else
+            return 3
+        } else if(month == 0){
+          return 3
+        } else if(month == 1){
+          return 3
+        } else if(month == 2){
+          if(day <= 19)
+            return 3
+          else
+            return 4
+        } else if(month == 3){
+          return 4
+        } else if(month == 4){
+          return 4
+        } else if(month == 5){
+          if(day <= 25)
+            return 4
+          else
+            return null
+        } else {
+          return null
+        }
+      },
+
+      attached: function(){
+        this.term = this.getTerm()
+
+        const that = this;
+
+        this.$.file.addEventListener('change',function(e){
+
+          that.id = that.db.ref('Files/').push().key;
+          that.fire('toggle-ptoast');
+
+          var file = e.target.files[0]
+
+          var task = that.app.storage().ref('SchoolFiles/' + that.user.val.school + '/' + that.getYear() + '/' + that.term + '/' +  that.sel.split('.')[0].split('-')[0] + '/' + that.sel.split('.')[0].split('-')[1] + '/' + that.sel.split('.')[1] + '/' + that.sel.split('.')[2]  + '/' + that.id + '/' + file.name).put(file);
+
+          task.on('state_changed',function(snapshot){
+            that.fire('progressChanged',{p:snapshot.bytesTransferred / snapshot.totalBytes * 100});
+          },function(err){
+            alert(err);
+          },function(){
+
+            that.db.ref('SchoolFiles/' + that.user.val.school + '/' + that.getYear() + '/' + that.term + '/' +  that.sel.split('.')[0].split('-')[0] + '/' + that.sel.split('.')[0].split('-')[1] + '/' + that.sel.split('.')[1] + '/' + that.sel.split('.')[2]  + '/' + that.id).set({
+              name: file.name,
+              link: task.snapshot.downloadURL,
+              auth: Cookies.get('id'),
+              time: Date.now(),
+              size: (file.size / 1000 /1000).toPrecision(2) + 'mb'
+            })
+
+            that.fire('toggle-ptoast')
+            that.fire('open-toast',{text: 'Файл "' + file.name + '" по предмету "' + that.localize(that.sel.split('.')[2]) + '" успешно добавлен'})
+          })
+
+        })
+
+      },
+
+      userChanged:function(u){
+       for(let key in u.val.classes){
+
+         var c = u.val.classes[key]
+          this.push('cls',{
+            name:c.class + ' - ' + this.localize(c.group) + ' - ' + this.localize(c.subject),
+            key: c.class + '.' + c.group + '.' + c.subject
+          });
+        }
+        for(let key in u.val.cclasses){
+          console.log(u.val.cclasses[key])
+          var c = u.val.cclasses[key]
+          this.push('cls',{
+            name:c.class ,
+            key: 'chos.' + c.class
+          });
+        }
+      },
+
+    })
   </script>
 </dom-module>

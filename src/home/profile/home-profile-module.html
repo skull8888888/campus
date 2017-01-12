@@ -1,0 +1,47 @@
+<link rel="import" href="../../post/post-create-module.html">
+<link rel="import" href="../../post/post-module.html">
+<link rel="import" href="home-profile-avatar-module.html">
+<link rel="import" href="home-profile-info-module.html">
+<link rel="import" href="home-profile-panel-module.html">
+<link rel="import" href="home-profile-posts-module.html">
+<link rel="import" href="../../settings/settings-module.html">
+
+<dom-module id="home-profile-module">
+  <template>
+    <style include="wrapper-module">
+    </style>
+    <div>
+      <iron-grid>
+        <div class="l5 layout vertical">
+          <home-profile-info-module user=[[user]]></home-profile-info-module>
+          <iron-pages selected=[[sel]]>
+            <home-profile-posts-module user=[[user]]></home-profile-posts-module>
+            <div></div>
+            <div></div>
+            <div></div>
+            <settings-module user=[[user]]></settings-module>
+          </iron-pages>
+        </div>
+        <div class="l3 layout vertical">
+          <home-profile-avatar-module user=[[user]]></home-profile-avatar-module>
+          <home-profile-panel-module sel={{sel}} user=[[user]]></home-profile-panel-module>
+        </div>
+      </iron-grid>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'home-profile-module',
+
+      properties:{
+        sel:{
+          type:Number,
+          value:0
+        }
+      },
+
+    });
+  </script>
+</dom-module>

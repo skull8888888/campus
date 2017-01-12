@@ -1,0 +1,62 @@
+<link rel="import" href="learn-teacher-timetable-week-day-module.html">
+
+<dom-module id="learn-teacher-timetable-week-module">
+  <style include="wrapper-module">
+
+    :host{
+      display: block;
+      height: 100%
+    }
+
+    .week {
+      width: 100%;
+      height: 100%;
+      background-color: white
+    }
+
+    .wrap {
+      border: 1px solid var(--paper-grey-300);
+      width: 100%;
+      height: 100%
+/*      background-color: white*/
+    }
+
+    .notwrap {
+      width: 100%
+    }
+
+  </style>
+  <template>
+    <div class="layout horizontal week">
+      <div class="wrap">
+        <learn-teacher-timetable-week-day-module user="[[user]]" day="[[week.0]]" n="0"></learn-teacher-timetable-week-day-module>
+      </div>
+      <div class="wrap">
+        <learn-teacher-timetable-week-day-module user="[[user]]" day="[[week.1]]" n="1"></learn-teacher-timetable-week-day-module>
+      </div>
+      <div class="wrap">
+        <learn-teacher-timetable-week-day-module user="[[user]]" day="[[week.2]]" n="2"></learn-teacher-timetable-week-day-module>
+      </div>
+      <div class="wrap">
+        <learn-teacher-timetable-week-day-module user="[[user]]" day="[[week.3]]" n="3"></learn-teacher-timetable-week-day-module>
+      </div>
+      <div class="wrap">
+        <learn-teacher-timetable-week-day-module user="[[user]]" day="[[week.4]]" n="4"></learn-teacher-timetable-week-day-module>
+      </div>
+      <div class="wrap">
+        <learn-teacher-timetable-week-day-module user="[[user]]" day="[[week.5]]" n="5"></learn-teacher-timetable-week-day-module>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-timetable-week-module',
+
+      properties:{
+        week:{
+          type: Object
+        }
+      }
+    })
+  </script>
+</dom-module>

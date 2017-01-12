@@ -1,0 +1,94 @@
+<dom-module id="learn-pupil-journal-pupil-goals-goal-module">
+  <style include="wrapper-module">
+    :host{
+      width: 20vw;
+    }
+
+    .key{
+      font-size: 18px;
+      font-weight: 400;
+      padding: 0px 0px 8px 0px;
+      color: var(--paper-grey-500);
+      width: 8%
+    }
+
+    .des{
+      width: 52%;
+      padding: 0px 8px 8px 8px;
+      color: var(--paper-grey-800);
+
+    }
+
+    .tabs{
+      width: 40%;
+      background-color:var(--paper-grey-300);
+    }
+
+    paper-tabs .iron-selected#achived{
+      background-color:  #81C784;
+      color:white
+    }
+
+    paper-tabs .iron-selected#wt{
+      background-color:  indianred;
+      color:white
+    }
+
+    .tabs paper-tab{
+      width: 50%
+    }
+
+    .card{
+      border-bottom: solid var(--paper-grey-300) 2px;
+    }
+
+    .wrapper {
+      padding: 8px 12px 0px 12px
+    }
+
+  </style>
+  <template>
+    <div class="wrapper">
+      <div class="layout horizontal card">
+        <div class="key">[[goal.key]]</div>
+        <div class="des">
+          [[goal.val.des]]
+        </div>
+        <paper-tabs selected={{achived}} noink class=tabs disabled no-bar>
+          <paper-tab id="wt">Cтремится</paper-tab>
+          <paper-tab id="achived">Достиг</paper-tab>
+        </paper-tabs>
+      </div>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-pupil-journal-pupil-goals-goal-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      observers:[
+        'goalChanged(goal,user,subject,term)',
+      ],
+
+      goalChanged:function(goal,user,subject,term){
+        if(subject){
+
+
+          const that = this;
+
+          that.achived = null;
+
+          this.getItem('PupilGoals/' + user.val.school + '/' + this.getYear() +  '/'+ term + '/' + user.key + '/' + subject + '/goals/' + goal.key, g =>{
+
+            if(g != null)
+              that.achived = g;
+          })
+        }
+      }
+    })
+  </script>
+</dom-module>

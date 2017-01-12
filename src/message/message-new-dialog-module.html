@@ -1,0 +1,37 @@
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="message-new-dialog-private-module.html">
+<link rel="import" href="message-new-dialog-channel-module.html">
+
+<dom-module id="message-new-dialog-module">
+  <template>
+    <style include="wrapper-module">
+    </style>
+    <paper-tabs selected={{sel}}>
+      <paper-tab>
+        Новый чат
+      </paper-tab>
+      <paper-tab>
+        Новый канал
+      </paper-tab>
+    </paper-tabs>
+    <div class="wrapper">
+      <iron-pages selected={{sel}}>
+        <message-new-dialog-private-module></message-new-dialog-private-module>
+        <message-new-dialog-channel-module></message-new-dialog-channel-module>
+      </iron-pages>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'message-new-dialog-module',
+
+      attached:function(){
+        this.sel = 0
+      },
+
+
+    })
+  </script>
+</dom-module>

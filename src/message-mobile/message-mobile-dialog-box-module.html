@@ -1,0 +1,115 @@
+<dom-module id="message-mobile-dialog-box-module">
+  <template>
+    <style include="wrapper-module">
+      #ava{
+        width:40px;
+        height:40px;
+        background-repeat:no-repeat;
+        background-size:cover;
+        border-radius:50%;
+        margin: 6px 10px 0px 10px;
+      }
+
+      #body{
+        margin-left: 60px;
+        width: 80%
+      }
+      .name{
+        font-size: 18px;
+        font-weight: 600;
+        margin-top: 4px;
+        margin-bottom: 8px;
+      }
+
+      .time{
+        color:var(--paper-grey-400);
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0px 0px 0px 8px
+      }
+
+      .newDate {
+        text-align: center;
+      }
+    </style>
+    <template is="dom-if" if="[[newd]]">
+      <div class="newDate fs18 fw500 fc500 wrapper">[[localize(month)]], [[newd]]</div>
+    </template>
+    <div class="layout horizontal wrap">
+      <template is="dom-if" if="[[u]]">
+        <div preload src="[[u.image]]" style="background-image:url([[u.image]])" id="ava" sizing="cover"></div>
+      </template>
+      <div id="body">
+        <template is="dom-if" if="[[u]]">
+          <div class="name layout horizontal">
+            <div>
+              [[u.name]] [[u.surname]]
+            </div>
+            <div class="time">
+              [[h]]:[[m]]
+            </div>
+          </div>
+        </template>
+        <div style="font-size:20px;margin-bottom:4px">
+          [[message.val.text]]
+        </div>
+      </div>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'message-mobile-dialog-box-module',
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      observers:[
+        'messageChanged(message,prev,sel)'
+      ],
+
+      messageChanged: function(me,previ,sel) {
+        const that = this
+        const m = me.val
+        if(previ){
+          const prev = previ.val
+          if(m.time - prev.time >= 180000 || prev.auth != m.auth  ) {
+            this.getItemOnce('Users/' + m.auth + '/info', u=>{
+              that.u = u
+              that.$.body.style.marginLeft = '0px'
+              that.fire('scroll')
+
+            })
+            const d = new Date(m.time)
+            this.m = d.getMinutes() < 10 ? '0' + d.getMinutes():d.getMinutes()
+            this.h = d.getHours()
+
+
+          }
+          const d1 = new Date(m.time).getDate(), d2 = new Date(prev.time).getDate()
+
+          if(d1 != d2){
+            this.newd = d1
+            this.month = 'm'+ new Date(m.time).getMonth()
+          }
+
+        } else {
+          this.getItemOnce('Users/' + m.auth + '/info', u=>{
+            that.u = u
+            that.$.body.style.marginLeft = '0px'
+            that.fire('scroll')
+          })
+          const d = new Date(m.time)
+          this.m = d.getMinutes() < 10 ? '0' + d.getMinutes():d.getMinutes()
+          this.h = d.getHours()
+          this.newd = d.getDate()
+          this.month = 'm'+ d.getMonth()
+        }
+        //            this.fire('scroll')
+      }
+
+    })
+  </script>
+</dom-module>

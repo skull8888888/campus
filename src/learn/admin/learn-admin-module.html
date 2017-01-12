@@ -8,7 +8,6 @@
       position: fixed;
       width: 100vw;
       z-index: 1;
-      /*      --paper-tabs-selection-bar-color: #111111;*/
     }
 
     iron-pages{
@@ -31,11 +30,12 @@
     </paper-tabs>
     <iron-pages selected="{{selected}}" attr-for-selected="name" class="mw">
       <learn-admin-timetable-module name="timetable" user="[[user]]"></learn-admin-timetable-module>
-      <learn-admin-stuff-module user="[[user]]" name="stuff"></learn-admin-stuff-module>
-      <learn-admin-chos-module user='[[user]]' name="chos"></learn-admin-chos-module>
+      <learn-admin-chos-module user=[[user]] name="chos"></learn-admin-chos-module>
+      <learn-admin-stuff-module user=[[user]] name="stuff"></learn-admin-stuff-module>
     </iron-pages>
   </template>
   <script>
+
     Polymer({
       is: 'learn-admin-module',
 
@@ -50,6 +50,7 @@
 
       pageChanged: function(page){
         this.selected = page || 'timetable'
+
         this.importHref(this.resolveUrl('learn-admin-' + this.selected + '-module.html'), null, null, true);
       },
 
@@ -58,5 +59,6 @@
       }
 
     })
+
   </script>
 </dom-module>

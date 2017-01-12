@@ -1,42 +1,175 @@
-<link rel="import" href="learn-pupil-journal-subject-module.html">
-<link rel="import" href="learn-pupil-journal-subjects-module.html">
-<link rel="import" href="../../../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="learn-pupil-journal-subjects-list-module.html">
+<link rel="import" href="learn-pupil-journal-pupil-goals-module.html">
+<link rel="import" href="learn-pupil-journal-files-module.html">
 
 <dom-module id="learn-pupil-journal-module">
   <template>
-    <style>
+    <style include="wrapper-module">
+
+      :host{
+        display: block;
+        height: 100%
+      }
+
+      .panel{
+        width: 30%;
+        height: calc(100vh - 119.5px);
+        background-color: #78909C;
+      }
+
+      .main{
+        width: 70%;
+        height: 100%;
+        background-color: white;
+
+      }
+
+      .card{
+        height: 100%;
+        background-color: white;
+        overflow: hidden;
+      }
+
+      #t .outer{
+        width: 25%;
+        color: white;
+        font-size: 10pt;
+        text-align: center;
+        padding: 4px;
+        font-weight: 400;
+        color: var(--paper-grey-300)
+      }
+
+      #t .inner{
+        padding: 12px 2px 12px 2px
+      }
+
+      #t .iron-selected .inner{
+        background-color: var(--app-secondary-color);
+        border-radius: 4px;
+        font-weight: 500;
+        color: white
+      }
+
+      #t{
+        background-color:  #546E7A;
+      }
+
+      .wrap{
+        width: 100%;
+/*        height: 100%*/
+      }
+
+      .head{
+        border-bottom: 1px solid var(--paper-grey-300);
+        height: 26px;
+        background-color: whitesmoke;
+        font-size: 22px
+      }
+
+      .body{
+        height:calc(100vh - 107px)
+      }
+
+      .left{
+        border-right: 2px solid var(--paper-grey-300)
+      }
     </style>
-      <app-location route="{{route}}"></app-location>
-      <app-route
-                 route="{{route}}"
-                 pattern="/learn/journal/:subject"
-                 data="{{router}}"
-                 tail="{{subroute}}"
-                 active="{{subjectActive}}"
-                 >
-      </app-route>
-      <iron-grid>
-        <iron-pages class="offset-l3 l6 xs12 offset-xs0" id="pages">
-          <learn-pupil-journal-subjects-module></learn-pupil-journal-subjects-module>
-          <learn-pupil-journal-subject-module></learn-pupil-journal-subject-module>
-        </iron-pages>
-      </iron-grid>
+    <div class="wrap layout horizontal">
+      <div class="panel">
+        <div style="background: #546E7A;padding:4px">
+          <iron-selector id="t" selected="{{term}}" attr-for-selected="name" noink class="layout horizontal">
+            <div name="1" class="outer">
+              <div class="inner">1 четверть</div>
+            </div>
+            <div name="2" class="outer">
+              <div class="inner">2 четверть</div>
+            </div>
+            <div name="3" class="outer">
+              <div class="inner">3 четверть</div>
+            </div>
+            <div name="4" class="outer">
+              <div class="inner">4 четверть</div>
+            </div>
+          </iron-selector>
+        </div>
+        <learn-pupil-journal-subjects-list-module user=[[user]] term=[[term]] selsubject={{sub}}></learn-pupil-journal-subjects-list-module>
+      </div>
+      <div class="main layout horizontal">
+        <div style="width:64%" class="left outer">
+          <div class="head wrapper fs20 fc500">
+            Цели
+          </div>
+          <div class="body">
+            <learn-pupil-journal-pupil-goals-module subject=[[sub]] user=[[user]] term=[[term]]></learn-pupil-journal-pupil-goals-module>
+          </div>
+        </div>
+        <div style="width:36%" class="outer">
+          <div class="head wrapper fs20 fc500">
+            Файлы
+          </div>
+          <div class="body">
+            <learn-pupil-journal-files-module user=[[user]] subject=[[sub]] term=[[term]]></learn-pupil-journal-files-module>
+          </div>
+        </div>
+      </div>
+    </div>
     </template>
     <script>
       Polymer({
         is: 'learn-pupil-journal-module',
 
         observers:[
-          'activeChanged(subjectActive)'
+          'userChanged(user)',
+          'selChanged(sel)'
         ],
 
-        activeChanged: function(active){
-          if(active){
-            this.$.pages.select(1)
+        attached:function(){
+          this.term = this.getTerm()
+        },
+
+        getTerm:function(){
+          const d = new Date()
+          const month = d.getMonth()
+          const day = d.getDate()
+
+          if(month == 8){
+            return 1
+          } else if(month == 9){
+            if(day <= 23)
+              return 1
+            else
+              return 2
+          } else if(month == 10){
+            return 2
+          } else if(month == 11){
+            if(day <= 21)
+              return 2
+            else
+              return 3
+          } else if(month == 0){
+            return 3
+          } else if(month == 1){
+            return 3
+          } else if(month == 2){
+            if(day <= 19)
+              return 3
+            else
+              return 4
+          } else if(month == 3){
+            return 4
+          } else if(month == 4){
+            return 4
+          } else if(month == 5){
+            if(day <= 25)
+              return 4
+            else
+              return null
           } else {
-            this.$.pages.select(0)
+            return null
           }
-        }
+        },
+
       });
     </script>
 </dom-module>

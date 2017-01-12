@@ -3,36 +3,53 @@
 
 <dom-module id="settings-account-module">
   <style include="wrapper-module">
+
+    :host{
+      width: 100%
+    }
+
     .prefix{
-      color: var(--paper-grey-500)
+      color: var(--paper-grey-500);
+      margin-left: 4px
+    }
+
+    paper-input,paper-textarea,vaadin-combo-box {
+      width:100%;
+      border:2px solid var(--paper-grey-300);
+      border-radius: 4px;
+      background-color: white;
+    }
+
+    .wrapper{
+      border-bottom:2px solid var(--paper-grey-300);
     }
   </style>
   <template>
     <div class="wrapper">
-      <paper-card>
-        <div class="card-content">
-          <form is="iron-form" id="form">
-            <div class="layout horizontal">
-              <paper-input  maxlength="20" label="Персональный адрес" value="{{li}}">
-                <div prefix class="prefix">campus-a.kz/</div>
-              </paper-input>
-              <paper-spinner-lite active="{{lactive}}"></paper-spinner-lite>
-              <iron-icon icon="{{icon}}"></iron-icon>
-            </div>
-            <vaadin-combo-box label="Школа" items="[[schools]]" item-label-path="val" item-value-path="key" value="{{user.val.school}}"></vaadin-combo-box>
-            <div class="layout horizontal mw">
-              <paper-input  maxlength="12" label="ИИН (обязательно)" value="{{user.val.pin}}">
-              </paper-input>
-              <paper-spinner-lite active="{{active}}"></paper-spinner-lite>
-              <paper-icon-button icon="icons:verified-user" style="color:red"></paper-icon-button>
-            </div>
-            <paper-textarea max-rows="4" label="О себе" value="{{user.val.des}}"></paper-textarea>
-          </form>
+      <form is="iron-form" id="form">
+        <div class="label">Школа</div>
+        <div style="padding-right:4px">
+          <vaadin-combo-box no-label-float label="Школа" items="[[schools]]" item-label-path="val" item-value-path="key" value="{{user.val.school}}"></vaadin-combo-box>
         </div>
-        <div class="card-actions">
-          <paper-button on-tap="save" class="button" style="float: right; margin-bottom: 5px">Сохранить</paper-button>
+        <div></div>
+        <div class="label">ИИН</div>
+        <div style="padding-right:4px">
+          <paper-input name="name" no-label-float required value="{{user.val.pin}}" required allowed-pattern="[0-9]" maxlength="12" error-message="вы не {{localize(type)}}">
+            <paper-spinner-lite suffix active="[[active]]" style="margin-right:8px"></paper-spinner-lite>
+            <template is="dom-if" if="{{ended}}">
+              <iron-icon suffix icon="[[icon]]" style$="color:{{color}}"></iron-icon>
+            </template>
+          </paper-input>
         </div>
-      </paper-card>
+
+        <div class="label">О себе</div>
+        <div style="padding-right:8px">
+          <paper-textarea style="padding-left:4px" no-label-float max-rows="4" label="Ваши достижения, интересы, вкусы и т.п" value="{{user.val.des}}"></paper-textarea>
+        </div>
+
+      </form>
+      <div class="label"></div>
+      <paper-button on-tap="save" class="button2"  style="margin-top:8px;margin-bottom:8px">Сохранить</paper-button>
     </div>
   </template>
   <script>
@@ -49,20 +66,19 @@
         'linkChanged(li)'
       ],
 
+      attached:function(){
+        this.fillObjects('SchoolsName/',(schools)=>{
+          this.schools = schools;
+        });
+      },
+
       idChanged:function(id){
         this.li = id;
       },
 
-      attached: function(){
-        var that = this;
-        this.fillObjects('SchoolsName/',function(schools){
-          that.schools = schools;
-        });
-      },
-
       pinChanged: function(pin){
         this.active = false;
-        if(pin)
+        if(pin && this.user.val.info.type != 'pupil')
           if(pin.length == 12){
             this.active = true
           }

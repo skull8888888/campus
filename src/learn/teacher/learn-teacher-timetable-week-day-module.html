@@ -1,0 +1,325 @@
+<dom-module id="learn-teacher-timetable-week-day-module">
+  <template>
+    <style include="wrapper-module">
+
+      .card{
+        color: white;
+        padding: 8px;
+        font-weight: 400;
+        border-radius: 4px
+      }
+
+      .date{
+        padding: 8px;
+        border-bottom: solid 2px var(--paper-grey-300)
+      }
+
+      .day {
+        color: var(--paper-grey-600);
+        font-size: 19px;
+        font-weight: 500
+      }
+
+      .num{
+        color: var(--paper-grey-300);
+        font-size: 50px;
+      }
+
+      .wrap {
+/*        border-bottom: 1px solid var(--paper-grey-300)*/
+      }
+
+      .bottom {
+        padding: 0px 4px 2px 4px
+      }
+
+      .middle {
+        padding: 0px 4px 0px 4px;
+      }
+
+      .middle .card{
+        color: transparent;
+        border-radius: 0;
+      }
+
+      .middle .card .text{
+        margin: 2px 0px 2px 0px
+      }
+
+      .none{
+        padding: 2px 4px 2px 4px;
+      }
+
+      .none .card{
+        border-radius: 4px
+      }
+
+      .clear .card{
+        color: transparent;
+      }
+
+      .bottom .card{
+        border-radius: 0px 0px 4px 4px;
+        color: transparent
+      }
+
+      .bottom .card .text{
+        margin-top: 2px;
+      }
+
+      .top{
+        padding: 2px 4px 0px 4px
+      }
+
+      .top .card{
+        border-radius: 4px 4px 0px 0px
+      }
+
+      .top .card .text{
+        margin-bottom: 2px;
+      }
+
+      iron-icon{
+        height: 18px
+      }
+    </style>
+    <div class="mod" id="l">
+      <div class="date">
+        <div class="day">
+          [[localize(d)]]
+        </div>
+        <div class="num" style$="color:[[color]]">
+          [[day.date]]
+        </div>
+      </div>
+      <iron-list style="margin:2px 0px 2px 0px" items="[[items]]" as="item" selection-enabled selected-item="{{selected}}" id="list">
+        <template>
+          <div class$="[[setClass(index)]] wrap">
+            <div class="card" style$="background-color:[[setColor(item.num)]]">
+              <div class="text layout horizontal justified">
+                <div>
+                  <div>
+                    [[item.cl]]    [[localize(item.group)]]
+                  </div>
+                  <div>
+                    [[localize(item.sub)]]
+                  </div>
+                </div>
+                <template is=dom-if if=[[item.homework]]>
+                  <div style="float:right">
+                    <iron-icon icon="icons:description"></iron-icon>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+      </iron-list>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-timetable-week-day-module',
+
+      properties:{
+        items:{
+          type: Array,
+          value:[]
+        }
+      },
+
+      observers:[
+        'fill(n,user,day)',
+        'subjectsChanged(subjects)',
+        'selectedChanged(selected)',
+        'subjectsChanged(items)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior,
+        CardColorBehavior,
+        NotifsBehavior
+      ],
+
+      listeners:{
+        'homework':'homework'
+      },
+
+      setClass:function(i){
+
+
+        console.log(this.items[i].cl)
+
+        if(i + 1 >= this.items.length){
+
+          if(this.items[i - 1].cl == this.items[i].cl)
+            return 'bottom';
+          else
+            return 'none'
+
+        } else if(i != 0){
+
+          if(this.items[i - 1].cl == this.items[i].cl && this.items[i + 1].cl == this.items[i].cl)
+            return this.items[i].cl == 'null' ? 'clear middle' : 'middle'
+
+          if(this.items[i - 1].cl == this.items[i].cl)
+            return this.items[i].cl == 'null' ? 'clear bottom':'bottom';
+
+          if(this.items[i + 1].cl == this.items[i].cl)
+            return this.items[i].cl == 'null' ? 'clear top' : 'top';
+
+          if(this.items[i - 1].cl != this.items[i].cl && this.items[i + 1].cl != this.items[i].cl)
+            return this.items[i].cl == 'null' ? 'clear none': 'none'
+
+        } else {
+
+          if(this.items[i + 1].cl == this.items[i].cl)
+            return this.items[i].cl == 'null' ? 'clear top' : 'top';
+          else
+            return this.items[i].cl == 'null' ? 'clear none': 'none'
+        }
+
+      },
+
+      selectedChanged:function(s){
+        if(s){
+          console.log(s)
+          this.fire('show-homework',{s:s,day: this.day})
+        }
+      },
+
+      subjectsChanged:function(i){
+        this.items = i;
+      },
+
+      fill: function(n, user,day){
+
+        this.d = 'd' + n;
+        this.m = 'm' + day.month;
+
+        var d = new Date()
+        var date = d.getDate()
+
+        if(day.date == date && day.month == d.getMonth()){
+          this.color = 'indianred'
+        } else {
+          this.color = '#E0E0E0'
+        }
+
+        const that = this
+
+        var Subjects = []
+
+        for(let i = 0; i < 16;i++) Subjects.push({
+          sub: 'null',
+          cl: 'null',
+          num: 'null'
+        })
+
+        var c = 0, c1 = 0
+        this.startSpin()
+        for(let key in user.val.classes){
+
+          let item = user.val.classes[key]
+          let cl = item.class.split('-')
+
+          this.db.ref('SchoolSchedule/' + user.val.school + '/' + this.getYear() + '/' + cl[0]  + '/' + cl[1] + '/' + n).orderByValue().equalTo(item.subject).on('value', res=>{
+
+            if(res.val()){
+
+              for(i in res.val()){
+
+                Subjects[i] = {
+                  sub:res.val()[i],
+                  group: item.group,
+                  cl: item.class,
+                  num: cl[0]
+                }
+
+                const index = i
+                that.getItem('SchoolHomework/' + user.val.school + '/' + that.getYear() + '/' + cl[0] + '/' + cl[1] + '/' + that.day.date + '-'  + that.day.month + '/' + item.subject + '/' + item.group, homework =>{
+
+                  if(homework){
+
+                    that.set('items.' + index + '.homework', homework.text)
+                    Subjects[index].homework = homework.text
+                  }
+
+                })
+
+              }
+
+            }
+            c++
+
+            if(c == Object.keys(user.val.classes).length){
+
+              if(user.val.cclasses){
+
+                for(let key in user.val.cclasses){
+                  let item = user.val.cclasses[key]
+
+                  that.getObjectOnce('SchoolChos/' + user.val.school + '/' + that.getYear() + '/' + n + '/' + item.class, s=>{
+                    if(s.val){
+                      var ar = s.val.split(',')
+                      ar.forEach( iter =>{
+                        Subjects[iter] = {
+                          sub:s.key.split('-')[0],
+                          type: 'chos',
+                          cl: item.class,
+                          num: "11"
+                        }
+                        const ind = iter
+                        that.getItem('SchoolHomework/' + user.val.school + '/' + that.getYear() + '/' + s.key + '/' + that.day.date + '-'  + that.day.month, homework =>{
+
+                          if(homework){
+
+                            that.set('items.' + ind + '.homework', homework.text)
+                            Subjects[ind].homework = homework.text
+                          }
+                        })
+
+                      })
+                    }
+                    c1++
+                    if(c1 == Object.keys(user.val.cclasses).length){
+                      that.endSpin()
+                      that.items = Subjects
+
+                      that.cut(Subjects)
+                    }
+                  })
+                }
+
+              } else {
+                that.endSpin()
+                that.items =  Subjects
+
+                that.cut(Subjects)
+
+              }
+            }
+
+          })
+
+        }
+
+      },
+
+      cut: function(arr){
+
+        let i = arr.length - 1
+
+        while(arr[i].sub == 'null'){
+          i--
+          if(i == -1)
+            return arr.splice(0,arr.length - i)
+        }
+
+        return arr.splice(i + 1,arr.length - i)
+      }
+
+    });
+  </script>
+</dom-module>

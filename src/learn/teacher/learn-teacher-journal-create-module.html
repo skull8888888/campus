@@ -1,8 +1,3 @@
-<link rel="import" href="learn-teacher-journal-add-module.html">
-<link rel="import" href="../../../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../../../bower_components/paper-input/paper-input-container.html">
-<link rel="import" href="learn-teacher-goal-module.html">
-
 <dom-module id="learn-teacher-journal-create-module">
   <template>
     <style include="wrapper-module">
@@ -10,82 +5,153 @@
         margin: 10px
       }
 
-      vaadin-combo-box{
-        width: 300px;
+      vaadin-combo-box,paper-input,paper-textarea{
+        width: 100%;
+        background-color: white;
+        border-radius: 4px;
+        border: solid 2px var(--paper-grey-300)
       }
 
-      paper-input{
-        width: 100px
+      .left{
+        border-radius: 4px 0px 0px 4px;
+        border-right: solid 1px var(--paper-grey-300)
       }
 
-      paper-textarea{
-
+      .right{
+        border-radius: 0px 4px 4px 0px;
+        border-left: solid 1px var(--paper-grey-300)
       }
 
       #parals{
-        width: 100px
+        width: 50%
       }
 
       #subs{
-        width: 170px
+        width: 50%
       }
 
       .add{
         padding: 8px
       }
 
-      paper-fab{
-        position: absolute;
-        bottom: -18px;
-        right: 15px;
-        z-index: 3
-      }
 
       #d{
         width: 400px
       }
 
       .nums{
-        width: 50px
+        width: 70px
       }
 
+      #st,#subs{
+        border-bottom-left-radius: 4px;
+        border-top-left-radius: 4px
+      }
+
+      #end,#parals{
+        border-bottom-right-radius: 4px;
+        border-top-right-radius: 4px
+      }
+
+      iron-selector .iron-selected{
+        background: var(--app-secondary-color);
+        color: white;
+        font-weight: 500
+      }
+
+      iron-selector{
+        background-color: white;
+        border:2px solid var(--paper-grey-300);
+        border-radius: 4px;
+        overflow: hidden
+      }
+
+      iron-selector div{
+        padding: 12px;
+        font-size: 14px;
+
+      }
+
+      .title{
+        border-bottom: 1px solid var(--paper-grey-300);
+        border-top: 1px solid var(--paper-grey-300);
+        background-color: var(--paper-grey-100);
+      }
+
+      paper-tabs{
+        background-color: whitesmoke;
+        border-radius: 4px 4px 0px 0px
+      }
     </style>
-<!--
-    <learn-teacher-journal-add-module>
-    </learn-teacher-journal-add-module>
--->
-    <div class="wrapper">
-      <paper-card>
-        <div>
-          <form is="iron-form" id="form" class="cl layout horizontal">
-            <vaadin-combo-box id="subs" label="Предмет" items="{{subs}}" item-label-path="val" item-value-path="key" value="{{sub}}" required></vaadin-combo-box>
-            <vaadin-combo-box id="parals" label="Парал." items="{{parals}}" item-label-path="i" item-value-path="i" value="{{paral}}" required></vaadin-combo-box>
-          </form>
-          <paper-fab icon="icons:add" on-tap="open"></paper-fab>
+
+    <paper-tabs selected={{selected}}>
+      <paper-tab>Форматив</paper-tab>
+      <paper-tab>Сумматив</paper-tab>
+    </paper-tabs>
+    <iron-pages selected={{selected}}>
+      <div>
+        <div class="wrapper title layout horizontal justified">
+          <div class="fs20" style="padding-top:4px">Новая цель</div>
+          <paper-button class="button-light-standart" on-tap="add">Добавить цель</paper-button>
         </div>
-      </paper-card>
-      <template is="dom-if" if="{{noGoals}}" restamp="true">
-        <h3>Пока нет целей, но если вы учитель по этому предмету то вы можете добавить цели, нажав на кнопку</h3>
-      </template>
-      <iron-list items="[[goals]]" as="goal">
-        <template>
-          <div>
-            <learn-teacher-goal-module goal="[[goal]]"></learn-teacher-goal-module>
+        <form is="iron-form" id="form" class="wrapper">
+          <div  class="label">Четверть</div>
+          <div style="padding-right:4px">
+            <iron-selector attr-for-selected="name" selected="{{term}}" class="layout horizontal mw justified">
+              <div name="1">1 четверть</div>
+              <div name="2">2 четверть</div>
+              <div name="3">3 четверть</div>
+              <div name="4">4 четверть</div>
+            </iron-selector>
           </div>
-        </template>
-      </iron-list>
-    </div>
-    <paper-dialog id="d">
-      <paper-textarea label="Описание цели" max-rows="3" value="{{des}}"></paper-textarea>
-      <div class="layout horizontal mw">
-        <vaadin-combo-box class="nums" items="{{nums}}" value="{{f}}" no-label-float></vaadin-combo-box>
+          <div class="label">Предмет и параллель</div>
+          <div class="layout horizontal">
+            <vaadin-combo-box class="left" label="Предмет" id="subs" no-label-float items="{{subs}}" item-label-path="val" item-value-path="key" value="{{sub}}" required></vaadin-combo-box>
+            <vaadin-combo-box class="right" id="parals" label="Параллель" no-label-float items="{{parals}}" item-label-path="i" item-value-path="i" value="{{paral}}" required></vaadin-combo-box>
+          </div>
+          <div class="label">Номер цели</div>
+          <div class="layout horizontal mw">
+            <vaadin-combo-box id="st" class="nums left" items="{{nums}}" item-label-path="i" item-value-path="i" value="{{f}}" no-label-float></vaadin-combo-box>
 
-        <vaadin-combo-box class="nums" items="{{nums}}" value="{{s}}" no-label-float></vaadin-combo-box>
+            <vaadin-combo-box class="nums left right" style="border-radius:0" items="{{nums}}" value="{{s}}" item-label-path="i" item-value-path="i" no-label-float></vaadin-combo-box>
 
-        <vaadin-combo-box class="nums" items="{{nums}}" value="{{t}}" no-label-float></vaadin-combo-box>
-        <paper-button class="button" style="float:right" on-tap="add">Добавить цель</paper-button>
+            <vaadin-combo-box  id="end" class="nums right" items="{{nums}}" value="{{t}}" item-label-path="i" item-value-path="i" no-label-float></vaadin-combo-box>
+          </div>
+          <div class="label">Цель</div>
+          <div style="padding-right:4px">
+            <paper-textarea no-label-float label="Описание цели" rows=2 max-rows="3" value="{{des}}"></paper-textarea>
+          </div>
+        </form>
       </div>
-    </paper-dialog>
+      <div>
+        <div class="wrapper title layout horizontal justified">
+          <div class="fs20" style="padding-top:4px">Максимальный балл</div>
+          <paper-button class="button-light-standart" on-tap="setSum">Добавить балл</paper-button>
+        </div>
+        <form is="iron-form" id="form1" class="wrapper">
+          <div class="label">Четверть</div>
+          <div style="padding-right:4px">
+            <iron-selector attr-for-selected="name" selected="{{term1}}" class="layout horizontal mw justified">
+              <div name="1">1 четверть</div>
+              <div name="2">2 четверть</div>
+              <div name="3">3 четверть</div>
+              <div name="4">4 четверть</div>
+            </iron-selector>
+          </div>
+
+          <div class="label">Предмет и параллель</div>
+          <div class="layout horizontal">
+            <vaadin-combo-box id="subs" class="left" no-label-float items="{{subs}}" item-label-path="val" item-value-path="key" value="{{sub1}}" required></vaadin-combo-box>
+            <vaadin-combo-box id="parals" class="right" no-label-float items="{{parals}}" item-label-path="i" item-value-path="i" value="{{paral1}}" required></vaadin-combo-box>
+          </div>
+          <div class="label">Балл</div>
+          <div style="padding-right:4px">
+            <paper-input no-label-float label="Максимальный балл" value="{{result}}" class="mw"></paper-input>
+          </div>
+
+        </form>
+      </div>
+    </iron-pages>
   </template>
   <script>
     Polymer({
@@ -96,9 +162,9 @@
           type: Array,
           value: function(){
             var a = [];
-            for(var i=1; i< 13;i++){
+            for(var i=7; i< 13;i++){
               a.push({
-                i: i
+                i: String(i)
               });
             };
             return a;
@@ -107,7 +173,13 @@
         nums: {
           type: Array,
           value: function(){
-           return '0,1,2,3,4,5,6,7,8,9,10'.split(',');
+            var a = [];
+            for(var i=0; i< 100;i++){
+              a.push({
+                i: String(i)
+              });
+            };
+            return a;
           }
         },
       },
@@ -117,11 +189,8 @@
         LocalizeBehavior
       ],
 
-      observers:[
-        'fillGoals(sub,paral)',
-      ],
-
       attached:function(){
+        this.selected= 0
         const that = this;
         this.fillObjects('Subjects/',function(subs){
           var s = [];
@@ -135,34 +204,36 @@
         });
       },
 
-      fillGoals:function(s,p){
+      setSum:function(){
+        if(this.$.form1.validate()){
 
-        if(s,p){
-          console.log(s,p);
           const that = this;
-          this.fillItems('Goals/' + u.val.school + '/' + this.sub + '/' + this.paral,function(goals){
-            that.goals = goals
-            if(goals.length == 0){
-              that.noGoals = true;
-            }
-          },true);
+          const year = new Date().getFullYear()
+          this.db.ref('Goals/' + this.u.val.school + '/' + this.getYear() + '/'+ this.term1 + '/' + this.sub1 + '/' + this.paral1 + '/sum').set(this.result).then(function(){
+            that.fire('close-add')
+            that.fire('open-toast',{text:'Максимальный балл добавлен'})
+          })
         }
       },
 
       add:function(){
-        this.db.ref('Goals/' + u.val.school + '/' + this.sub + '/' + this.paral).push({
-          n: this.f + '.' + this.s + '.' + this.t,
-          des: this.des,
-          auth: Cookies.get('id')
-        })
-      },
-
-      open:function(){
-
         if(this.$.form.validate()){
-          this.$.d.toggle();
+
+          const that = this;
+          const year = new Date().getFullYear()
+          this.db.ref('Goals/' + this.u.val.school + '/' + this.getYear() + '/'+ this.term + '/' + this.sub + '/' + this.paral + '/goals/' + this.f + '-' + this.s + '-' + this.t).set({
+            des: this.des,
+            auth: Cookies.get('id')
+          }).then(function(){
+            that.f = null
+            that.s = null
+            that.t = null
+            that.des = null
+            that.fire('close-add')
+            that.fire('open-toast',{text:'Цель добавлена'})
+          })
         }
-      }
+      },
     })
   </script>
 </dom-module>

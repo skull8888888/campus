@@ -1,0 +1,111 @@
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+
+<dom-module id="learn-admin-stuff-add-module">
+  <template>
+    <style include="wrapper-module">
+      paper-input {
+        width:100%;
+        /*            height: 50px;*/
+        background-color: white;
+        --paper-input-container-input:{
+          font-size: 18px;
+          font-weight: 500;
+          padding-left: 8px;
+        }
+
+
+        --paper-input-container-label:{
+          font-size: 18px;
+          font-weight: 500;
+          padding-left: 8px;
+        }
+        --paper-input-container-input-color:black;
+        border:1px solid var(--paper-grey-300);
+        border-radius: 4px;
+        --paper-input-container-underline:{
+          display: none;
+          height:0px
+        }
+
+        --paper-input-container-focus-color:rgba(0, 0, 0, 0.0);
+      }
+
+      vaadin-combo-box{
+        width:100%;
+        /*            height: 50px;*/
+        background-color: white;
+        --paper-input-container-input:{
+          font-size: 18px;
+          font-weight: 500;
+          padding-left: 8px;
+        }
+
+
+        --paper-input-container-label:{
+          font-size: 18px;
+          font-weight: 500;
+          padding-left: 8px;
+        }
+        --paper-input-container-input-color:black;
+        border:1px solid var(--paper-grey-300);
+        border-radius: 4px;
+        --paper-input-container-underline:{
+          display: none;
+          height:0px
+        }
+
+        --paper-input-container-focus-color:rgba(0, 0, 0, 0.0);
+      }
+
+      .wrapper {
+       background-color: #eee;
+      }
+    </style>
+    <div class="wrapper">
+      <h2>Новый персонал</h2>
+      <form is="iron-form" id="form">
+        <div>Имя и Фамилия</div>
+        <paper-input no-label-float required value="{{name}}"></paper-input>
+        <div>ИИН</div>
+        <paper-input no-label-float required allowed-pattern="[0-9]" maxlength="12" value="{{pin}}"></paper-input>
+        <div>Тип</div>
+        <vaadin-combo-box no-label-float required items="{{types}}" item-label-path="val" item-value-path="key" value="{{type}}"></vaadin-combo-box>
+      </form>
+      <paper-button class="button" on-tap="add" >Добавить</paper-button>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-admin-stuff-add-module',
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      attached:function(){
+        const that = this;
+        this.types =[
+          {
+          key: 'teacher',
+            val: this.localize('teacher')
+          },
+          {
+            key: 'admin',
+            val: this.localize('admin')
+          },
+          {
+            key: 'curator',
+            val: this.localize('curator')
+          }
+        ]
+      },
+
+      add:function(){
+        if(this.$.form.validate()){
+          this.db.ref('SchoolStuff/' + this.user.val.school + '/' + this.type + '/' + this.pin).set(this.name)
+        }
+      },
+    })
+  </script>
+</dom-module>

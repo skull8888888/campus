@@ -1,0 +1,62 @@
+<dom-module id="message-panel-channels-channel-module">
+  <template>
+    <style include="wrapper-module">
+      .wrap{
+        padding: 4px 0px 4px 4px;
+        color: var(--paper-grey-200);
+        font-size: 18px;
+        font-weight: 400;
+        width: 100%;
+        cursor: pointer;
+      }
+      .newm{
+        float: right;
+        padding: 0px 8px 0px 8px;
+        background-color: #78909C;
+        border-radius: 4px;
+        margin-right: 12px
+      }
+    </style>
+    <div class="wrap layout horizontal justified">
+      <div>
+        # [[n]]
+      </div>
+      <div class="newm" hidden$=[[!nm]]>
+        [[nm]]
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'message-panel-channels-channel-module',
+
+      behaviors:[
+        LocalizeBehavior,
+        DatabaseBehavior
+      ],
+
+      properties:{
+        nm: {
+          type: Number,
+          value: 0
+        }
+      },
+
+      observers:[
+        'channelChanged(channel)'
+      ],
+
+      channelChanged:function(c){
+
+        this.getItemOnce('Channels/' + c.key + '/name/', name=>{
+          this.n = name
+        })
+        this.db.ref('Chats/' + Cookies.get('id') + '/messages/' + c.key).orderByChild('new').equalTo(1).on('value', snap=>{
+          //          console.log(snap.val())
+          this.nm = snap.numChildren()
+        })
+      }
+
+    })
+  </script>
+</dom-module>

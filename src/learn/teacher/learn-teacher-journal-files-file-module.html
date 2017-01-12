@@ -1,0 +1,56 @@
+<dom-module id="learn-teacher-journal-files-file-module">
+  <template>
+    <style include="wrapper-module">
+      .file{
+        background-color: whitesmoke;
+        border-radius: 4px
+      }
+
+      #fileIcon{
+        height: 20px;
+        width: 20px
+      }
+
+      .size{
+        color: var(--paper-grey-400);
+        font-size: 14px;
+        font-weight: 300
+      }
+
+      iron-icon{
+        color: var(--paper-grey-400);
+      }
+
+      a{
+        margin-right: 16px
+      }
+    </style>
+    <div class="wrapper">
+      <div class="wrapper file">
+        <div>[[file.val.name]]</div>
+        <div class="size">[[file.val.size]]</div>
+        <div class="layout horizontal">
+          <a href$="[[file.val.link]]" download="name" target="_blank" class="link">
+            <div class="button-light" noink on-tap=delete>
+              СКАЧАТЬ
+            </div>
+          </a>
+          <div class="fc400 button-light-default" noink on-tap=delete>
+            УДАЛИТЬ
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-journal-files-file-module',
+
+      delete:function(){
+        this.fire('delete',{
+          id:this.file.key
+        })
+      }
+    })
+  </script>
+</dom-module>

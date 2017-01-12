@@ -1,0 +1,62 @@
+<link rel="import" href="../../post/post-create-module.html">
+<link rel="import" href="../../post/post-module.html">
+
+<dom-module id="home-main-module">
+  <template>
+    <style include="wrapper-module">
+    </style>
+    <div>
+      <iron-grid>
+        <div class="l5">
+          <post-create-module type="Users"></post-create-module>
+          <iron-list items=[[posts]] as=post class=mw>
+            <template>
+              <post-module post=[[post]]></post-module>
+            </template>
+          </iron-list>
+        </div>
+      </iron-grid>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'home-main-module',
+
+      properties:{
+        posts:{
+          type:Array,
+          value:[]
+        }
+      },
+
+      observers:[
+        'userChanged(user)'
+      ],
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      attached:function(){
+        this.startSpin()
+
+        this.db.ref('Posts/' + this.user.key).on('child_added', snap => {
+
+          this.unshift('posts',{
+            val: snap.val(),
+            key: snap.key
+          })
+          this.endSpin()
+        })
+      },
+
+      userChanged:function(u){
+
+
+      }
+
+    });
+  </script>
+</dom-module>

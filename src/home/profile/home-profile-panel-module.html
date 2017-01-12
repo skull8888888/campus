@@ -1,0 +1,74 @@
+<dom-module id="home-profile-panel-module">
+  <template>
+    <style include="wrapper-module">
+
+      #sel .outer{
+/*        padding: 0px 4px 0px 4px;*/
+        color: var(--paper-grey-800);
+        font-size: 16px;
+      }
+
+      #sel .outer .inner{
+        padding: 8px;
+/*        font-weight: 500;*/
+      }
+
+      #sel .iron-selected .inner{
+        background-color: var(--app-secondary-color);
+        border-radius: 4px;
+        font-weight: 500;
+        color: white
+      }
+
+      paper-card{
+        padding: 8px
+      }
+
+    </style>
+    <div class="wrapper mw">
+      <paper-card elevation=0>
+        <iron-selector id=sel selected={{sel}}>
+          <div class="outer">
+            <div class="inner layout horizontal justified">
+              <div>Посты</div>
+              <div class="amount">23</div>
+            </div>
+          </div>
+          <div class="outer">
+            <div class="inner">Подписчики</div>
+          </div>
+          <div class="outer">
+            <div class="inner">Подписки</div>
+          </div>
+          <div class="outer">
+            <div class="inner">Клубы</div>
+          </div>
+          <template is=dom-if if=[[showSettings(user)]]>
+            <div class="outer">
+              <div class="inner">Настройки</div>
+            </div>
+          </template>
+        </iron-selector>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'home-profile-panel-module',
+
+      properties:{
+        sel:{
+          reflectToAttributes:true,
+          notify:true
+        }
+      },
+
+      showSettings:function(u){
+        if(u.key == Cookies.get('id'))
+          return true
+      }
+
+
+    })
+  </script>
+</dom-module>

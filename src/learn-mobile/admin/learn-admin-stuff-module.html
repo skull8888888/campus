@@ -1,0 +1,98 @@
+<link rel="import" href="../../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="learn-admin-stuff-add-module.html">
+<link rel="import" href="learn-admin-stuff-user-module.html">
+<dom-module id="learn-admin-stuff-module">
+  <template>
+    <style include="wrapper-module">
+      .left{
+        position: fixed;
+      }
+
+      paper-tabs{
+        @apply(--tabs-theme);
+        width: 100%
+      }
+
+      .card{
+        height: 81vh
+      }
+
+      paper-fab{
+        position: fixed;
+        bottom: 16px;
+        right: 16px
+      }
+
+      paper-dialog{
+        width: 400px;
+        border-radius: 4px;
+        background-color: #eee
+      }
+    </style>
+
+    <iron-grid>
+      <div class="left l4 wrapper">
+        <paper-card class="card">
+          <paper-tabs selected="{{type}}" attr-for-selected="name">
+            <paper-tab name="teacher">Учителя</paper-tab>
+            <paper-tab name="curator">Кураторы</paper-tab>
+            <paper-tab name="admin">Администрация</paper-tab>
+          </paper-tabs>
+        </paper-card>
+      </div>
+
+      <div class="l8 offset-l4">
+        <iron-list id="list" items="{{stuff}}" as="u" class="mw" grid>
+          <template>
+            <learn-admin-stuff-user-module user="[[u]]"></learn-admin-stuff-user-module>
+          </template>
+        </iron-list>
+      </div>
+    </iron-grid>
+
+    <paper-fab on-tap="add" icon="icons:add"></paper-fab>
+
+    <paper-dialog
+
+                  id="dialog" entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation"
+                  with-backdrop
+                  >
+      <learn-admin-stuff-add-module user="[[user]]"></learn-admin-stuff-add-module>
+    </paper-dialog>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-admin-stuff-module',
+
+      behaviors:[
+        DatabaseBehavior
+      ],
+
+      listeners:{
+        'delete-user' :'delete'
+      },
+
+      delete:function(e){
+        this.db.ref('SchoolStuff/' + this.user.val.school + '/' + e.detail.type + '/' + e.detail.id).set(null)
+      },
+
+      observers:[
+        'userChanged(user,type)'
+      ],
+
+      add:function(){
+        this.$.dialog.toggle()
+      },
+
+      userChanged:function(u,type){
+        const that = this
+        that.stuff = [];
+        this.fillObjects('SchoolStuff/' + u.val.school + '/' + type, stuff=>{
+          that.stuff = stuff
+        })
+      }
+
+    })
+  </script>
+</dom-module>

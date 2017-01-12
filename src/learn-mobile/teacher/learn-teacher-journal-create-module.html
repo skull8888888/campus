@@ -1,0 +1,170 @@
+<link rel="import" href="../../../bower_components/paper-input/paper-input-container.html">
+
+<dom-module id="learn-teacher-journal-create-module">
+  <template>
+    <style include="wrapper-module">
+      .cl{
+        margin: 10px
+      }
+
+      vaadin-combo-box{
+        width: 300px;
+        background-color: white;
+        margin-bottom: 8px;
+        border: solid 1px var(--paper-grey-200)
+      }
+
+      paper-input{
+        width: 100px
+      }
+
+      paper-textarea{
+
+      }
+
+      #parals{
+        width: 50px
+      }
+
+      #subs{
+        width: 170px
+      }
+
+      .add{
+        padding: 8px
+      }
+
+
+      #d{
+        width: 400px
+      }
+
+      .nums{
+        width: 50px
+      }
+
+      .wrapper {
+       background-color: var(--paper-grey-100)
+      }
+
+      #st,#subs{
+        border-bottom-left-radius: 4px;
+        border-top-left-radius: 4px
+      }
+
+      #end,#parals{
+        border-bottom-right-radius: 4px;
+        border-top-right-radius: 4px
+      }
+
+      paper-textarea{
+        --paper-input-container-underline:{
+          visibility: hidden
+        };
+
+        --paper-input-container:{
+          background-color: white;
+          margin-bottom: 8px;
+          border-radius: 4px;
+          border: solid 1px var(--paper-grey-200)
+        };
+        --paper-input-container-focus-color:white;
+
+      }
+
+    </style>
+    <div class="wrapper">
+      <h2>Новая цель</h2>
+      <form is="iron-form" id="form">
+        <div>Предмет и параллель</div>
+        <div class="layout horizontal">
+          <vaadin-combo-box id="subs" no-label-float items="{{subs}}" item-label-path="val" item-value-path="key" value="{{sub}}" required></vaadin-combo-box>
+          <vaadin-combo-box id="parals" no-label-float items="{{parals}}" item-label-path="i" item-value-path="i" value="{{paral}}" required></vaadin-combo-box>
+        </div>
+        <div>Номер цели</div>
+        <div class="layout horizontal mw">
+          <vaadin-combo-box id="st" class="nums" items="{{nums}}" item-label-path="i" item-value-path="i" value="{{f}}" no-label-float></vaadin-combo-box>
+
+          <vaadin-combo-box class="nums" items="{{nums}}" value="{{s}}" item-label-path="i" item-value-path="i" no-label-float></vaadin-combo-box>
+
+          <vaadin-combo-box  id="end" class="nums" items="{{nums}}" value="{{t}}" item-label-path="i" item-value-path="i" no-label-float></vaadin-combo-box>
+        </div>
+
+        <paper-textarea no-label-float label="Описание цели" max-rows="3" value="{{des}}"></paper-textarea>
+      </form>
+      <paper-button class="button" on-tap="add">Добавить цель</paper-button>
+
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'learn-teacher-journal-create-module',
+
+      properties:{
+        parals: {
+          type: Array,
+          value: function(){
+            var a = [];
+            for(var i=7; i< 13;i++){
+              a.push({
+                i: i
+              });
+            };
+            return a;
+          }
+        },
+        nums: {
+          type: Array,
+          value: function(){
+            var a = [];
+            for(var i=0; i< 100;i++){
+              a.push({
+                i:i
+              });
+            };
+            return a;
+          }
+        },
+      },
+
+      behaviors:[
+        DatabaseBehavior,
+        LocalizeBehavior
+      ],
+
+      attached:function(){
+        const that = this;
+        this.fillObjects('Subjects/',function(subs){
+          var s = [];
+          subs.forEach(function(i){
+            s.push({
+              val:that.localize(i.key),
+              key: i.key
+            });
+          });
+          that.subs = s;
+        });
+      },
+
+
+      add:function(){
+        if(this.$.form.validate()){
+
+          const that = this;
+
+          this.db.ref('Goals/' + this.u.val.school + '/' + this.sub + '/' + this.paral + '/' + this.f + '-' + this.s + '-' + this.t).set({
+            des: this.des,
+            auth: Cookies.get('id')
+          }).then(function(){
+            that.f = null
+            that.s = null
+            that.t = null
+            that.des = null
+            that.fire('close-add')
+            that.fire('open-toast',{text:'Цель добавлена'})
+          })
+        }
+      },
+    })
+  </script>
+</dom-module>
